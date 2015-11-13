@@ -1,3 +1,9 @@
+# Gedit backup files
+*~
+
+# Build products
+/build*/
+
 # Compiled Object files
 *.slo
 *.lo
