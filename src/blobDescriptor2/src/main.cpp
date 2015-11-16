@@ -7,6 +7,37 @@
  *
  */
 
+/** 
+\defgroup robot-affordances blobDescriptor2
+
+This module implements a feature extractor for blobs.
+
+\section intro_sec Description
+
+This module implements a feature extractor for blobs.
+
+\section lib_sec Libraries
+- YARP
+
+- OpenCV
+
+\section parameters_sec Parameters
+Basic options:
+--name <module name> (default: objectDescriptor)
+--threadPeriod <thread period in seconds> (default: 0.033)
+--maxObjects <number> (default: 10)
+--mode <2d or 3d> (default: 2d)
+
+Advanced options (2d mode):
+--minArea <minimum valid blob area> (default: 100)
+--maxArea <maximum valid blob area> (default: 20000)
+
+\section tested_os_sec Tested OS
+Linux
+
+\author Giovanni Saponaro
+*/
+
 #include <yarp/os/Log.h>
 #include <yarp/os/Network.h>
 
