@@ -25,18 +25,14 @@ This module implements a feature extractor for blobs.
 Basic options:
 \verbatim
 --name <module name> (default: objectDescriptor)
-
 --threadPeriod <thread period in seconds> (default: 0.033)
-
 --maxObjects <number> (default: 10)
-
 --mode <2d or 3d> (default: 2d)
 \endverbatim
 
 Advanced options (2d mode):
 \verbatim
 --minArea <minimum valid blob area> (default: 100)
-
 --maxArea <maximum valid blob area> (default: 20000)
 \endverbatim
 
