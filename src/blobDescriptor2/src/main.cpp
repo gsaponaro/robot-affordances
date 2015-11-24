@@ -8,7 +8,8 @@
  */
 
 /** 
-\defgroup robot-affordances blobDescriptor2
+@defgroup blobDescriptor2
+@ingroup robot-affordances
 
 This module implements a feature extractor for blobs.
 
