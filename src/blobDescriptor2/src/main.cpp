@@ -11,11 +11,11 @@
 @defgroup blobDescriptor2
 @ingroup robot-affordances
 
-This module implements a feature extractor for blobs.
+This module extracts features from segmented images.
 
 \section intro_sec Description
 
-This module implements a feature extractor for blobs.
+This module extracts features from segmented images.
 
 \section lib_sec Libraries
 - YARP
