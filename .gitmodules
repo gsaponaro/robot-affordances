@@ -1,3 +1,0 @@
-[submodule "src/poeticon-modules"]
-	path = src/poeticon-modules
-	url = https://github.com/robotology/poeticon.git
