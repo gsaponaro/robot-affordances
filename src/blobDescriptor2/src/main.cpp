@@ -47,6 +47,8 @@ Linux
 
 #include "DescriptorModule.h"
 
+using namespace yarp::os;
+
 int main(int argc, char *argv[])
 {
     ResourceFinder rf;

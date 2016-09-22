@@ -9,69 +9,65 @@
 #ifndef DESC_THREAD_H
 #define DESC_THREAD_H
 
+#include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/LogStream.h>
 #include <yarp/os/RateThread.h>
 #include <yarp/os/Semaphore.h>
 #include <yarp/os/Stamp.h>
 
-#include <opencv2/legacy/compat.hpp> // cvCopyImage
-
 #include "Helpers.h"
 
-using namespace cv;
-using namespace yarp::os;
-using namespace yarp::sig;
-
-class BlobDescriptorThread : public RateThread
+class BlobDescriptorThread : public yarp::os::RateThread
 {
     private:
-        string moduleName;
+        std::string moduleName;
 
         bool closing;
-        Semaphore mutex;
+        yarp::os::Semaphore mutex;
 
         int maxObjects;
-        string mode;
+        std::string mode;
 
         // 2d mode
 
-        string inRawImgPortName;
-        string inBinImgPortName;
-        string inLabImgPortName;
-        string inRoiPortName;
+        std::string inRawImgPortName;
+        std::string inBinImgPortName;
+        std::string inLabImgPortName;
+        std::string inRoiPortName;
 
-        string outRawImgPortName;
-        string outAnnotatedImgPortName;
-        string outAffPortName;
-        string outToolAffPortName;
+        std::string outRawImgPortName;
+        std::string outAnnotatedImgPortName;
+        std::string outAffPortName;
+        std::string outToolAffPortName;
 
-        BufferedPort<ImageOf<PixelBgr> > inRawImgPort;
-        BufferedPort<ImageOf<PixelBgr> > inBinImgPort;
-        BufferedPort<ImageOf<PixelInt> > inLabImgPort;
-        BufferedPort<Bottle>             inRoiPort;
+        yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inRawImgPort;
+        yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inBinImgPort;
+        yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelInt> > inLabImgPort;
+        yarp::os::BufferedPort<yarp::os::Bottle>                                   inRoiPort;
 
-        BufferedPort<ImageOf<PixelBgr> > outRawImgPort;
-        BufferedPort<ImageOf<PixelBgr> > outAnnotatedImgPort;
-        BufferedPort<Bottle>             outAffPort;
-        BufferedPort<Bottle>             outToolAffPort;
+        yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outRawImgPort;
+        yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outAnnotatedImgPort;
+        yarp::os::BufferedPort<yarp::os::Bottle>                                   outAffPort;
+        yarp::os::BufferedPort<yarp::os::Bottle>                                   outToolAffPort;
 
-        Bottle aff;
-        Bottle toolAff;
-        
-        int minArea, maxArea;
+        yarp::os::Bottle aff;
+        yarp::os::Bottle toolAff;
+
+        int minArea;
+        int maxArea;
 
         // for debug
-        string                           outBothPartsImgPortName;
-        Port                             outBothPartsImgPort;
-        Mat                              bothParts;
+        std::string                           outBothPartsImgPortName;
+        yarp::os::Port                        outBothPartsImgPort;
+        cv::Mat                               bothParts;
 
         // 3d mode
 
     public:
-        BlobDescriptorThread(const string &_moduleName, const double _period,
+        BlobDescriptorThread(const std::string &_moduleName, const double _period,
                              const int &_maxObjects,
-                             const string &_mode,
+                             const std::string &_mode,
                              const int &_minArea, const int &_maxArea);
 
         bool openPorts();

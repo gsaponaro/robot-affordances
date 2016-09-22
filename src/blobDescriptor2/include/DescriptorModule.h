@@ -14,15 +14,11 @@
 
 #include "DescriptorThread.h"
 
-using namespace std;
-using namespace yarp::os;
-using namespace yarp::sig;
-
-class BlobDescriptorModule : public RFModule
+class BlobDescriptorModule : public yarp::os::RFModule
 {
     private:
         // module parameters
-        string moduleName;
+        std::string moduleName;
         bool closing;
 
         // pointer to a new thread
@@ -31,12 +27,12 @@ class BlobDescriptorModule : public RFModule
         // thread parameters
         double threadPeriod;
         int maxObjects;
-        string mode;
+        std::string mode;
         int minArea, maxArea;
         //bool synch;
 
     public:
-        virtual bool configure(ResourceFinder &rf);
+        virtual bool configure(yarp::os::ResourceFinder &rf);
         virtual bool interruptModule();
         virtual bool close();
 

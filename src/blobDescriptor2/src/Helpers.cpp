@@ -8,6 +8,8 @@
 
 #include "Helpers.h"
 
+using namespace cv;
+
 /**
   * Find the unique elements of a single-channel Mat.
   * adapted from stackoverflow.com/questions/24716932
@@ -40,10 +42,10 @@ std::vector<int> unique(const Mat &input, bool shouldSort)
 }
 
 /**
-  * Given a matrix and an integer number (label), return a binary matrix with
+  * Given a Matrix and an integer number (label), return a binary Matrix with
   * elements set to 1 where input==label, 0 elsewhere.
   */
-bool binaryMaskFromLabel(const cv::Mat &input, const int label, cv::Mat &output)
+bool binaryMaskFromLabel(const Mat &input, const int label, Mat &output)
 {
     if (input.channels()>1 || input.type()!=CV_8U)
     {
@@ -51,7 +53,7 @@ bool binaryMaskFromLabel(const cv::Mat &input, const int label, cv::Mat &output)
         return false;
     }
 
-    output = Mat::zeros(input.size(), CV_8UC1);
+    output = cv::Mat::zeros(input.size(), CV_8UC1);
 
     int nl = input.rows;
     int nc = input.cols * input.channels();

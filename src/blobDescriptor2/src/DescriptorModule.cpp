@@ -8,6 +8,8 @@
 
 #include "DescriptorModule.h"
 
+using namespace yarp::os;
+
 bool BlobDescriptorModule::configure(ResourceFinder &rf)
 {
     // parse basic options

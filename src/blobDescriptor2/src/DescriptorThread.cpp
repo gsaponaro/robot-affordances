@@ -6,10 +6,16 @@
  *
  */
 
+#include <string>
+
 #include <yarp/os/Log.h>
 
 #include "DescriptorThread.h"
 #include "Obj2D.h"
+
+using namespace std;
+using namespace yarp::os;
+using namespace yarp::sig;
 
 BlobDescriptorThread::BlobDescriptorThread(const string &_moduleName,
     const double _period, const int &_maxObjects, const string &_mode,
@@ -187,7 +193,7 @@ void BlobDescriptorThread::run2d()
         std::vector<Obj2D> objs;
 
         int valid_objs = 0;
-        yDebug("");
+        yDebug(" ");
         for (std::vector<int>::iterator it=uniq.begin(); it!=uniq.end(); ++it)
         {
             // *it is the current label value: firstLabel, secondLabel, ...
@@ -267,7 +273,8 @@ void BlobDescriptorThread::run2d()
     {
         // annotated output image
         Mat outAnnotatedMat;
-        outAnnotatedMat = static_cast<IplImage*>( inRawImg->getIplImage() );
+        // FIXME
+        //outAnnotatedMat = static_cast<IplImage*>( inRawImg->getIplImage() );
         Mat channels[4];
         split(outAnnotatedMat,channels);
         Scalar minColor(0,0,0);
@@ -279,8 +286,9 @@ void BlobDescriptorThread::run2d()
         IplImage outAnnotatedIpl = outAnnotatedMat2;
         outAnnotatedYarp.resize(outAnnotatedIpl.width,
                                 outAnnotatedIpl.height);
-        cvCopyImage( &outAnnotatedIpl,
-                     static_cast<IplImage*>(outAnnotatedYarp.getIplImage()) );
+        // FIXME with opencvImg.copyTo(cv::cvarrToMat(static_cast<IplImage*>(outDepthYarp.getIplImage())));
+        //cvCopyImage( &outAnnotatedIpl,
+        //             static_cast<IplImage*>(outAnnotatedYarp.getIplImage()) );
         outAnnotatedImgPort.setEnvelope(tsRaw);
         outAnnotatedImgPort.write();
     }
