@@ -12,39 +12,13 @@ using namespace yarp::os;
 
 bool BlobDescriptorModule::configure(ResourceFinder &rf)
 {
-    // parse basic options
     moduleName = rf.check("name", Value("blobDescriptor"), "module name (string)").asString();
     setName(moduleName.c_str());
 
-    threadPeriod = rf.check("threadPeriod", Value(0.033),
-        "thread period in seconds (double)").asDouble();
-
-    maxObjects = rf.check("maxObjects", Value(10),
-        "maximum number of objects to process (int)").asInt();
-
-    mode = rf.check("mode", Value("2d"), "2d or 3d (string)").asString();
-    std::transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
-    if (mode!="2d" && mode!="3d")
-        mode = "2d";
-
-    // parse advanced options (2d mode)
-    minArea = rf.check("minArea", Value(100),
-        "minimum valid blob area (int)").asInt();
-
-    maxArea = rf.check("maxArea", Value(3000),
-        "maximum valid blob area (int)").asInt();
-
-    // parse advanced options (3d mode)
-    // tbc
-
-    // end of options parsing
-
     closing = false;
 
-    // create the thread and pass pointers to the module parameters
-    thread = new BlobDescriptorThread(moduleName, threadPeriod, maxObjects,
-                                      mode,
-                                      minArea, maxArea);
+    // create the thread, pass parameters with ResourceFinder
+    thread = new BlobDescriptorThread(moduleName, rf);
 
     // start the thread to do the work
     if (!thread->start()) {

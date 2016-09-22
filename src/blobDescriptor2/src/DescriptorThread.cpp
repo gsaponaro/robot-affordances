@@ -13,22 +13,18 @@
 #include "DescriptorThread.h"
 #include "Obj2D.h"
 
+#define THREAD_PERIOD 33 // [ms]
+
 using namespace std;
 using namespace yarp::os;
 using namespace yarp::sig;
 
 BlobDescriptorThread::BlobDescriptorThread(const string &_moduleName,
-    const double _period, const int &_maxObjects, const string &_mode,
-    const int &_minArea, const int &_maxArea)
-    : moduleName(_moduleName), RateThread(int(_period*1000.0)),
-      maxObjects(_maxObjects),
-      mode(_mode),
-      minArea(_minArea), maxArea(_maxArea)
+    ResourceFinder &_rf)
+    : RateThread(THREAD_PERIOD),
+      moduleName(_moduleName),
+      rf(_rf)
 {
-    yInfo("constructed thread with variables "
-          "maxObjects=%d mode=%s minArea=%d maxArea=%d",
-          maxObjects, mode.c_str(), minArea, maxArea
-          );
 }
 
 bool BlobDescriptorThread::openPorts()
@@ -124,7 +120,26 @@ void BlobDescriptorThread::interrupt()
 
 bool BlobDescriptorThread::threadInit()
 {
-    //yInfo("thread initialization");
+    // parse basic options
+    maxObjects = rf.check("maxObjects", Value(10),
+        "maximum number of objects to process (int)").asInt();
+
+    mode = rf.check("mode", Value("2d"), "2d or 3d (string)").asString();
+    std::transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
+    if (mode!="2d" && mode!="3d")
+        mode = "2d";
+
+    // parse advanced options (2d mode)
+    minArea = rf.check("minArea", Value(100),
+        "minimum valid blob area (int)").asInt();
+
+    maxArea = rf.check("maxArea", Value(3000),
+        "maximum valid blob area (int)").asInt();
+
+    yInfo("initialized thread with "
+          "maxObjects=%d mode=%s minArea=%d maxArea=%d",
+          maxObjects, mode.c_str(), minArea, maxArea
+          );
 
     if( !openPorts() )
     {

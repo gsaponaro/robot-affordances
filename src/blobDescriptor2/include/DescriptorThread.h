@@ -13,6 +13,7 @@
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/LogStream.h>
 #include <yarp/os/RateThread.h>
+#include <yarp/os/ResourceFinder.h>
 #include <yarp/os/Semaphore.h>
 #include <yarp/os/Stamp.h>
 
@@ -22,6 +23,7 @@ class BlobDescriptorThread : public yarp::os::RateThread
 {
     private:
         std::string moduleName;
+        yarp::os::ResourceFinder rf;
 
         bool closing;
         yarp::os::Semaphore mutex;
@@ -44,12 +46,12 @@ class BlobDescriptorThread : public yarp::os::RateThread
         yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inRawImgPort;
         yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inBinImgPort;
         yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelInt> > inLabImgPort;
-        yarp::os::BufferedPort<yarp::os::Bottle>                                   inRoiPort;
+        yarp::os::BufferedPort<yarp::os::Bottle>                         inRoiPort;
 
         yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outRawImgPort;
         yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outAnnotatedImgPort;
-        yarp::os::BufferedPort<yarp::os::Bottle>                                   outAffPort;
-        yarp::os::BufferedPort<yarp::os::Bottle>                                   outToolAffPort;
+        yarp::os::BufferedPort<yarp::os::Bottle>                         outAffPort;
+        yarp::os::BufferedPort<yarp::os::Bottle>                         outToolAffPort;
 
         yarp::os::Bottle aff;
         yarp::os::Bottle toolAff;
@@ -58,17 +60,15 @@ class BlobDescriptorThread : public yarp::os::RateThread
         int maxArea;
 
         // for debug
-        std::string                           outBothPartsImgPortName;
-        yarp::os::Port                        outBothPartsImgPort;
-        cv::Mat                               bothParts;
+        std::string    outBothPartsImgPortName;
+        yarp::os::Port outBothPartsImgPort;
+        cv::Mat        bothParts;
 
         // 3d mode
 
     public:
-        BlobDescriptorThread(const std::string &_moduleName, const double _period,
-                             const int &_maxObjects,
-                             const std::string &_mode,
-                             const int &_minArea, const int &_maxArea);
+        BlobDescriptorThread(const std::string &_moduleName,
+                             yarp::os::ResourceFinder &_rf);
 
         bool openPorts();
         void close();

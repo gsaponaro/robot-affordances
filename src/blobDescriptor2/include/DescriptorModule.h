@@ -24,13 +24,6 @@ class BlobDescriptorModule : public yarp::os::RFModule
         // pointer to a new thread
         BlobDescriptorThread *thread;
 
-        // thread parameters
-        double threadPeriod;
-        int maxObjects;
-        std::string mode;
-        int minArea, maxArea;
-        //bool synch;
-
     public:
         virtual bool configure(yarp::os::ResourceFinder &rf);
         virtual bool interruptModule();

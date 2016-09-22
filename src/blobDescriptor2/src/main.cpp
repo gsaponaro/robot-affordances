@@ -67,7 +67,6 @@ int main(int argc, char *argv[])
     {
         yInfo("Basic options:");
         yInfo("--name <module name> (default: blobDescriptor)");
-        yInfo("--threadPeriod <thread period in seconds> (default: 0.033)");
         yInfo("--maxObjects <number> (default: 10)");
         yInfo("--mode <2d or 3d> (default: 2d)");
 
