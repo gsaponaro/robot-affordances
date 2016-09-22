@@ -66,14 +66,14 @@ int main(int argc, char *argv[])
     if(rf.check("help"))
     {
         yInfo("Basic options:");
-        yInfo("--name <module name> (default: objectDescriptor)");
+        yInfo("--name <module name> (default: blobDescriptor)");
         yInfo("--threadPeriod <thread period in seconds> (default: 0.033)");
         yInfo("--maxObjects <number> (default: 10)");
         yInfo("--mode <2d or 3d> (default: 2d)");
 
         yInfo("Advanced options (2d mode):");
         yInfo("--minArea <minimum valid blob area> (default: 100)");
-        yInfo("--maxArea <maximum valid blob area> (default: 20000)");
+        yInfo("--maxArea <maximum valid blob area> (default: 3000)");
         
         return 0; // EXIT_SUCCESS
     }

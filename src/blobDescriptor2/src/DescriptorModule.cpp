@@ -26,12 +26,12 @@ bool BlobDescriptorModule::configure(ResourceFinder &rf)
     std::transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
     if (mode!="2d" && mode!="3d")
         mode = "2d";
-        
+
     // parse advanced options (2d mode)
     minArea = rf.check("minArea", Value(100),
         "minimum valid blob area (int)").asInt();
 
-    maxArea = rf.check("maxArea", Value(20000),
+    maxArea = rf.check("maxArea", Value(3000),
         "maximum valid blob area (int)").asInt();
 
     // parse advanced options (3d mode)

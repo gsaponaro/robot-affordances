@@ -3,7 +3,7 @@
 # Authors: Giovanni Saponaro <gsaponaro@isr.ist.utl.pt>
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 project(blobDescriptor2)
 
 find_package(YARP)
@@ -36,6 +36,3 @@ add_executable(${PROJECT_NAME} ${source} ${header})
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-
-#icubcontrib_finalize_export (${PROJECT_NAME})
-#icubcontrib_add_uninstall_target()
