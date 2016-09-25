@@ -2,6 +2,51 @@
 <name>Affordances from robot camera</name>
 
     <dependencies>
+        <port>/icub/camcalib/left/out</port>
+        <port>/lbpExtract/extractedlbp:o</port>
     </dependencies>
 
-</application
+    <module>
+        <name>blobDescriptor2</name>
+        <parameters>--name bd2</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>sequentialLabeller</name>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /view/blobdesc2 --x 320 --y 0</parameters>
+        <node>console</node>
+    </module>
+
+    <connection>
+        <from>/lbpExtract/extractedlbp:o</from>
+        <to>/sequentialLabeller/binImg:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/lbpExtract/extractedlbp:o</from>
+        <to>/bd2/binImg:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/bd2/rawImg:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/sequentialLabeller/labeledImg:o</from>
+        <to>/bd2/labeledImg:i</to>
+        <protocol>udp</protocol>
+    </connection>
+    <connection>
+        <from>/blobDescriptor/annotatedImg:o</from>
+        <to>/view/blobdesc</to>
+        <protocol>udp</protocol>
+    </connection>
+
+</application>
