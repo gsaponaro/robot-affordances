@@ -44,7 +44,7 @@ bool BlobDescriptorModule::close()
     thread->interrupt();
     thread->close();
     yInfo("deleting thread");
-    delete thread;
+    if (thread) delete thread;
     yInfo("done deleting thread");
 
     return true;
