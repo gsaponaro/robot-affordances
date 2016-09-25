@@ -28,7 +28,7 @@ std::vector<int> unique(const cv::Mat &input, bool shouldSort=false);
 template <class T>
 cv::Mat iplToMat(yarp::sig::ImageOf<T> &ipl)
 {
-    return cv::cvarrToMat(ipl.getIplImage());
+    return cv::cvarrToMat(static_cast<IplImage*>(ipl.getIplImage()));
 }
 
 /**********************************************************/
