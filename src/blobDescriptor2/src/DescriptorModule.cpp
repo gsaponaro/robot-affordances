@@ -43,6 +43,7 @@ bool BlobDescriptorModule::close()
     yInfo("starting the shutdown procedure");
     thread->interrupt();
     thread->close();
+    thread->stop();
     yInfo("deleting thread");
     if (thread) delete thread;
     yInfo("done deleting thread");
