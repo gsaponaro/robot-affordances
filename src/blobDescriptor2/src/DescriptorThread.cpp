@@ -185,7 +185,6 @@ void BlobDescriptorThread::run2d()
         // container of objects/blobs with associated features
         std::vector<Obj2D> objs;
 
-        int valid_objs = 0;
         yDebug(" ");
         for (std::vector<int>::iterator it=uniq.begin(); it!=uniq.end(); ++it)
         {
@@ -210,8 +209,6 @@ void BlobDescriptorThread::run2d()
 
             double largestArea = contourArea(cont[intIdx][largest]);
             bool isValid = (largestArea>minArea && largestArea<maxArea);
-            if (isValid)
-                ++valid_objs;
 
             // construct Obj2D with validity,contour,area
             objs.push_back( Obj2D(isValid, cont[intIdx][largest], largestArea) );
@@ -227,7 +224,6 @@ void BlobDescriptorThread::run2d()
         // output shape descriptors of whole blobs
         Bottle &bDesc = outAffPort.prepare();
         bDesc.clear();
-        bDesc.addInt(valid_objs);
         for (std::vector<Obj2D>::iterator it=objs.begin(); it!=objs.end(); ++it)
         {
             if (it->isValid())
