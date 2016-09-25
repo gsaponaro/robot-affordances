@@ -235,11 +235,14 @@ void BlobDescriptorThread::run2d()
                 Bottle &bObj = bDesc.addList();
                 bObj.clear();
                 RotatedRect er = it->getEnclosingRect();
+                // OLD
                 /*0*/bObj.addDouble(er.center.x);
                 /*1*/bObj.addDouble(er.center.y);
                 /*2*/bObj.addDouble(er.size.width);
                 /*3*/bObj.addDouble(er.size.height);
                 /*4*/bObj.addDouble(er.angle);
+                // NEW
+
                 Rect br = it->getBoundingRect();
                 // estimate of point over the table
                 /*5*/bObj.addDouble(br.x + br.width/2.);
@@ -266,23 +269,26 @@ void BlobDescriptorThread::run2d()
     {
         // annotated output image
         Mat outAnnotatedMat;
-        // FIXME
-        //outAnnotatedMat = static_cast<IplImage*>( inRawImg->getIplImage() );
+        outAnnotatedMat = iplToMat(*inRawImg);
         Mat channels[4];
         split(outAnnotatedMat,channels);
         Scalar minColor(0,0,0);
         Scalar maxColor(255,255,0);
         inRange(outAnnotatedMat,minColor,maxColor,channels[3]);
         Mat outAnnotatedMat2;
+        // FIXME
+        /*
         cv::merge(channels,4,outAnnotatedMat2);
         ImageOf<PixelBgr> &outAnnotatedYarp = outAnnotatedImgPort.prepare();
         IplImage outAnnotatedIpl = outAnnotatedMat2;
         outAnnotatedYarp.resize(outAnnotatedIpl.width,
                                 outAnnotatedIpl.height);
-        // FIXME with opencvImg.copyTo(cv::cvarrToMat(static_cast<IplImage*>(outDepthYarp.getIplImage())));
-        //cvCopyImage( &outAnnotatedIpl,
-        //             static_cast<IplImage*>(outAnnotatedYarp.getIplImage()) );
+        //outAnnotatedYarp.resize(outAnnotatedMat2.cols,
+        //                        outAnnotatedMat2.rows);
+        //outAnnotatedMat2.copyTo( iplToMat(outAnnotatedYarp) );
+        outAnnotatedMat2.copyTo( cv::cvarrToMat(static_cast<IplImage*>(outAnnotatedYarp.getIplImage())) );
         outAnnotatedImgPort.setEnvelope(tsRaw);
         outAnnotatedImgPort.write();
+        */
     }
 }
