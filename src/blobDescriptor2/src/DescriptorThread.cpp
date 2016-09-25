@@ -185,7 +185,6 @@ void BlobDescriptorThread::run2d()
         // container of objects/blobs with associated features
         std::vector<Obj2D> objs;
 
-        yDebug(" ");
         for (std::vector<int>::iterator it=uniq.begin(); it!=uniq.end(); ++it)
         {
             // *it is the current label value: firstLabel, secondLabel, ...
@@ -221,6 +220,16 @@ void BlobDescriptorThread::run2d()
             //for (int i=0; i<16; i++) yDebug() << "value" << i << "=" << objs[intIdx].getHueHistogram().at<float>(i);
         }
 
+        bool printArea = true;
+        bool printConvexity = true;
+        bool printEccentricity = true;
+        bool printCompactness = true;
+        bool printCircleness = true;
+        bool printSquareness = true;
+
+        bool printBoundingRectangle = false;
+        bool printEnclosingRectangle = false;
+
         // output shape descriptors of whole blobs
         Bottle &bDesc = outAffPort.prepare();
         bDesc.clear();
@@ -229,32 +238,97 @@ void BlobDescriptorThread::run2d()
             if (it->isValid())
             {
                 Bottle &bObj = bDesc.addList();
-                bObj.clear();
-                RotatedRect er = it->getEnclosingRect();
-                // OLD
-                /*0*/bObj.addDouble(er.center.x);
-                /*1*/bObj.addDouble(er.center.y);
-                /*2*/bObj.addDouble(er.size.width);
-                /*3*/bObj.addDouble(er.size.height);
-                /*4*/bObj.addDouble(er.angle);
-                // NEW
 
-                Rect br = it->getBoundingRect();
-                // estimate of point over the table
-                /*5*/bObj.addDouble(br.x + br.width/2.);
-                /*6*/bObj.addDouble(br.y + br.height);
-                // colour histograms
+                // area info
+                if (printArea)
+                {
+                    Bottle &areaBot = bObj.addList();
+                    areaBot.addString("area");
+                    Bottle &areaBotCnt = areaBot.addList();
+                    areaBotCnt.addDouble(it->getArea());
+                }
+
+                // convexity info
+                if (printConvexity)
+                {
+                    Bottle &convBot = bObj.addList();
+                    convBot.addString("convexity");
+                    Bottle &convBotCnt = convBot.addList();
+                    convBotCnt.addDouble(it->getConvexity());
+                }
+
+                // eccentricity info
+                if (printEccentricity)
+                {
+                    Bottle &eccBot = bObj.addList();
+                    eccBot.addString("eccentricity");
+                    Bottle &eccBotCnt = eccBot.addList();
+                    eccBotCnt.addDouble(it->getEccentricity());
+                }
+
+                // compactness info
+                if (printCompactness)
+                {
+                    Bottle &compBot = bObj.addList();
+                    compBot.addString("compactness");
+                    Bottle &compBotCnt = compBot.addList();
+                    compBotCnt.addDouble(it->getCompactness());
+                }
+
+                // circleness info
+                if (printCircleness)
+                {
+                    Bottle &circBot = bObj.addList();
+                    circBot.addString("circleness");
+                    Bottle &circBotCnt = circBot.addList();
+                    circBotCnt.addDouble(it->getCircleness());
+                }
+
+                // squareness info
+                if (printSquareness)
+                {
+                    Bottle &sqBot = bObj.addList();
+                    sqBot.addString("squareness");
+                    Bottle &sqBotCnt = sqBot.addList();
+                    sqBotCnt.addDouble(it->getSquareness());
+                }
+
+                // (up-right) bounding rectangle info
+                if (printBoundingRectangle)
+                {
+                    Rect br = it->getBoundingRect();
+                    Bottle &brBot = bObj.addList();
+                    brBot.addString("bounding_rectangle");
+                    Bottle &brBotCnt = brBot.addList();
+                    brBotCnt.addDouble(br.tl().x);
+                    brBotCnt.addDouble(br.tl().y);
+                    brBotCnt.addDouble(br.br().x);
+                    brBotCnt.addDouble(br.br().y);
+                    // OLD: estimate of point over the table
+                    // br.x + br.width/2.;
+                    // br.y + br.height;
+                }
+
+                // (rotated) enclosing rectangle info
+                if (printEnclosingRectangle)
+                {
+                    RotatedRect er = it->getEnclosingRect();
+                    Bottle &erBot = bObj.addList();
+                    erBot.addString("enclosing_rectangle");
+                    Bottle &erBotCnt = erBot.addList();
+                    erBotCnt.addDouble(er.center.x);
+                    erBotCnt.addDouble(er.center.y);
+                    erBotCnt.addDouble(er.size.width);
+                    erBotCnt.addDouble(er.size.height);
+                    erBotCnt.addDouble(er.angle);
+                }
+
+                // OLD colour histograms info
+                /*
                 MatND hueHist = it->getHueHistogram();
                 for (int i=0; i<16; i++)
                     bObj.addDouble( hueHist.at<float>(i) );
-
-                // shape descriptors
-                bObj.addDouble(it->getArea());
-                bObj.addDouble(it->getConvexity());
-                bObj.addDouble(it->getEccentricity());
-                bObj.addDouble(it->getCompactness());
-                bObj.addDouble(it->getCircleness());
-                bObj.addDouble(it->getSquareness());
+                */
             }
         }
         outAffPort.setEnvelope(tsRaw);

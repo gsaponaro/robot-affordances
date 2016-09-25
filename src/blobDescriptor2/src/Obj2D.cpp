@@ -76,11 +76,9 @@ bool Obj2D::computeDescriptors()
                      enclosingRect.size.width);
     double enclosingRectArea = majorAxisRect * minorAxisRect;
     squareness = (enclosingRectArea>0 ? area/enclosingRectArea : 0);
-    //yDebug("area=%.2f enclosingRectArea=%.2f \t squareness=%.2f",
-    //       area, enclosingRectArea, squareness);
 
-    yDebug("perimeter=%.2f area=%.2f convexity=%.2f eccentricity=%.2f compactness=%.2f circleness=%.2f squareness=%.2f",
-           perimeter, area, convexity, eccentricity, compactness, circleness, squareness);
+    //yDebug("perimeter=%.2f area=%.2f convexity=%.2f eccentricity=%.2f compactness=%.2f circleness=%.2f squareness=%.2f",
+    //       perimeter, area, convexity, eccentricity, compactness, circleness, squareness);
 
     return true;
 }
