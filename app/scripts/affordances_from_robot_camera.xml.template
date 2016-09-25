@@ -19,8 +19,8 @@
 
     <module>
         <name>yarpview</name>
-        <parameters>--name /view/blobdesc2 --x 320 --y 0</parameters>
-        <node>console</node>
+        <parameters>--name /view/bd2 --x 320 --y 0</parameters>
+        <node>localhost</node>
     </module>
 
     <connection>
@@ -44,8 +44,8 @@
         <protocol>udp</protocol>
     </connection>
     <connection>
-        <from>/blobDescriptor/annotatedImg:o</from>
-        <to>/view/blobdesc</to>
+        <from>/bd2/annotatedImg:o</from>
+        <to>/view/bd2</to>
         <protocol>udp</protocol>
     </connection>
 
