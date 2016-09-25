@@ -6,10 +6,6 @@
  *
  */
 
-#include <string>
-
-#include <yarp/os/Log.h>
-
 #include "DescriptorThread.h"
 #include "Obj2D.h"
 

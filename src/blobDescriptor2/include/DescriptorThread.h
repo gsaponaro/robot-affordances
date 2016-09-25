@@ -9,8 +9,11 @@
 #ifndef DESC_THREAD_H
 #define DESC_THREAD_H
 
+#include <string>
+
 #include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
+#include <yarp/os/Log.h>
 #include <yarp/os/LogStream.h>
 #include <yarp/os/RateThread.h>
 #include <yarp/os/ResourceFinder.h>

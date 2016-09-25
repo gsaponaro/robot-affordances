@@ -12,7 +12,7 @@ using namespace yarp::os;
 
 bool BlobDescriptorModule::configure(ResourceFinder &rf)
 {
-    moduleName = rf.check("name", Value("blobDescriptor"), "module name (string)").asString();
+    moduleName = rf.check("name", Value("blobDescriptor")).asString();
     setName(moduleName.c_str());
 
     closing = false;
