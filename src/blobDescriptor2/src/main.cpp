@@ -10,11 +10,11 @@
 @defgroup blobDescriptor2
 @ingroup robot-affordances
 
-This module extracts features from segmented images.
+Extract object features from segmented images.
 
 \section intro_sec Description
 
-This module extracts features from segmented images.
+Extract object features from segmented images.
 
 \section lib_sec Libraries
 - YARP
@@ -25,7 +25,6 @@ This module extracts features from segmented images.
 Basic options:
 \verbatim
 --name <module name> (default: objectDescriptor)
---threadPeriod <thread period in seconds> (default: 0.033)
 --maxObjects <number> (default: 10)
 --mode <2d or 3d> (default: 2d)
 \endverbatim
