@@ -25,37 +25,34 @@ BlobDescriptorThread::BlobDescriptorThread(const string &_moduleName,
 
 bool BlobDescriptorThread::openPorts()
 {
-    if (mode=="2d")
-    {
-        inRawImgPortName = "/" + moduleName + "/rawImg:i";
-        inRawImgPort.open(inRawImgPortName.c_str());
+    inRawImgPortName = "/" + moduleName + "/rawImg:i";
+    inRawImgPort.open(inRawImgPortName.c_str());
 
-        inBinImgPortName = "/" + moduleName + "/binImg:i";
-        inBinImgPort.open(inBinImgPortName.c_str());
+    inBinImgPortName = "/" + moduleName + "/binImg:i";
+    inBinImgPort.open(inBinImgPortName.c_str());
 
-        inLabImgPortName = "/" + moduleName + "/labeledImg:i";
-        inLabImgPort.open(inLabImgPortName.c_str());
+    inLabImgPortName = "/" + moduleName + "/labeledImg:i";
+    inLabImgPort.open(inLabImgPortName.c_str());
 
-        // tbc
-        //inRoiPortName = "/" + moduleName + "/blobs:i";
-        //inRoiPort.open(inRoiPortName.c_str());
+    // tbc
+    //inRoiPortName = "/" + moduleName + "/blobs:i";
+    //inRoiPort.open(inRoiPortName.c_str());
 
-        outRawImgPortName = "/" + moduleName + "/rawImg:o";
-        outRawImgPort.open(outRawImgPortName.c_str());
+    outRawImgPortName = "/" + moduleName + "/rawImg:o";
+    outRawImgPort.open(outRawImgPortName.c_str());
 
-        outAnnotatedImgPortName = "/" + moduleName + "/annotatedImg:o";
-        outAnnotatedImgPort.open(outAnnotatedImgPortName.c_str());
+    outAnnotatedImgPortName = "/" + moduleName + "/annotatedImg:o";
+    outAnnotatedImgPort.open(outAnnotatedImgPortName.c_str());
 
-        outAffPortName = "/" + moduleName + "/affDescriptor:o";
-        outAffPort.open(outAffPortName.c_str());
+    outAffPortName = "/" + moduleName + "/affDescriptor:o";
+    outAffPort.open(outAffPortName.c_str());
 
-        // tbc
-        //outToolAffPortName = "/" + moduleName + "/toolAffDescriptor:o";
-        //outToolAffPort.open(outToolAffPortName.c_str());
+    // tbc
+    //outToolAffPortName = "/" + moduleName + "/toolAffDescriptor:o";
+    //outToolAffPort.open(outToolAffPortName.c_str());
 
-        //outBothPartsImgPortName = "/" + moduleName + "/bothPartsImg:o";
-        //outBothPartsImgPort.open(outBothPartsImgPortName.c_str());
-    }
+    //outBothPartsImgPortName = "/" + moduleName + "/bothPartsImg:o";
+    //outBothPartsImgPort.open(outBothPartsImgPortName.c_str());
 
     return true;
 }
@@ -67,24 +64,21 @@ void BlobDescriptorThread::close()
     // critical section
     mutex.wait();
 
-    if (mode=="2d")
-    {
-        inRawImgPort.close();
-        inBinImgPort.close();
-        inLabImgPort.close();
+    inRawImgPort.close();
+    inBinImgPort.close();
+    inLabImgPort.close();
 
-        outRawImgPort.writeStrict();
-        outRawImgPort.close();
-        outAnnotatedImgPort.close();
-        outAffPort.writeStrict();
-        outAffPort.close();
+    outRawImgPort.writeStrict();
+    outRawImgPort.close();
+    outAnnotatedImgPort.close();
+    outAffPort.writeStrict();
+    outAffPort.close();
 
-        /*
-        inRoiPort.close();
-        // for debug
-        outBothPartsImgPort.close();
-        */
-    }
+    /*
+    inRoiPort.close();
+    // for debug
+    outBothPartsImgPort.close();
+    */
 
     mutex.post();
 }
@@ -95,23 +89,20 @@ void BlobDescriptorThread::interrupt()
 
     closing = true;
 
-    if (mode=="2d")
-    {
-        inRawImgPort.interrupt();
-        inBinImgPort.interrupt();
-        inLabImgPort.interrupt();
+    inRawImgPort.interrupt();
+    inBinImgPort.interrupt();
+    inLabImgPort.interrupt();
 
-        outRawImgPort.interrupt();
-        outAnnotatedImgPort.interrupt();
-        outAffPort.interrupt();
+    outRawImgPort.interrupt();
+    outAnnotatedImgPort.interrupt();
+    outAffPort.interrupt();
 
-        /*
-        inRoiPort.interrupt();
-        outToolAffPort.interrupt();
-        // for debug
-        outBothPartsImgPort.interrupt();
-        */
-    }
+    /*
+    inRoiPort.interrupt();
+    outToolAffPort.interrupt();
+    // for debug
+    outBothPartsImgPort.interrupt();
+    */
 }
 
 bool BlobDescriptorThread::threadInit()
@@ -120,12 +111,6 @@ bool BlobDescriptorThread::threadInit()
     maxObjects = rf.check("maxObjects", Value(10),
         "maximum number of objects to process (int)").asInt();
 
-    mode = rf.check("mode", Value("2d"), "2d or 3d (string)").asString();
-    std::transform(mode.begin(), mode.end(), mode.begin(), ::tolower);
-    if (mode!="2d" && mode!="3d")
-        mode = "2d";
-
-    // parse advanced options (2d mode)
     minArea = rf.check("minArea", Value(100),
         "minimum valid blob area (int)").asInt();
 
@@ -133,9 +118,8 @@ bool BlobDescriptorThread::threadInit()
         "maximum valid blob area (int)").asInt();
 
     yInfo("initialized thread with "
-          "maxObjects=%d mode=%s minArea=%d maxArea=%d",
-          maxObjects, mode.c_str(), minArea, maxArea
-          );
+          "maxObjects=%d minArea=%d maxArea=%d",
+          maxObjects, minArea, maxArea);
 
     if( !openPorts() )
     {
@@ -151,10 +135,8 @@ void BlobDescriptorThread::run()
 {
     while(!closing)
     {
-        if (mode=="2d")
-            run2d();
-        else if (mode=="3d")
-            run3d();
+        run2d();
+        yarp::os::Time::delay(0.01);
     }
 }
 
@@ -303,9 +285,4 @@ void BlobDescriptorThread::run2d()
         outAnnotatedImgPort.setEnvelope(tsRaw);
         outAnnotatedImgPort.write();
     }
-}
-
-void BlobDescriptorThread::run3d()
-{
-    // tbc
 }

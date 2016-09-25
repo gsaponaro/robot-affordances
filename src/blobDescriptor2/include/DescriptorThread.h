@@ -19,6 +19,7 @@
 #include <yarp/os/ResourceFinder.h>
 #include <yarp/os/Semaphore.h>
 #include <yarp/os/Stamp.h>
+#include <yarp/os/Time.h>
 
 #include "Helpers.h"
 
@@ -32,9 +33,6 @@ class BlobDescriptorThread : public yarp::os::RateThread
         yarp::os::Semaphore mutex;
 
         int maxObjects;
-        std::string mode;
-
-        // 2d mode
 
         std::string inRawImgPortName;
         std::string inBinImgPortName;
@@ -67,8 +65,6 @@ class BlobDescriptorThread : public yarp::os::RateThread
         yarp::os::Port outBothPartsImgPort;
         cv::Mat        bothParts;
 
-        // 3d mode
-
     public:
         BlobDescriptorThread(const std::string &_moduleName,
                              yarp::os::ResourceFinder &_rf);
@@ -81,7 +77,6 @@ class BlobDescriptorThread : public yarp::os::RateThread
         void run();
 
         void run2d();
-        void run3d();
 };
 
 #endif
