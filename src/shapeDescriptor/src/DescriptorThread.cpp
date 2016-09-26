@@ -11,6 +11,7 @@
 
 #define THREAD_PERIOD 33 // [ms]
 
+using namespace cv;
 using namespace std;
 using namespace yarp::os;
 using namespace yarp::sig;
@@ -121,6 +122,9 @@ bool ShapeDescriptorThread::threadInit()
     useSquareness = rf.check("squareness",Value("on")).asString()=="on"?true:false;
     usePerimeter = rf.check("perimeter",Value("on")).asString()=="on"?true:false;
     useElongation = rf.check("elongation",Value("on")).asString()=="on"?true:false;
+    useSpatialMoments = rf.check("spatialMoments",Value("on")).asString()=="on"?true:false;
+    useCentralMoments = rf.check("centralMoments",Value("off")).asString()=="on"?true:false;
+    useCentralNormalizedMoments = rf.check("centralNormalizedMoments",Value("off")).asString()=="on"?true:false;
     useBoundingRectangle = rf.check("boundingRectangle",Value("off")).asString()=="on"?true:false;
     useEnclosingRectangle = rf.check("enclosingRectangle",Value("off")).asString()=="on"?true:false;
     useColorHistogram = rf.check("colorHistogram",Value("off")).asString()=="on"?true:false;
@@ -303,6 +307,66 @@ void ShapeDescriptorThread::run2d()
                     eloBot.addString("elongation");
                     Bottle &eloBotCnt = eloBot.addList();
                     eloBotCnt.addDouble(it->getElongation());
+                }
+
+                // acquire raw moments if needed later
+                Moments mom;
+                if (useSpatialMoments || useCentralMoments || useCentralNormalizedMoments)
+                    mom = it->getMoments();
+
+                // spatial moments info
+                if (useSpatialMoments)
+                {
+                    Bottle &smBot = bObj.addList();
+                    smBot.addString("spatialMoments");
+                    Bottle &smBotCnt = smBot.addList();
+                    smBotCnt.addDouble(mom.m00);
+                    smBotCnt.addDouble(mom.m10);
+                    smBotCnt.addDouble(mom.m01);
+                    smBotCnt.addDouble(mom.m20);
+                    smBotCnt.addDouble(mom.m11);
+                    smBotCnt.addDouble(mom.m02);
+                    smBotCnt.addDouble(mom.m30);
+                    smBotCnt.addDouble(mom.m21);
+                    smBotCnt.addDouble(mom.m12);
+                    smBotCnt.addDouble(mom.m03);
+
+                    // also add mass center info
+                    Bottle &centerBot = bObj.addList();
+                    centerBot.addString("center");
+                    Bottle &centerBotCnt = centerBot.addList();
+                    centerBotCnt.addDouble(mom.m10/mom.m00);
+                    centerBotCnt.addDouble(mom.m01/mom.m00);
+                }
+
+                // central moments info
+                if (useCentralMoments)
+                {
+                    Bottle &cmBot = bObj.addList();
+                    cmBot.addString("centralMoments");
+                    Bottle &cmBotCnt = cmBot.addList();
+                    cmBotCnt.addDouble(mom.mu20);
+                    cmBotCnt.addDouble(mom.mu11);
+                    cmBotCnt.addDouble(mom.mu02);
+                    cmBotCnt.addDouble(mom.mu30);
+                    cmBotCnt.addDouble(mom.mu21);
+                    cmBotCnt.addDouble(mom.mu12);
+                    cmBotCnt.addDouble(mom.mu03);
+                }
+
+                // central normalized moments info
+                if (useCentralNormalizedMoments)
+                {
+                    Bottle &cnmBot = bObj.addList();
+                    cnmBot.addString("centralNormalizedMoments");
+                    Bottle &cnmBotCnt = cnmBot.addList();
+                    cnmBotCnt.addDouble(mom.nu20);
+                    cnmBotCnt.addDouble(mom.nu11);
+                    cnmBotCnt.addDouble(mom.nu02);
+                    cnmBotCnt.addDouble(mom.nu30);
+                    cnmBotCnt.addDouble(mom.nu21);
+                    cnmBotCnt.addDouble(mom.nu12);
+                    cnmBotCnt.addDouble(mom.nu03);
                 }
 
                 // (up-right) bounding rectangle info

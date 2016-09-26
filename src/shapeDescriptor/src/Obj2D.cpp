@@ -8,6 +8,8 @@
 
 #include "Obj2D.h"
 
+using namespace cv;
+
 /**
   * Constructor specifying validity, contour and area.
   */
@@ -61,9 +63,7 @@ bool Obj2D::computeDescriptors()
     //yDebug("4*pi*area=%.2f per^2=%.2f \t compactness=%.2f",
     //       4*CV_PI*area, pow(perimeter,2), compactness);
 
-    // TODO: revise elongation formula
-    if (eccentricity>0.0 && eccentricity<1.0)
-        elongation = 1.0 - eccentricity + compactness*5;
+    moments = cv::moments(contour);
 
     minEnclosingCircle(contour, circleCenter, circleRadius);
     circleness = (circleRadius>0 ? area/(CV_PI*pow(circleRadius,2)) : 0);
@@ -80,6 +80,8 @@ bool Obj2D::computeDescriptors()
                      enclosingRect.size.width);
     double enclosingRectArea = majorAxisRect * minorAxisRect;
     squareness = (enclosingRectArea>0 ? area/enclosingRectArea : 0);
+
+    elongation = majorAxisRect; // TODO: revise computation
 
     //yDebug("perimeter=%.2f area=%.2f convexity=%.2f eccentricity=%.2f compactness=%.2f circleness=%.2f squareness=%.2f",
     //       perimeter, area, convexity, eccentricity, compactness, circleness, squareness);
@@ -122,22 +124,6 @@ bool Obj2D::computeHueHistogram()
 bool Obj2D::isValid() const
 {
     return valid;
-}
-
-/**
-  * Return enclosing rectangle (rotated rectangle containing best-fit ellipse).
-  */
-RotatedRect Obj2D::getEnclosingRect() const
-{
-    return enclosingRect;
-}
-
-/**
-  * Return bounding rectangle (up-right bounding box in image).
-  */
-Rect Obj2D::getBoundingRect() const
-{
-    return cv::boundingRect(contour);
 }
 
 /**
@@ -202,6 +188,30 @@ double Obj2D::getPerimeter() const
 double Obj2D::getElongation() const
 {
     return elongation;
+}
+
+/**
+  * Return object moments.
+  */
+Moments Obj2D::getMoments() const
+{
+    return moments;
+}
+
+/**
+  * Return bounding rectangle (up-right bounding box in image).
+  */
+Rect Obj2D::getBoundingRect() const
+{
+    return cv::boundingRect(contour);
+}
+
+/**
+  * Return enclosing rectangle (rotated rectangle containing best-fit ellipse).
+  */
+RotatedRect Obj2D::getEnclosingRect() const
+{
+    return enclosingRect;
 }
 
 /**

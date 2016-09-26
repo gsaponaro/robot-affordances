@@ -16,14 +16,12 @@
 
 #include "Obj.h"
 
-using namespace cv;
-
 class Obj2D : public Obj
 {
 private:
     bool valid;
 
-    std::vector<Point> contour;
+    std::vector<cv::Point> contour;
     double area;
 
     // shape descriptors
@@ -37,38 +35,36 @@ private:
     double elongation;
 
     // raw moments (spatial, central, central normalized)
-    Moments moments;
+    cv::Moments moments;
 
     // minimum enclosing rectangles
-    Rect boundingRect; // up-right = bounding box in image
-    RotatedRect enclosingRect; // rotated rectangle containing best-fit ellipse
+    cv::Rect boundingRect; // up-right = bounding box in image
+    cv::RotatedRect enclosingRect; // rotated rectangle containing best-fit ellipse
 
     // minimum enclosing circle
-    Point2f circleCenter;
+    cv::Point2f circleCenter;
     float circleRadius;
 
     // polygonal approximation
-    std::vector<Point> poly;
+    std::vector<cv::Point> poly;
 
     // convex hull
-    std::vector<Point> hull;
+    std::vector<cv::Point> hull;
 
     // convexity defects
-    std::vector<Vec4i> defects;
+    std::vector<cv::Vec4i> defects;
 
     // hue colour histogram
-    MatND histH;
-    Mat mask;
+    cv::MatND histH;
+    cv::Mat mask;
 
 public:
-    Obj2D(bool _isValid, std::vector<Point> _contour, double _area);
+    Obj2D(bool _isValid, std::vector<cv::Point> _contour, double _area);
     bool computeDescriptors();
     bool computeHueHistogram();
 
     // getters
     bool isValid() const;
-    RotatedRect getEnclosingRect() const;
-    Rect getBoundingRect() const;
     double getArea() const;
     double getConvexity() const;
     double getEccentricity() const;
@@ -77,11 +73,14 @@ public:
     double getSquareness() const;
     double getPerimeter() const;
     double getElongation() const;
-    Mat getMask() const;
-    MatND getHueHistogram() const;
+    cv::Moments getMoments() const;
+    cv::Rect getBoundingRect() const;
+    cv::RotatedRect getEnclosingRect() const;
+    cv::Mat getMask() const;
+    cv::MatND getHueHistogram() const;
 
     // setters
-    bool setMask(const Mat& m);
+    bool setMask(const cv::Mat& m);
 };
 
 #endif
