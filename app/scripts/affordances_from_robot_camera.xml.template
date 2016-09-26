@@ -7,6 +7,11 @@
     </dependencies>
 
     <module>
+        <name>lbpExtract</name>
+        <node>localhost</node>
+    </module>
+
+    <module>
         <name>shapeDescriptor</name>
         <node>localhost</node>
     </module>
@@ -22,6 +27,11 @@
         <node>localhost</node>
     </module>
 
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/lbpExtract/image:i</to>
+        <protocol>udp</protocol>
+    </connection>
     <connection>
         <from>/lbpExtract/extractedlbp:o</from>
         <to>/sequentialLabeller/binImg:i</to>
