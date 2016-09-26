@@ -15,7 +15,7 @@ using namespace std;
 using namespace yarp::os;
 using namespace yarp::sig;
 
-BlobDescriptorThread::BlobDescriptorThread(const string &_moduleName,
+ShapeDescriptorThread::ShapeDescriptorThread(const string &_moduleName,
     ResourceFinder &_rf)
     : RateThread(THREAD_PERIOD),
       moduleName(_moduleName),
@@ -23,7 +23,7 @@ BlobDescriptorThread::BlobDescriptorThread(const string &_moduleName,
 {
 }
 
-bool BlobDescriptorThread::openPorts()
+bool ShapeDescriptorThread::openPorts()
 {
     inRawImgPortName = "/" + moduleName + "/rawImg:i";
     inRawImgPort.open(inRawImgPortName.c_str());
@@ -57,7 +57,7 @@ bool BlobDescriptorThread::openPorts()
     return true;
 }
 
-void BlobDescriptorThread::close()
+void ShapeDescriptorThread::close()
 {
     yInfo("closing ports");
 
@@ -83,7 +83,7 @@ void BlobDescriptorThread::close()
     mutex.post();
 }
 
-void BlobDescriptorThread::interrupt()
+void ShapeDescriptorThread::interrupt()
 {
     yInfo("interrupting ports");
 
@@ -105,7 +105,7 @@ void BlobDescriptorThread::interrupt()
     */
 }
 
-bool BlobDescriptorThread::threadInit()
+bool ShapeDescriptorThread::threadInit()
 {
     // parse basic options
     maxObjects = rf.check("maxObjects", Value(10),
@@ -131,7 +131,7 @@ bool BlobDescriptorThread::threadInit()
     return true;
 }
 
-void BlobDescriptorThread::run()
+void ShapeDescriptorThread::run()
 {
     while(!closing)
     {
@@ -140,7 +140,7 @@ void BlobDescriptorThread::run()
     }
 }
 
-void BlobDescriptorThread::run2d()
+void ShapeDescriptorThread::run2d()
 {
     // acquire new input images
     ImageOf<PixelBgr> *inRawImg = inRawImgPort.read(true);

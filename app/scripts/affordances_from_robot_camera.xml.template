@@ -7,8 +7,7 @@
     </dependencies>
 
     <module>
-        <name>blobDescriptor2</name>
-        <parameters>--name bd2</parameters>
+        <name>shapeDescriptor</name>
         <node>localhost</node>
     </module>
 
@@ -19,7 +18,7 @@
 
     <module>
         <name>yarpview</name>
-        <parameters>--name /view/bd2 --x 320 --y 0</parameters>
+        <parameters>--name /view/shapeDesc --x 320 --y 0</parameters>
         <node>localhost</node>
     </module>
 
@@ -30,22 +29,22 @@
     </connection>
     <connection>
         <from>/lbpExtract/extractedlbp:o</from>
-        <to>/bd2/binImg:i</to>
+        <to>/shapeDescriptor/binImg:i</to>
         <protocol>udp</protocol>
     </connection>
     <connection>
         <from>/icub/camcalib/left/out</from>
-        <to>/bd2/rawImg:i</to>
+        <to>/shapeDescriptor/rawImg:i</to>
         <protocol>udp</protocol>
     </connection>
     <connection>
         <from>/sequentialLabeller/labeledImg:o</from>
-        <to>/bd2/labeledImg:i</to>
+        <to>/shapeDescriptor/labeledImg:i</to>
         <protocol>udp</protocol>
     </connection>
     <connection>
-        <from>/bd2/annotatedImg:o</from>
-        <to>/view/bd2</to>
+        <from>/shapeDescriptor/annotatedImg:o</from>
+        <to>/view/shapeDesc</to>
         <protocol>udp</protocol>
     </connection>
 

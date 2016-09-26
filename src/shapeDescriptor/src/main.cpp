@@ -7,7 +7,7 @@
  */
 
 /** 
-@defgroup blobDescriptor2
+@defgroup shapeDescriptor
 @ingroup robot-affordances
 
 Extract object features from segmented images.
@@ -51,20 +51,20 @@ int main(int argc, char *argv[])
 {
     ResourceFinder rf;
     rf.setVerbose(true);
-    rf.setDefaultContext("blobDescriptor2");    // overridden by --context
-    rf.setDefaultConfigFile("blobDescriptor2.ini");  // overridden by --from
+    rf.setDefaultContext("shapeDescriptor");    // overridden by --context
+    rf.setDefaultConfigFile("shapeDescriptor.ini");  // overridden by --from
     rf.configure(argc, argv);
 
     #ifdef CV_MAJOR_VERSION
     yInfo("This module has been compiled with OpenCV %d.%d.%d",CV_MAJOR_VERSION,CV_MINOR_VERSION,CV_SUBMINOR_VERSION);
     #else
-    yInfo("This module has been compiled with an unknown version of OpenCV (probably < 1.0)");
+    yInfo("This module has been compiled with an unknown version of OpenCV (possibly < 1.0)");
     #endif    
 
     if(rf.check("help"))
     {
         yInfo("Basic options:");
-        yInfo("--name <module name> (default: blobDescriptor)");
+        yInfo("--name <module name> (default: shapeDescriptor)");
         yInfo("--maxObjects <number> (default: 10)");
 
         yInfo("Advanced options:");
@@ -81,8 +81,7 @@ int main(int argc, char *argv[])
         return 1; // EXIT_FAILURE
     }
 
-    BlobDescriptorModule bdm;
+    ShapeDescriptorModule mod;
 
-    return bdm.runModule(rf);
+    return mod.runModule(rf);
 }
-

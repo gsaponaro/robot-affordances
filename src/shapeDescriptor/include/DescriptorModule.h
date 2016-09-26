@@ -14,7 +14,7 @@
 
 #include "DescriptorThread.h"
 
-class BlobDescriptorModule : public yarp::os::RFModule
+class ShapeDescriptorModule : public yarp::os::RFModule
 {
     private:
         // module parameters
@@ -22,7 +22,7 @@ class BlobDescriptorModule : public yarp::os::RFModule
         bool closing;
 
         // pointer to a new thread
-        BlobDescriptorThread *thread;
+        ShapeDescriptorThread *thread;
 
     public:
         virtual bool configure(yarp::os::ResourceFinder &rf);

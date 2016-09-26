@@ -4,7 +4,7 @@
 # CopyPolicy: Released under the terms of the GNU GPL v2.0.
 
 cmake_minimum_required(VERSION 2.8)
-project(blobDescriptor2)
+project(shapeDescriptor)
 
 find_package(YARP)
 find_package(ICUB)

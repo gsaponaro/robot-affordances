@@ -23,7 +23,7 @@
 
 #include "Helpers.h"
 
-class BlobDescriptorThread : public yarp::os::RateThread
+class ShapeDescriptorThread : public yarp::os::RateThread
 {
     private:
         std::string moduleName;
@@ -66,8 +66,8 @@ class BlobDescriptorThread : public yarp::os::RateThread
         cv::Mat        bothParts;
 
     public:
-        BlobDescriptorThread(const std::string &_moduleName,
-                             yarp::os::ResourceFinder &_rf);
+        ShapeDescriptorThread(const std::string &_moduleName,
+                              yarp::os::ResourceFinder &_rf);
 
         bool openPorts();
         void close();

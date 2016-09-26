@@ -10,15 +10,15 @@
 
 using namespace yarp::os;
 
-bool BlobDescriptorModule::configure(ResourceFinder &rf)
+bool ShapeDescriptorModule::configure(ResourceFinder &rf)
 {
-    moduleName = rf.check("name", Value("blobDescriptor")).asString();
+    moduleName = rf.check("name", Value("ShapeDescriptor")).asString();
     setName(moduleName.c_str());
 
     closing = false;
 
     // create the thread, pass parameters with ResourceFinder
-    thread = new BlobDescriptorThread(moduleName, rf);
+    thread = new ShapeDescriptorThread(moduleName, rf);
 
     // start the thread to do the work
     if (!thread->start()) {
@@ -29,14 +29,14 @@ bool BlobDescriptorModule::configure(ResourceFinder &rf)
     return true;
 }
 
-bool BlobDescriptorModule::interruptModule()
+bool ShapeDescriptorModule::interruptModule()
 {
     // interrupt rpc ports, if any
 
     return true;
 }
 
-bool BlobDescriptorModule::close()
+bool ShapeDescriptorModule::close()
 {
     // close rpc ports, if any
 
@@ -51,18 +51,18 @@ bool BlobDescriptorModule::close()
     return true;
 }
 
-bool BlobDescriptorModule::quit()
+bool ShapeDescriptorModule::quit()
 {
     closing = true;
     return true;
 }
 
-bool BlobDescriptorModule::updateModule()
+bool ShapeDescriptorModule::updateModule()
 {
     return !closing;
 }
 
-double BlobDescriptorModule::getPeriod()
+double ShapeDescriptorModule::getPeriod()
 {
     return 0.0;
 }
