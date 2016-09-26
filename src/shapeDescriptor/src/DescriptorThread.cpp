@@ -34,22 +34,21 @@ bool ShapeDescriptorThread::openPorts()
     inLabImgPortName = "/" + moduleName + "/labeledImg:i";
     inLabImgPort.open(inLabImgPortName.c_str());
 
-    // tbc
     //inRoiPortName = "/" + moduleName + "/blobs:i";
     //inRoiPort.open(inRoiPortName.c_str());
 
-    outRawImgPortName = "/" + moduleName + "/rawImg:o";
-    outRawImgPort.open(outRawImgPortName.c_str());
+    //outRawImgPortName = "/" + moduleName + "/rawImg:o";
+    //outRawImgPort.open(outRawImgPortName.c_str());
 
     outAnnotatedImgPortName = "/" + moduleName + "/annotatedImg:o";
     outAnnotatedImgPort.open(outAnnotatedImgPortName.c_str());
 
-    outAffPortName = "/" + moduleName + "/affDescriptor:o";
-    outAffPort.open(outAffPortName.c_str());
+    outWholeDescPortName = "/" + moduleName + "/wholeDescriptors:o";
+    outWholeDescPort.open(outWholeDescPortName.c_str());
 
     // tbc
-    //outToolAffPortName = "/" + moduleName + "/toolAffDescriptor:o";
-    //outToolAffPort.open(outToolAffPortName.c_str());
+    //outPartDescPortName = "/" + moduleName + "/partDescriptors:o";
+    //outPartDescPort.open(outPartDescPortName.c_str());
 
     //outBothPartsImgPortName = "/" + moduleName + "/bothPartsImg:o";
     //outBothPartsImgPort.open(outBothPartsImgPortName.c_str());
@@ -68,11 +67,11 @@ void ShapeDescriptorThread::close()
     inBinImgPort.close();
     inLabImgPort.close();
 
-    outRawImgPort.writeStrict();
-    outRawImgPort.close();
+    //outRawImgPort.writeStrict();
+    //outRawImgPort.close();
     outAnnotatedImgPort.close();
-    outAffPort.writeStrict();
-    outAffPort.close();
+    outWholeDescPort.writeStrict();
+    outWholeDescPort.close();
 
     /*
     inRoiPort.close();
@@ -93,13 +92,13 @@ void ShapeDescriptorThread::interrupt()
     inBinImgPort.interrupt();
     inLabImgPort.interrupt();
 
-    outRawImgPort.interrupt();
+    //outRawImgPort.interrupt();
     outAnnotatedImgPort.interrupt();
-    outAffPort.interrupt();
+    outWholeDescPort.interrupt();
 
     /*
     inRoiPort.interrupt();
-    outToolAffPort.interrupt();
+    outPartDescPort.interrupt();
     // for debug
     outBothPartsImgPort.interrupt();
     */
@@ -107,19 +106,22 @@ void ShapeDescriptorThread::interrupt()
 
 bool ShapeDescriptorThread::threadInit()
 {
-    // parse basic options
-    maxObjects = rf.check("maxObjects", Value(10),
-        "maximum number of objects to process (int)").asInt();
+    maxObjects = rf.check("maxObjects", Value(10)).asInt();
+    minArea = rf.check("minArea", Value(100)).asInt();
+    maxArea = rf.check("maxArea", Value(3000)).asInt();
 
-    minArea = rf.check("minArea", Value(100),
-        "minimum valid blob area (int)").asInt();
-
-    maxArea = rf.check("maxArea", Value(3000),
-        "maximum valid blob area (int)").asInt();
-
-    yInfo("initialized thread with "
-          "maxObjects=%d minArea=%d maxArea=%d",
+    yInfo("initialized thread with maxObjects=%d minArea=%d maxArea=%d",
           maxObjects, minArea, maxArea);
+
+    useArea = rf.check("area",Value("on")).asString()=="on"?true:false;
+    useConvexity = rf.check("convexity",Value("on")).asString()=="on"?true:false;
+    useEccentricity = rf.check("eccentricity",Value("on")).asString()=="on"?true:false;
+    useCompactness = rf.check("compactness",Value("on")).asString()=="on"?true:false;
+    useCircleness = rf.check("circleness",Value("on")).asString()=="on"?true:false;
+    useSquareness = rf.check("squareness",Value("on")).asString()=="on"?true:false;
+    useBoundingRectangle = rf.check("boundingRectangle",Value("off")).asString()=="on"?true:false;
+    useEnclosingRectangle = rf.check("enclosingRectangle",Value("off")).asString()=="on"?true:false;
+    useColorHistogram = rf.check("colorHistogram",Value("off")).asString()=="on"?true:false;
 
     if( !openPorts() )
     {
@@ -220,20 +222,8 @@ void ShapeDescriptorThread::run2d()
             //for (int i=0; i<16; i++) yDebug() << "value" << i << "=" << objs[intIdx].getHueHistogram().at<float>(i);
         }
 
-        bool printArea = true;
-        bool printConvexity = true;
-        bool printEccentricity = true;
-        bool printCompactness = true;
-        bool printCircleness = true;
-        bool printSquareness = true;
-
-        bool printBoundingRectangle = false;
-        bool printEnclosingRectangle = false;
-
-        bool printColorHistogram = false;
-
         // output shape descriptors of whole blobs
-        Bottle &bDesc = outAffPort.prepare();
+        Bottle &bDesc = outWholeDescPort.prepare();
         bDesc.clear();
         for (std::vector<Obj2D>::iterator it=objs.begin(); it!=objs.end(); ++it)
         {
@@ -242,7 +232,7 @@ void ShapeDescriptorThread::run2d()
                 Bottle &bObj = bDesc.addList();
 
                 // area info
-                if (printArea)
+                if (useArea)
                 {
                     Bottle &areaBot = bObj.addList();
                     areaBot.addString("area");
@@ -251,7 +241,7 @@ void ShapeDescriptorThread::run2d()
                 }
 
                 // convexity info
-                if (printConvexity)
+                if (useConvexity)
                 {
                     Bottle &convBot = bObj.addList();
                     convBot.addString("convexity");
@@ -260,7 +250,7 @@ void ShapeDescriptorThread::run2d()
                 }
 
                 // eccentricity info
-                if (printEccentricity)
+                if (useEccentricity)
                 {
                     Bottle &eccBot = bObj.addList();
                     eccBot.addString("eccentricity");
@@ -269,7 +259,7 @@ void ShapeDescriptorThread::run2d()
                 }
 
                 // compactness info
-                if (printCompactness)
+                if (useCompactness)
                 {
                     Bottle &compBot = bObj.addList();
                     compBot.addString("compactness");
@@ -278,7 +268,7 @@ void ShapeDescriptorThread::run2d()
                 }
 
                 // circleness info
-                if (printCircleness)
+                if (useCircleness)
                 {
                     Bottle &circBot = bObj.addList();
                     circBot.addString("circleness");
@@ -287,7 +277,7 @@ void ShapeDescriptorThread::run2d()
                 }
 
                 // squareness info
-                if (printSquareness)
+                if (useSquareness)
                 {
                     Bottle &sqBot = bObj.addList();
                     sqBot.addString("squareness");
@@ -296,7 +286,7 @@ void ShapeDescriptorThread::run2d()
                 }
 
                 // (up-right) bounding rectangle info
-                if (printBoundingRectangle)
+                if (useBoundingRectangle)
                 {
                     Rect br = it->getBoundingRect();
                     Bottle &brBot = bObj.addList();
@@ -312,7 +302,7 @@ void ShapeDescriptorThread::run2d()
                 }
 
                 // (rotated) enclosing rectangle info
-                if (printEnclosingRectangle)
+                if (useEnclosingRectangle)
                 {
                     RotatedRect er = it->getEnclosingRect();
                     Bottle &erBot = bObj.addList();
@@ -327,7 +317,7 @@ void ShapeDescriptorThread::run2d()
 
                 // OLD colour histograms info
                 /*
-                if (printColorHistogram)
+                if (useColorHistogram)
                 {
                     MatND hueHist = it->getHueHistogram();
                     for (int i=0; i<16; i++)
@@ -336,8 +326,8 @@ void ShapeDescriptorThread::run2d()
                 */
             }
         }
-        outAffPort.setEnvelope(tsRaw);
-        outAffPort.write();
+        outWholeDescPort.setEnvelope(tsRaw);
+        outWholeDescPort.write();
     }
 
     if (inRawImg!=NULL)

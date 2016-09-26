@@ -37,28 +37,35 @@ class ShapeDescriptorThread : public yarp::os::RateThread
         std::string inRawImgPortName;
         std::string inBinImgPortName;
         std::string inLabImgPortName;
-        std::string inRoiPortName;
+        //std::string inRoiPortName; // alternative to labelled image
 
-        std::string outRawImgPortName;
+        //std::string outRawImgPortName;
         std::string outAnnotatedImgPortName;
-        std::string outAffPortName;
-        std::string outToolAffPortName;
+        std::string outWholeDescPortName;
+        std::string outPartDescPortName;
 
         yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inRawImgPort;
         yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inBinImgPort;
         yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelInt> > inLabImgPort;
-        yarp::os::BufferedPort<yarp::os::Bottle>                         inRoiPort;
+        //yarp::os::BufferedPort<yarp::os::Bottle>                         inRoiPort;
 
-        yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outRawImgPort;
+        //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outRawImgPort;
         yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outAnnotatedImgPort;
-        yarp::os::BufferedPort<yarp::os::Bottle>                         outAffPort;
-        yarp::os::BufferedPort<yarp::os::Bottle>                         outToolAffPort;
-
-        yarp::os::Bottle aff;
-        yarp::os::Bottle toolAff;
+        yarp::os::BufferedPort<yarp::os::Bottle>                         outWholeDescPort;
+        yarp::os::BufferedPort<yarp::os::Bottle>                         outPartDescPort;
 
         int minArea;
         int maxArea;
+
+        bool useArea;
+        bool useConvexity;
+        bool useEccentricity;
+        bool useCompactness;
+        bool useCircleness;
+        bool useSquareness;
+        bool useBoundingRectangle;
+        bool useEnclosingRectangle;
+        bool useColorHistogram;
 
         // for debug
         std::string    outBothPartsImgPortName;

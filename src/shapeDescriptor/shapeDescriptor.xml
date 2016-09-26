@@ -27,7 +27,7 @@
     <param default="shapeDescriptor.ini" desc="configuration file name">from</param>
     <param default="shapeDescriptor" desc="context">context</param>
 
-    <param default="10" desc="maximum numbers of blobs to be processed">maxObjects</param>
+    <param default="10" desc="maximum numbers of blobs to process">maxObjects</param>
     <param default="100" desc="minimum valid blob area">minArea</param>
     <param default="3000" desc="maximum valid blob area">maxArea</param>
 
@@ -75,6 +75,24 @@
         Port receiving incoming labelled images (0=background, 1=object, 2=another object, 3=another object, etc.).
       </description>
     </input>
+
+    <output>
+      <type>Image</type>
+      <port carrier="udp">/shapeDescriptor/annotatedImg:o</port>
+      <description>Port with overlay visual representation of blobs and their descriptors.</description>
+    </output>
+
+    <output>
+      <type>Bottle</type>
+      <port carrier="tcp">/shapeDescriptor/wholeDescriptors:o</port>
+      <description>Port with the shape descriptors of whole objects.</description>
+    </output>
+
+    <output>
+      <type>Bottle</type>
+      <port carrier="tcp">/shapeDescriptor/wholeDescriptors:o</port>
+      <description>Port with the shape descriptors of parts of objects.</description>
+    </output>
 
   </data>
 
