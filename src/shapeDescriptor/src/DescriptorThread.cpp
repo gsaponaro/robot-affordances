@@ -190,7 +190,7 @@ void ShapeDescriptorThread::run2d()
         // container of contours: i'th object associated to vector<vector<Point> >
         std::vector< std::vector<std::vector<Point> > > cont(numObjects);
 
-        // container of temporary objects/blobs with associated features
+        // container to store temporary objects/blobs with associated features
         std::vector<Obj2D> objs;
 
         for (std::vector<int>::iterator it=uniq.begin(); it!=uniq.end(); ++it)
@@ -416,32 +416,44 @@ void ShapeDescriptorThread::run2d()
                bDesc.size(), 1000.0*(t1-t0));
         outWholeDescPort.setEnvelope(tsRaw);
         outWholeDescPort.write();
-    }
 
-    if (inRawImg!=NULL)
-    {
         // annotated output image
         Mat outAnnotatedMat;
         outAnnotatedMat = iplToMat(*inRawImg);
-        Mat channels[4];
-        split(outAnnotatedMat,channels);
-        Scalar minColor(0,0,0);
-        Scalar maxColor(255,255,0);
-        inRange(outAnnotatedMat,minColor,maxColor,channels[3]);
-        Mat outAnnotatedMat2;
-        // FIXME
-        /*
-        cv::merge(channels,4,outAnnotatedMat2);
+
+        const Scalar Blue(255,0,0);
+        const Scalar Yellow(255,255,0);
+        const int thickness = 2;
+        for (std::vector<Obj2D>::iterator it = objs.begin();
+             it != objs.end();
+             ++it)
+        {
+            // intIdx is an auxiliary current index: 0, 1, ...
+            int intIdx = std::distance(objs.begin(),it);
+
+            if (it->isValid())
+            {
+                drawContours(outAnnotatedMat,
+                             cont[intIdx],
+                             -1, // draw all the contours of cont[intIdx]
+                             Blue,
+                             thickness);
+            }
+            else
+            {
+                drawContours(outAnnotatedMat,
+                             cont[intIdx],
+                             -1, // draw all the contours of cont[intIdx]
+                             Yellow,
+                             thickness);
+            }
+        }
+
         ImageOf<PixelBgr> &outAnnotatedYarp = outAnnotatedImgPort.prepare();
-        IplImage outAnnotatedIpl = outAnnotatedMat2;
-        outAnnotatedYarp.resize(outAnnotatedIpl.width,
-                                outAnnotatedIpl.height);
-        //outAnnotatedYarp.resize(outAnnotatedMat2.cols,
-        //                        outAnnotatedMat2.rows);
-        //outAnnotatedMat2.copyTo( iplToMat(outAnnotatedYarp) );
-        outAnnotatedMat2.copyTo( cv::cvarrToMat(static_cast<IplImage*>(outAnnotatedYarp.getIplImage())) );
+        outAnnotatedYarp.resize(outAnnotatedMat.cols,
+                                outAnnotatedMat.rows);
+        outAnnotatedMat.copyTo( cv::cvarrToMat(static_cast<IplImage*>(outAnnotatedYarp.getIplImage())) );
         outAnnotatedImgPort.setEnvelope(tsRaw);
         outAnnotatedImgPort.write();
-        */
     }
 }
