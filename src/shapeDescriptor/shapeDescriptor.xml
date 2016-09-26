@@ -37,6 +37,8 @@
     <param default="on" desc="enable compactness">compactness</param>
     <param default="on" desc="enable circleness">circleness</param>
     <param default="on" desc="enable squareness">squareness</param>
+    <param default="on" desc="enable perimeter">perimeter</param>
+    <param default="on" desc="enable elongation">elongation</param>
 
     <param default="off" desc="enable (up-right) bounding rectangle">boundingRectangle</param>
     <param default="off" desc="enable (rotated) enclosing rectangle">enclosingRectangle</param>

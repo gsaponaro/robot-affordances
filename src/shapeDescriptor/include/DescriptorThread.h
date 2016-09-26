@@ -63,6 +63,8 @@ class ShapeDescriptorThread : public yarp::os::RateThread
         bool useCompactness;
         bool useCircleness;
         bool useSquareness;
+        bool usePerimeter;
+        bool useElongation;
         bool useBoundingRectangle;
         bool useEnclosingRectangle;
         bool useColorHistogram;

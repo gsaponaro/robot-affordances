@@ -75,6 +75,8 @@ public:
     double getCompactness() const;
     double getCircleness() const;
     double getSquareness() const;
+    double getPerimeter() const;
+    double getElongation() const;
     Mat getMask() const;
     MatND getHueHistogram() const;
 

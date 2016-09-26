@@ -119,6 +119,8 @@ bool ShapeDescriptorThread::threadInit()
     useCompactness = rf.check("compactness",Value("on")).asString()=="on"?true:false;
     useCircleness = rf.check("circleness",Value("on")).asString()=="on"?true:false;
     useSquareness = rf.check("squareness",Value("on")).asString()=="on"?true:false;
+    usePerimeter = rf.check("perimeter",Value("on")).asString()=="on"?true:false;
+    useElongation = rf.check("elongation",Value("on")).asString()=="on"?true:false;
     useBoundingRectangle = rf.check("boundingRectangle",Value("off")).asString()=="on"?true:false;
     useEnclosingRectangle = rf.check("enclosingRectangle",Value("off")).asString()=="on"?true:false;
     useColorHistogram = rf.check("colorHistogram",Value("off")).asString()=="on"?true:false;
@@ -283,6 +285,24 @@ void ShapeDescriptorThread::run2d()
                     sqBot.addString("squareness");
                     Bottle &sqBotCnt = sqBot.addList();
                     sqBotCnt.addDouble(it->getSquareness());
+                }
+
+                // perimeter info
+                if (usePerimeter)
+                {
+                    Bottle &perBot = bObj.addList();
+                    perBot.addString("perimeter");
+                    Bottle &perBotCnt = perBot.addList();
+                    perBotCnt.addDouble(it->getPerimeter());
+                }
+
+                // elongation info
+                if (useElongation)
+                {
+                    Bottle &eloBot = bObj.addList();
+                    eloBot.addString("elongation");
+                    Bottle &eloBotCnt = eloBot.addList();
+                    eloBotCnt.addDouble(it->getElongation());
                 }
 
                 // (up-right) bounding rectangle info

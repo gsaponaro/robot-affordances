@@ -61,6 +61,10 @@ bool Obj2D::computeDescriptors()
     //yDebug("4*pi*area=%.2f per^2=%.2f \t compactness=%.2f",
     //       4*CV_PI*area, pow(perimeter,2), compactness);
 
+    // TODO: revise elongation formula
+    if (eccentricity>0.0 && eccentricity<1.0)
+        elongation = 1.0 - eccentricity + compactness*5;
+
     minEnclosingCircle(contour, circleCenter, circleRadius);
     circleness = (circleRadius>0 ? area/(CV_PI*pow(circleRadius,2)) : 0);
     //yDebug("area=%.2f pi*radius^2=%.2f \t circleness=%.2f",
@@ -182,6 +186,22 @@ double Obj2D::getCircleness() const
 double Obj2D::getSquareness() const
 {
     return squareness;
+}
+
+/**
+  * Return object squareness.
+  */
+double Obj2D::getPerimeter() const
+{
+    return perimeter;
+}
+
+/**
+  * Return object squareness.
+  */
+double Obj2D::getElongation() const
+{
+    return elongation;
 }
 
 /**
