@@ -452,7 +452,7 @@ void ShapeDescriptorThread::run2d()
         ImageOf<PixelBgr> &outAnnotatedYarp = outAnnotatedImgPort.prepare();
         outAnnotatedYarp.resize(outAnnotatedMat.cols,
                                 outAnnotatedMat.rows);
-        outAnnotatedMat.copyTo( cv::cvarrToMat(static_cast<IplImage*>(outAnnotatedYarp.getIplImage())) );
+        outAnnotatedMat.copyTo(iplToMat(outAnnotatedYarp));
         outAnnotatedImgPort.setEnvelope(tsRaw);
         outAnnotatedImgPort.write();
     }
