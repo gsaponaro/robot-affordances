@@ -119,7 +119,7 @@ bool Obj2D::computeHueHistogram()
 // getters
 
 /**
-  * Return whether the object is valid.
+  * Return whether the shape is valid.
   */
 bool Obj2D::isValid() const
 {
@@ -127,7 +127,7 @@ bool Obj2D::isValid() const
 }
 
 /**
-  * Return object area.
+  * Return area.
   */
 double Obj2D::getArea() const
 {
@@ -135,7 +135,7 @@ double Obj2D::getArea() const
 }
 
 /**
-  * Return object convexity.
+  * Return convexity.
   */
 double Obj2D::getConvexity() const
 {
@@ -143,7 +143,7 @@ double Obj2D::getConvexity() const
 }
 
 /**
-  * Return object eccentricity.
+  * Return eccentricity.
   */
 double Obj2D::getEccentricity() const
 {
@@ -151,7 +151,7 @@ double Obj2D::getEccentricity() const
 }
 
 /**
-  * Return object compactness.
+  * Return compactness.
   */
 double Obj2D::getCompactness() const
 {
@@ -159,7 +159,7 @@ double Obj2D::getCompactness() const
 }
 
 /**
-  * Return object circleness.
+  * Return circleness.
   */
 double Obj2D::getCircleness() const
 {
@@ -167,7 +167,7 @@ double Obj2D::getCircleness() const
 }
 
 /**
-  * Return object squareness.
+  * Return squareness.
   */
 double Obj2D::getSquareness() const
 {
@@ -175,7 +175,7 @@ double Obj2D::getSquareness() const
 }
 
 /**
-  * Return object squareness.
+  * Return perimeter.
   */
 double Obj2D::getPerimeter() const
 {
@@ -183,7 +183,7 @@ double Obj2D::getPerimeter() const
 }
 
 /**
-  * Return object squareness.
+  * Return elongation.
   */
 double Obj2D::getElongation() const
 {
@@ -191,7 +191,7 @@ double Obj2D::getElongation() const
 }
 
 /**
-  * Return object moments.
+  * Return raw moments (spatial, central, central normalized).
   */
 Moments Obj2D::getMoments() const
 {
@@ -199,7 +199,7 @@ Moments Obj2D::getMoments() const
 }
 
 /**
-  * Return bounding rectangle (up-right bounding box in image).
+  * Return bounding rectangle (up-right bounding box).
   */
 Rect Obj2D::getBoundingRect() const
 {
@@ -223,7 +223,7 @@ Mat Obj2D::getMask() const
 }
 
 /**
-  * Return hue histogram of object.
+  * Return hue histogram of shape pixels.
   */
 MatND Obj2D::getHueHistogram() const
 {

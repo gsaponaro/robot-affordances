@@ -314,7 +314,7 @@ void ShapeDescriptorThread::run2d()
                 if (useSpatialMoments || useCentralMoments || useCentralNormalizedMoments)
                     mom = it->getMoments();
 
-                // spatial moments info
+                // spatial moments and center of mass info
                 if (useSpatialMoments)
                 {
                     Bottle &smBot = bObj.addList();
@@ -331,7 +331,6 @@ void ShapeDescriptorThread::run2d()
                     smBotCnt.addDouble(mom.m12);
                     smBotCnt.addDouble(mom.m03);
 
-                    // also add mass center info
                     Bottle &centerBot = bObj.addList();
                     centerBot.addString("center");
                     Bottle &centerBotCnt = centerBot.addList();
