@@ -231,6 +231,8 @@ void ShapeDescriptorThread::run2d()
         // output shape descriptors of whole blobs
         Bottle &bDesc = outWholeDescPort.prepare();
         bDesc.clear();
+        double t0, t1;
+        t0 = yarp::os::Time::now();
         for (std::vector<Obj2D>::iterator it=objs.begin(); it!=objs.end(); ++it)
         {
             if (it->isValid())
@@ -409,6 +411,9 @@ void ShapeDescriptorThread::run2d()
                 */
             }
         }
+        t1 = yarp::os::Time::now();
+        yDebug("computed descriptors of %d objects in %f msec",
+               bDesc.size(), 1000.0*(t1-t0));
         outWholeDescPort.setEnvelope(tsRaw);
         outWholeDescPort.write();
     }
