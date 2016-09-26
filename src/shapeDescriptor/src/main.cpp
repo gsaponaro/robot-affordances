@@ -6,40 +6,6 @@
  *
  */
 
-/** 
-@defgroup shapeDescriptor
-@ingroup robot-affordances
-
-Extract object features from segmented images.
-
-\section intro_sec Description
-
-Extract object features from segmented images.
-
-\section lib_sec Libraries
-- YARP
-
-- OpenCV
-
-\section parameters_sec Parameters
-Basic options:
-\verbatim
---name <module name> (default: objectDescriptor)
---maxObjects <number> (default: 10)
-\endverbatim
-
-Advanced options:
-\verbatim
---minArea <minimum valid blob area> (default: 100)
---maxArea <maximum valid blob area> (default: 20000)
-\endverbatim
-
-\section tested_os_sec Tested OS
-Linux
-
-\author Giovanni Saponaro
-*/
-
 #include <yarp/os/Log.h>
 #include <yarp/os/Network.h>
 

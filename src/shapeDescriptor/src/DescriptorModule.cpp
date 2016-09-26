@@ -12,7 +12,7 @@ using namespace yarp::os;
 
 bool ShapeDescriptorModule::configure(ResourceFinder &rf)
 {
-    moduleName = rf.check("name", Value("ShapeDescriptor")).asString();
+    moduleName = rf.check("name", Value("shapeDescriptor")).asString();
     setName(moduleName.c_str());
 
     closing = false;

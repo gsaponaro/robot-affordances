@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet type="text/xsl" href="yarpmanifest.xsl"?>
+ 
+<module>
+  <name>shapeDescriptor</name>
+
+  <doxygen-group>robot-affordances</doxygen-group>
+
+  <description>Extract shape features from connected components.</description>
+
+  <copypolicy>Released under the terms of the GNU GPL v2.0</copypolicy>
+
+  <version>0.1</version>
+  
+  <description-long>
+    Extract shape features from connected components.
+
+    Connected components often corresponds to the images of the object present
+    in a scene. To identify those objects, to compare them with other image
+    elements, or to do inference on them (e.g., object affordance reasoning),
+    this module performs measurements on the components, in order to extract
+    some of their characteristics.
+  </description-long>
+
+  <arguments>
+    <param default="shapeDescriptor" desc="name of the module">name</param>
+    <param default="shapeDescriptor.ini" desc="configuration file name">from</param>
+    <param default="shapeDescriptor" desc="context">context</param>
+
+    <param default="10" desc="maximum numbers of blobs to be processed">maxObjects</param>
+    <param default="100" desc="minimum valid blob area">minArea</param>
+    <param default="3000" desc="maximum valid blob area">maxArea</param>
+
+    <param default="on" desc="enable area">area</param>
+    <param default="on" desc="enable convexity">convexity</param>
+    <param default="on" desc="enable eccentricity">eccentricity</param>
+    <param default="on" desc="enable compactness">compactness</param>
+    <param default="on" desc="enable circleness">circleness</param>
+    <param default="on" desc="enable squareness">squareness</param>
+
+    <param default="off" desc="enable (up-right) bounding rectangle">boundingRectangle</param>
+    <param default="off" desc="enable (rotated) enclosing rectangle">enclosingRectangle</param>
+
+    <param default="off" desc="enable hue colour histogram">colorHistogram</param>
+  </arguments>
+ 
+  <authors>
+    <author email="gsaponaro@isr.ist.utl.pt">Giovanni Saponaro</author>
+  </authors>
+
+  <data>
+
+    <input>
+      <type>Image</type>
+      <port carrier="udp">/shapeDescriptor/rawImg:i</port>
+      <required>yes</required>
+      <priority>no</priority>
+      <description>Port receiving incoming colour images from robot camera or recording.</description>
+    </input>
+
+    <input>
+      <type>Image</type>
+      <port carrier="udp">/shapeDescriptor/binImg:i</port>
+      <required>yes</required>
+      <priority>no</priority>
+      <description>Port receiving incoming segmented binary images (0=background, 1=blobs).</description>
+    </input>
+
+    <input>
+      <type>Image</type>
+      <port carrier="udp">/shapeDescriptor/labImg:i</port>
+      <required>yes</required>
+      <priority>no</priority>
+      <description>
+        Port receiving incoming labelled images (0=background, 1=object, 2=another object, 3=another object, etc.).
+      </description>
+    </input>
+
+  </data>
+
+</module>

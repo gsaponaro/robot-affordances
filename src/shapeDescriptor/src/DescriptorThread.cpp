@@ -182,7 +182,7 @@ void ShapeDescriptorThread::run2d()
         // container of contours: i'th object associated to vector<vector<Point> >
         std::vector< std::vector<std::vector<Point> > > cont(numObjects);
 
-        // container of objects/blobs with associated features
+        // container of temporary objects/blobs with associated features
         std::vector<Obj2D> objs;
 
         for (std::vector<int>::iterator it=uniq.begin(); it!=uniq.end(); ++it)
@@ -209,7 +209,7 @@ void ShapeDescriptorThread::run2d()
             double largestArea = contourArea(cont[intIdx][largest]);
             bool isValid = (largestArea>minArea && largestArea<maxArea);
 
-            // construct Obj2D with validity,contour,area
+            // construct temporary Obj2D with validity,contour,area
             objs.push_back( Obj2D(isValid, cont[intIdx][largest], largestArea) );
             // compute remaining shape descriptors and colour histogram
             objs[intIdx].computeDescriptors();
@@ -229,6 +229,8 @@ void ShapeDescriptorThread::run2d()
 
         bool printBoundingRectangle = false;
         bool printEnclosingRectangle = false;
+
+        bool printColorHistogram = false;
 
         // output shape descriptors of whole blobs
         Bottle &bDesc = outAffPort.prepare();
@@ -325,9 +327,12 @@ void ShapeDescriptorThread::run2d()
 
                 // OLD colour histograms info
                 /*
-                MatND hueHist = it->getHueHistogram();
-                for (int i=0; i<16; i++)
-                    bObj.addDouble( hueHist.at<float>(i) );
+                if (printColorHistogram)
+                {
+                    MatND hueHist = it->getHueHistogram();
+                    for (int i=0; i<16; i++)
+                        bObj.addDouble( hueHist.at<float>(i) );
+                }
                 */
             }
         }
