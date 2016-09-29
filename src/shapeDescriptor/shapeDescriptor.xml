@@ -58,9 +58,9 @@
     <input>
       <type>Image</type>
       <port carrier="udp">/shapeDescriptor/rawImg:i</port>
-      <required>yes</required>
+      <required>no</required>
       <priority>no</priority>
-      <description>Port receiving incoming colour images from robot camera or recording.</description>
+      <description>Port receiving optional incoming colour images from robot camera or recording.</description>
     </input>
 
     <input>
@@ -84,7 +84,7 @@
     <output>
       <type>Image</type>
       <port carrier="udp">/shapeDescriptor/annotatedImg:o</port>
-      <description>Port with overlay visual representation of blobs and their descriptors.</description>
+      <description>Port with overlay visual representation of blobs and their descriptors. Requires incoming colour image.</description>
     </output>
 
     <output>
