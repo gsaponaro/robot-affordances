@@ -19,8 +19,6 @@
 class Obj2D : public Obj
 {
 private:
-    bool valid;
-
     std::vector<cv::Point> contour;
     double area;
 
@@ -55,11 +53,12 @@ private:
     std::vector<cv::Vec4i> defects;
 
 public:
-    Obj2D(bool _isValid, std::vector<cv::Point> _contour, double _area);
+    Obj2D(std::vector<cv::Point> _contour);
+
     bool computeDescriptors();
+    bool areaInRange(const double &minArea, const double &maxArea) const;
 
     // getters
-    bool isValid() const;
     double getArea() const;
     double getConvexity() const;
     double getEccentricity() const;

@@ -164,15 +164,12 @@ void ShapeDescriptorThread::run2d()
 
     // read timestamps
     Stamp tsRaw, tsBin, tsLab;
-    if ( (useColor && !inRawImgPort.getEnvelope(tsRaw)) ||
-         (inBinImgPort.getInputCount() && !inBinImgPort.getEnvelope(tsBin)) ||
+    if ( (inBinImgPort.getInputCount() && !inBinImgPort.getEnvelope(tsBin)) ||
          (inLabImgPort.getInputCount() && !inLabImgPort.getEnvelope(tsBin)) )
     {
         yWarning("timestamp(s) missing");
     }
-
-    if ((useColor && inRawImg!=NULL) ||
-        inBinImg!=NULL &&
+    if (inBinImg!=NULL &&
         inLabImg!=NULL)
     {
         // check dimensions of input images to be equal
@@ -222,13 +219,8 @@ void ShapeDescriptorThread::run2d()
                 yDebug() << "largest contour index" << largest << "out of" << cont[intIdx].size();
             }
 
-            double largestArea = contourArea(cont[intIdx][largest]);
-            bool isValid = (largestArea>minArea && largestArea<maxArea);
-
-            // construct temporary Obj2D with validity,contour,area
-            objs.push_back( Obj2D(isValid, cont[intIdx][largest], largestArea) );
-            // compute remaining shape descriptors
-            objs[intIdx].computeDescriptors();
+            // construct temporary Obj2D
+            objs.push_back( Obj2D(cont[intIdx][largest]) );
         }
 
         // output shape descriptors of whole blobs
@@ -238,7 +230,7 @@ void ShapeDescriptorThread::run2d()
         t0 = yarp::os::Time::now();
         for (std::vector<Obj2D>::iterator it=objs.begin(); it!=objs.end(); ++it)
         {
-            if (it->isValid())
+            if (it->areaInRange(minArea,maxArea))
             {
                 Bottle &bObj = bDesc.addList();
 
@@ -426,7 +418,7 @@ void ShapeDescriptorThread::run2d()
                 // intIdx is an auxiliary current index: 0, 1, ...
                 int intIdx = std::distance(objs.begin(),it);
 
-                if (it->isValid())
+                if (it->areaInRange(minArea,maxArea))
                 {
                     drawContours(outAnnotatedMat,
                                  cont[intIdx],

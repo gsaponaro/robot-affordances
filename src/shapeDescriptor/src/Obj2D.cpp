@@ -11,28 +11,23 @@
 using namespace cv;
 
 /**
-  * Constructor specifying validity, contour and area.
+  * Constructor specifying contour.
   */
-Obj2D::Obj2D(bool _isValid, std::vector<cv::Point> _contour, double _area)
-: valid(_isValid),
-  contour(_contour),
-  area(_area), convexity(0.0), eccentricity(0.0), compactness(0.0),
-  circleness(0.0), squareness(0.0),
-  perimeter(0.0), elongation(0.0),
-  moments(cv::Moments()),
-  boundingRect(cv::Rect()), enclosingRect(cv::RotatedRect()),
-  circleCenter(cv::Point2f()), circleRadius(0.0),
-  poly(std::vector<cv::Point>()), hull(std::vector<cv::Point>()),
-  defects(std::vector<cv::Vec4i>())
+Obj2D::Obj2D(std::vector<cv::Point> _contour)
+: contour(_contour)
 {
+    area = contourArea(contour);
+    computeDescriptors();
 }
 
 /**
-  * Given an existing object with validity,contour,area already set,
-  * compute the remaining descriptors.
+  * Compute all the shape descriptors.
   */
 bool Obj2D::computeDescriptors()
 {
+    if (area <= 0)
+        return false;
+
     perimeter = arcLength(contour, true);
     convexHull(contour, hull);
     double hull_perimeter = arcLength(hull, true);
@@ -89,15 +84,16 @@ bool Obj2D::computeDescriptors()
     return true;
 }
 
-// getters
-
 /**
-  * Return whether the shape is valid.
+  * Check if the object area is within a range.
+  * (Equivalent to the "valid" flag in blobDescriptor.)
   */
-bool Obj2D::isValid() const
+bool Obj2D::areaInRange(const double &minArea, const double &maxArea) const
 {
-    return valid;
+    return (area>minArea && area<maxArea);
 }
+
+// getters
 
 /**
   * Return area.
