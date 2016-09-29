@@ -6,6 +6,8 @@
  *
  */
 
+//#include <utility>
+
 #include "DescriptorDefaults.h"
 #include "DescriptorThread.h"
 #include "Obj2D.h"
@@ -194,8 +196,11 @@ void ShapeDescriptorThread::run2d()
         // container of contours: i'th object associated to vector<vector<Point> >
         std::vector< std::vector<std::vector<Point> > > cont(numObjects);
 
-        // container to store temporary objects/blobs with associated features
+        // container of whole objects with associated features
         std::vector<Obj2D> objs;
+
+        // container of object parts with associated features
+        //std::vector<std::pair<Obj2D,Obj2D> > parts;
 
         for (std::vector<int>::iterator it=uniq.begin(); it!=uniq.end(); ++it)
         {
@@ -218,8 +223,11 @@ void ShapeDescriptorThread::run2d()
                 yDebug() << "largest contour index" << largest << "out of" << cont[intIdx].size();
             }
 
-            // construct temporary Obj2D
+            // construct whole object and extract features
             objs.push_back( Obj2D(cont[intIdx][largest]) );
+
+            // construct object parts and extract features
+            //parts.push_back( std::make_pair(Obj2D(contUpper),Obj2D(contLower)) );
         }
 
         // output shape descriptors of whole blobs
