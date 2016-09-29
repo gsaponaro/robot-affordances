@@ -13,11 +13,10 @@
 #include "Obj2D.h"
 
 using namespace cv;
-using namespace std;
 using namespace yarp::os;
 using namespace yarp::sig;
 
-ShapeDescriptorThread::ShapeDescriptorThread(const string &_moduleName,
+ShapeDescriptorThread::ShapeDescriptorThread(const std::string &_moduleName,
     ResourceFinder &_rf)
     : RateThread(DefThreadPeriod),
       moduleName(_moduleName),
