@@ -150,29 +150,38 @@ void ShapeDescriptorThread::run()
 
 void ShapeDescriptorThread::run2d()
 {
+    bool useColor = false;
+
+    if (inRawImgPort.getInputCount())
+        useColor = true;
+
     // acquire new input images
-    ImageOf<PixelBgr> *inRawImg = inRawImgPort.read(true);
+    ImageOf<PixelBgr> *inRawImg;
+    if (useColor)
+        inRawImg = inRawImgPort.read(true);
+
     ImageOf<PixelBgr> *inBinImg = inBinImgPort.read(true);
     ImageOf<PixelInt> *inLabImg = inLabImgPort.read(true);
 
     // read timestamps
     Stamp tsRaw, tsBin, tsLab;
-    if ( (inRawImgPort.getInputCount() && !inRawImgPort.getEnvelope(tsRaw)) ||
+    if ( (useColor && !inRawImgPort.getEnvelope(tsRaw)) ||
          (inBinImgPort.getInputCount() && !inBinImgPort.getEnvelope(tsBin)) ||
          (inLabImgPort.getInputCount() && !inLabImgPort.getEnvelope(tsBin)) )
     {
         yWarning("timestamp(s) missing");
     }
 
-    if (inRawImg!=NULL && inBinImg!=NULL && inLabImg!=NULL)
+    if ((useColor && inRawImg!=NULL) ||
+        inBinImg!=NULL &&
+        inLabImg!=NULL)
     {
         // check dimensions of input images to be equal
-        const int refWidth  = inRawImg->width(); 
-        const int refHeight = inRawImg->height();
-        if ( refWidth!=inBinImg->width() || refHeight!=inBinImg->height() ||
-             refWidth!=inLabImg->width() || refHeight!=inLabImg->height() )
+        const int refWidth  = inBinImg->width(); 
+        const int refHeight = inBinImg->height();
+        if (refWidth!=inLabImg->width() || refHeight!=inLabImg->height())
         {
-            yWarning("image dimensions mismatch");
+            yWarning("dimension mismatch between binary and labelled images");
         }
 
         // initialize object instances using labelled image
@@ -219,13 +228,17 @@ void ShapeDescriptorThread::run2d()
 
             // construct temporary Obj2D with validity,contour,area
             objs.push_back( Obj2D(isValid, cont[intIdx][largest], largestArea) );
-            // compute remaining shape descriptors and colour histogram
+            // compute remaining shape descriptors
             objs[intIdx].computeDescriptors();
-            Mat inRaw = iplToMat(*inRawImg);
-            objs[intIdx].setMask( inRaw(objs[intIdx].getBoundingRect()) );
-            if (!objs[intIdx].computeHueHistogram())
-                yWarning("error computing hue histogram");
-            //for (int i=0; i<16; i++) yDebug() << "value" << i << "=" << objs[intIdx].getHueHistogram().at<float>(i);
+            Mat inRaw;
+            if (useColor)
+            {
+                inRaw = iplToMat(*inRawImg);
+                objs[intIdx].setMask( inRaw(objs[intIdx].getBoundingRect()) );
+                if (!objs[intIdx].computeHueHistogram())
+                    yWarning("error computing hue histogram");
+                //for (int i=0; i<16; i++) yDebug() << "value" << i << "=" << objs[intIdx].getHueHistogram().at<float>(i);
+            }
         }
 
         // output shape descriptors of whole blobs
@@ -419,41 +432,44 @@ void ShapeDescriptorThread::run2d()
 
         // annotated output image
         Mat outAnnotatedMat;
-        outAnnotatedMat = iplToMat(*inRawImg);
-
-        const Scalar Blue(255,0,0);
-        const Scalar Yellow(255,255,0);
-        const int thickness = 2;
-        for (std::vector<Obj2D>::iterator it = objs.begin();
-             it != objs.end();
-             ++it)
+        if (useColor)
         {
-            // intIdx is an auxiliary current index: 0, 1, ...
-            int intIdx = std::distance(objs.begin(),it);
+            outAnnotatedMat = iplToMat(*inRawImg);
 
-            if (it->isValid())
+            const Scalar Blue(255,0,0);
+            const Scalar Yellow(255,255,0);
+            const int thickness = 2;
+            for (std::vector<Obj2D>::iterator it = objs.begin();
+                 it != objs.end();
+                 ++it)
             {
-                drawContours(outAnnotatedMat,
-                             cont[intIdx],
-                             -1, // draw all the contours of cont[intIdx]
-                             Blue,
-                             thickness);
-            }
-            else
-            {
-                drawContours(outAnnotatedMat,
-                             cont[intIdx],
-                             -1, // draw all the contours of cont[intIdx]
-                             Yellow,
-                             thickness);
-            }
-        }
+                // intIdx is an auxiliary current index: 0, 1, ...
+                int intIdx = std::distance(objs.begin(),it);
 
-        ImageOf<PixelBgr> &outAnnotatedYarp = outAnnotatedImgPort.prepare();
-        outAnnotatedYarp.resize(outAnnotatedMat.cols,
-                                outAnnotatedMat.rows);
-        outAnnotatedMat.copyTo(iplToMat(outAnnotatedYarp));
-        outAnnotatedImgPort.setEnvelope(tsRaw);
-        outAnnotatedImgPort.write();
-    }
+                if (it->isValid())
+                {
+                    drawContours(outAnnotatedMat,
+                                 cont[intIdx],
+                                 -1, // draw all the contours of cont[intIdx]
+                                 Blue,
+                                 thickness);
+                }
+                else
+                {
+                    drawContours(outAnnotatedMat,
+                                 cont[intIdx],
+                                 -1, // draw all the contours of cont[intIdx]
+                                 Yellow,
+                                 thickness);
+                }
+            }
+
+            ImageOf<PixelBgr> &outAnnotatedYarp = outAnnotatedImgPort.prepare();
+            outAnnotatedYarp.resize(outAnnotatedMat.cols,
+                                    outAnnotatedMat.rows);
+            outAnnotatedMat.copyTo(iplToMat(outAnnotatedYarp));
+            outAnnotatedImgPort.setEnvelope(tsRaw);
+            outAnnotatedImgPort.write();
+        } // end if (useColor)
+    } // end if (inBinImg!=NULL)
 }
