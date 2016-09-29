@@ -9,6 +9,7 @@
 #include <yarp/os/Log.h>
 #include <yarp/os/Network.h>
 
+#include "DescriptorDefaults.h"
 #include "DescriptorModule.h"
 
 using namespace yarp::os;
@@ -29,14 +30,27 @@ int main(int argc, char *argv[])
 
     if(rf.check("help"))
     {
-        yInfo("Basic options:");
-        yInfo("--name <module name> (default: shapeDescriptor)");
-        yInfo("--maxObjects <number> (default: 10)");
+        yInfo("Options:");
+        yInfo("--name <module name> (default: %s)", DefModuleName.c_str());
+        yInfo(" ");
+        yInfo("--maxObjects <number> (default: %d)", DefMaxObjects);
+        yInfo("--minArea <minimum valid blob area> (default: %d)", DefMinArea);
+        yInfo("--maxArea <maximum valid blob area> (default: %d)", DefMaxArea);
+        yInfo(" ");
+        yInfo("--area <on|off> (default: %s)", DefUseArea.c_str());
+        yInfo("--convexity <on|off> (default: %s)", DefUseConvexity.c_str());
+        yInfo("--eccentricity <on|off> (default: %s)", DefUseEccentricity.c_str());
+        yInfo("--compactness <on|off> (default: %s)", DefUseCompactness.c_str());
+        yInfo("--circleness <on|off> (default: %s)", DefUseCircleness.c_str());
+        yInfo("--squareness <on|off> (default: %s)", DefUseSquareness.c_str());
+        yInfo("--perimeter <on|off> (default: %s)", DefUsePerimeter.c_str());
+        yInfo("--elongation <on|off> (default: %s)", DefUseElongation.c_str());
+        yInfo("--spatialMoments <on|off> (default: %s)", DefSpatialMomentsCenterOfMass.c_str());
+        yInfo("--centralMoments <on|off> (default: %s)", DefCentralMoments.c_str());
+        yInfo("--centralNormalizedMoments <on|off> (default: %s)", DefCentralNormalizedMoments.c_str());
+        yInfo("--boundingRectangle <on|off> (default: %s)", DefBoundingRectangle.c_str());
+        yInfo("--enclosingRectangle <on|off> (default: %s)", DefEnclosingRectangle.c_str());
 
-        yInfo("Advanced options:");
-        yInfo("--minArea <minimum valid blob area> (default: 100)");
-        yInfo("--maxArea <maximum valid blob area> (default: 3000)");
-        
         return 0; // EXIT_SUCCESS
     }
 

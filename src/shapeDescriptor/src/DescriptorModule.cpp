@@ -6,13 +6,14 @@
  *
  */
 
+#include "DescriptorDefaults.h"
 #include "DescriptorModule.h"
 
 using namespace yarp::os;
 
 bool ShapeDescriptorModule::configure(ResourceFinder &rf)
 {
-    moduleName = rf.check("name", Value("shapeDescriptor")).asString();
+    moduleName = rf.check("name", Value(DefModuleName)).asString();
     setName(moduleName.c_str());
 
     closing = false;

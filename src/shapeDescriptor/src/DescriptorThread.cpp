@@ -6,10 +6,9 @@
  *
  */
 
+#include "DescriptorDefaults.h"
 #include "DescriptorThread.h"
 #include "Obj2D.h"
-
-#define THREAD_PERIOD 33 // [ms]
 
 using namespace cv;
 using namespace std;
@@ -18,7 +17,7 @@ using namespace yarp::sig;
 
 ShapeDescriptorThread::ShapeDescriptorThread(const string &_moduleName,
     ResourceFinder &_rf)
-    : RateThread(THREAD_PERIOD),
+    : RateThread(DefThreadPeriod),
       moduleName(_moduleName),
       rf(_rf)
 {
@@ -107,26 +106,26 @@ void ShapeDescriptorThread::interrupt()
 
 bool ShapeDescriptorThread::threadInit()
 {
-    maxObjects = rf.check("maxObjects", Value(10)).asInt();
-    minArea = rf.check("minArea", Value(100)).asInt();
-    maxArea = rf.check("maxArea", Value(3000)).asInt();
+    maxObjects = rf.check("maxObjects", Value(DefMaxObjects)).asInt();
+    minArea = rf.check("minArea", Value(DefMinArea)).asInt();
+    maxArea = rf.check("maxArea", Value(DefMaxArea)).asInt();
 
     yInfo("initialized thread with maxObjects=%d minArea=%d maxArea=%d",
           maxObjects, minArea, maxArea);
 
-    useArea = rf.check("area",Value("on")).asString()=="on"?true:false;
-    useConvexity = rf.check("convexity",Value("on")).asString()=="on"?true:false;
-    useEccentricity = rf.check("eccentricity",Value("on")).asString()=="on"?true:false;
-    useCompactness = rf.check("compactness",Value("on")).asString()=="on"?true:false;
-    useCircleness = rf.check("circleness",Value("on")).asString()=="on"?true:false;
-    useSquareness = rf.check("squareness",Value("on")).asString()=="on"?true:false;
-    usePerimeter = rf.check("perimeter",Value("on")).asString()=="on"?true:false;
-    useElongation = rf.check("elongation",Value("on")).asString()=="on"?true:false;
-    useSpatialMoments = rf.check("spatialMoments",Value("on")).asString()=="on"?true:false;
-    useCentralMoments = rf.check("centralMoments",Value("off")).asString()=="on"?true:false;
-    useCentralNormalizedMoments = rf.check("centralNormalizedMoments",Value("off")).asString()=="on"?true:false;
-    useBoundingRectangle = rf.check("boundingRectangle",Value("off")).asString()=="on"?true:false;
-    useEnclosingRectangle = rf.check("enclosingRectangle",Value("off")).asString()=="on"?true:false;
+    useArea = rf.check("area",Value(DefUseArea)).asString()=="on"?true:false;
+    useConvexity = rf.check("convexity",Value(DefUseConvexity)).asString()=="on"?true:false;
+    useEccentricity = rf.check("eccentricity",Value(DefUseEccentricity)).asString()=="on"?true:false;
+    useCompactness = rf.check("compactness",Value(DefUseCompactness)).asString()=="on"?true:false;
+    useCircleness = rf.check("circleness",Value(DefUseCircleness)).asString()=="on"?true:false;
+    useSquareness = rf.check("squareness",Value(DefUseSquareness)).asString()=="on"?true:false;
+    usePerimeter = rf.check("perimeter",Value(DefUsePerimeter)).asString()=="on"?true:false;
+    useElongation = rf.check("elongation",Value(DefUseElongation)).asString()=="on"?true:false;
+    useSpatialMoments = rf.check("spatialMoments",Value(DefSpatialMomentsCenterOfMass)).asString()=="on"?true:false;
+    useCentralMoments = rf.check("centralMoments",Value(DefCentralMoments)).asString()=="on"?true:false;
+    useCentralNormalizedMoments = rf.check("centralNormalizedMoments",Value(DefCentralNormalizedMoments)).asString()=="on"?true:false;
+    useBoundingRectangle = rf.check("boundingRectangle",Value(DefBoundingRectangle)).asString()=="on"?true:false;
+    useEnclosingRectangle = rf.check("enclosingRectangle",Value(DefEnclosingRectangle)).asString()=="on"?true:false;
 
     if( !openPorts() )
     {
