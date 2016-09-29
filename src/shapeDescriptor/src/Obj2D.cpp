@@ -89,33 +89,6 @@ bool Obj2D::computeDescriptors()
     return true;
 }
 
-/**
-  * Given an existing object compute the hue colour histogram.
-  */
-bool Obj2D::computeHueHistogram()
-{
-    Mat inHSV;
-    cvtColor(mask, inHSV, COLOR_BGR2HSV);
-    int h_bins = 16;
-    int histSize[] = { h_bins };
-    float h_ranges[] = { 0, 180 }; // in 8-bit images, hue varies from 0 to 179
-    const float *ranges[] = { h_ranges };
-    int channels[] = { 0 };
-
-    cv::calcHist(&inHSV,   // input
-                 1,        // histogram from 1 image only
-                 channels, // channel used
-                 Mat(),    // no mask is used
-                 histH,    // output histogram
-                 1,        // it is a 1D histogram
-                 histSize, // number of bins
-                 ranges);  // pixel value range
-
-    cv::normalize(histH, histH);
-
-    return true;
-}
-
 // getters
 
 /**
@@ -212,26 +185,4 @@ Rect Obj2D::getBoundingRect() const
 RotatedRect Obj2D::getEnclosingRect() const
 {
     return enclosingRect;
-}
-
-/**
-  * Return image mask: nonzero on object pixels, zero elsewhere.
-  */
-Mat Obj2D::getMask() const
-{
-    return mask;
-}
-
-/**
-  * Return hue histogram of shape pixels.
-  */
-MatND Obj2D::getHueHistogram() const
-{
-    return histH;
-}
-
-// setters
-bool Obj2D::setMask(const Mat& m)
-{
-    mask = m;
 }
