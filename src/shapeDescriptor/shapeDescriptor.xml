@@ -45,8 +45,6 @@
 
     <param default="off" desc="enable (up-right) bounding rectangle">boundingRectangle</param>
     <param default="off" desc="enable (rotated) enclosing rectangle">enclosingRectangle</param>
-
-    <param default="off" desc="enable hue colour histogram">colorHistogram</param>
   </arguments>
  
   <authors>

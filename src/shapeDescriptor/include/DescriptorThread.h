@@ -70,7 +70,6 @@ class ShapeDescriptorThread : public yarp::os::RateThread
         bool useCentralNormalizedMoments;
         bool useBoundingRectangle;
         bool useEnclosingRectangle;
-        bool useColorHistogram;
 
         // for debug
         std::string    outBothPartsImgPortName;

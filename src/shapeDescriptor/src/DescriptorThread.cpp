@@ -127,7 +127,6 @@ bool ShapeDescriptorThread::threadInit()
     useCentralNormalizedMoments = rf.check("centralNormalizedMoments",Value("off")).asString()=="on"?true:false;
     useBoundingRectangle = rf.check("boundingRectangle",Value("off")).asString()=="on"?true:false;
     useEnclosingRectangle = rf.check("enclosingRectangle",Value("off")).asString()=="on"?true:false;
-    useColorHistogram = rf.check("colorHistogram",Value("off")).asString()=="on"?true:false;
 
     if( !openPorts() )
     {
@@ -230,15 +229,6 @@ void ShapeDescriptorThread::run2d()
             objs.push_back( Obj2D(isValid, cont[intIdx][largest], largestArea) );
             // compute remaining shape descriptors
             objs[intIdx].computeDescriptors();
-            Mat inRaw;
-            if (useColor)
-            {
-                inRaw = iplToMat(*inRawImg);
-                objs[intIdx].setMask( inRaw(objs[intIdx].getBoundingRect()) );
-                if (!objs[intIdx].computeHueHistogram())
-                    yWarning("error computing hue histogram");
-                //for (int i=0; i<16; i++) yDebug() << "value" << i << "=" << objs[intIdx].getHueHistogram().at<float>(i);
-            }
         }
 
         // output shape descriptors of whole blobs
@@ -412,16 +402,6 @@ void ShapeDescriptorThread::run2d()
                     erBotCnt.addDouble(er.size.height);
                     erBotCnt.addDouble(er.angle);
                 }
-
-                // OLD colour histograms info
-                /*
-                if (useColorHistogram)
-                {
-                    MatND hueHist = it->getHueHistogram();
-                    for (int i=0; i<16; i++)
-                        bObj.addDouble( hueHist.at<float>(i) );
-                }
-                */
             }
         }
         t1 = yarp::os::Time::now();

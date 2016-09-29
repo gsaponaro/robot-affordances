@@ -54,14 +54,9 @@ private:
     // convexity defects
     std::vector<cv::Vec4i> defects;
 
-    // hue colour histogram
-    cv::MatND histH;
-    cv::Mat mask;
-
 public:
     Obj2D(bool _isValid, std::vector<cv::Point> _contour, double _area);
     bool computeDescriptors();
-    bool computeHueHistogram();
 
     // getters
     bool isValid() const;
@@ -76,11 +71,6 @@ public:
     cv::Moments getMoments() const;
     cv::Rect getBoundingRect() const;
     cv::RotatedRect getEnclosingRect() const;
-    cv::Mat getMask() const;
-    cv::MatND getHueHistogram() const;
-
-    // setters
-    bool setMask(const cv::Mat& m);
 };
 
 #endif
