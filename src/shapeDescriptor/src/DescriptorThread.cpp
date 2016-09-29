@@ -162,7 +162,7 @@ void ShapeDescriptorThread::run2d()
     ImageOf<PixelInt> *inLabImg = inLabImgPort.read(true);
 
     // read timestamps
-    Stamp tsRaw, tsBin, tsLab;
+    Stamp tsBin, tsLab;
     if ( (inBinImgPort.getInputCount() && !inBinImgPort.getEnvelope(tsBin)) ||
          (inLabImgPort.getInputCount() && !inLabImgPort.getEnvelope(tsBin)) )
     {
@@ -398,7 +398,7 @@ void ShapeDescriptorThread::run2d()
         t1 = yarp::os::Time::now();
         yDebug("computed descriptors of %d objects in %f msec",
                bDesc.size(), 1000.0*(t1-t0));
-        outWholeDescPort.setEnvelope(tsRaw);
+        outWholeDescPort.setEnvelope(tsBin);
         outWholeDescPort.write();
 
         // annotated output image
@@ -439,7 +439,7 @@ void ShapeDescriptorThread::run2d()
             outAnnotatedYarp.resize(outAnnotatedMat.cols,
                                     outAnnotatedMat.rows);
             outAnnotatedMat.copyTo(iplToMat(outAnnotatedYarp));
-            outAnnotatedImgPort.setEnvelope(tsRaw);
+            outAnnotatedImgPort.setEnvelope(tsBin);
             outAnnotatedImgPort.write();
         } // end if (useColor)
     } // end if (inBinImg!=NULL)
