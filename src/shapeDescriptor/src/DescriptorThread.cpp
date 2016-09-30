@@ -451,6 +451,35 @@ void ShapeDescriptorThread::run2d()
   */
 bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
 {
+    // acquire raw moments if needed later
+    Moments mom;
+    if (useSpatialMoments || useCentralMoments || useCentralNormalizedMoments)
+        mom = o.getMoments();
+
+    // spatial moments and center of mass info
+    if (useSpatialMoments)
+    {
+        Bottle &centerBot = b.addList();
+        centerBot.addString("center");
+        Bottle &centerBotCnt = centerBot.addList();
+        centerBotCnt.addDouble(mom.m10/mom.m00);
+        centerBotCnt.addDouble(mom.m01/mom.m00);
+
+        Bottle &smBot = b.addList();
+        smBot.addString("spatialMoments");
+        Bottle &smBotCnt = smBot.addList();
+        smBotCnt.addDouble(mom.m00);
+        smBotCnt.addDouble(mom.m10);
+        smBotCnt.addDouble(mom.m01);
+        smBotCnt.addDouble(mom.m20);
+        smBotCnt.addDouble(mom.m11);
+        smBotCnt.addDouble(mom.m02);
+        smBotCnt.addDouble(mom.m30);
+        smBotCnt.addDouble(mom.m21);
+        smBotCnt.addDouble(mom.m12);
+        smBotCnt.addDouble(mom.m03);
+    }
+
     if (useArea)
     {
         Bottle &areaBot = b.addList();
@@ -520,35 +549,6 @@ bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
         eloBot.addString("elongation");
         Bottle &eloBotCnt = eloBot.addList();
         eloBotCnt.addDouble(o.getElongation());
-    }
-
-    // acquire raw moments if needed later
-    Moments mom;
-    if (useSpatialMoments || useCentralMoments || useCentralNormalizedMoments)
-        mom = o.getMoments();
-
-    // spatial moments and center of mass info
-    if (useSpatialMoments)
-    {
-        Bottle &smBot = b.addList();
-        smBot.addString("spatialMoments");
-        Bottle &smBotCnt = smBot.addList();
-        smBotCnt.addDouble(mom.m00);
-        smBotCnt.addDouble(mom.m10);
-        smBotCnt.addDouble(mom.m01);
-        smBotCnt.addDouble(mom.m20);
-        smBotCnt.addDouble(mom.m11);
-        smBotCnt.addDouble(mom.m02);
-        smBotCnt.addDouble(mom.m30);
-        smBotCnt.addDouble(mom.m21);
-        smBotCnt.addDouble(mom.m12);
-        smBotCnt.addDouble(mom.m03);
-
-        Bottle &centerBot = b.addList();
-        centerBot.addString("center");
-        Bottle &centerBotCnt = centerBot.addList();
-        centerBotCnt.addDouble(mom.m10/mom.m00);
-        centerBotCnt.addDouble(mom.m01/mom.m00);
     }
 
     // central moments info
