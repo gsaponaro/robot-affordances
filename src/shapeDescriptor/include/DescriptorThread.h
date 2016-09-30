@@ -22,6 +22,7 @@
 #include <yarp/os/Time.h>
 
 #include "Helpers.h"
+#include "Obj2D.h"
 
 class ShapeDescriptorThread : public yarp::os::RateThread
 {
@@ -88,6 +89,8 @@ class ShapeDescriptorThread : public yarp::os::RateThread
         void run();
 
         void run2d();
+
+        bool addDescriptors(Obj2D &o, yarp::os::Bottle &b);
 };
 
 #endif

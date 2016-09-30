@@ -6,8 +6,6 @@
  *
  */
 
-//#include <utility>
-
 #include "DescriptorDefaults.h"
 #include "DescriptorThread.h"
 #include "Obj2D.h"
@@ -47,9 +45,8 @@ bool ShapeDescriptorThread::openPorts()
     outWholeDescPortName = "/" + moduleName + "/wholeDescriptors:o";
     outWholeDescPort.open(outWholeDescPortName.c_str());
 
-    // tbc
-    //outPartDescPortName = "/" + moduleName + "/partDescriptors:o";
-    //outPartDescPort.open(outPartDescPortName.c_str());
+    outPartDescPortName = "/" + moduleName + "/partDescriptors:o";
+    outPartDescPort.open(outPartDescPortName.c_str());
 
     //outBothPartsImgPortName = "/" + moduleName + "/bothPartsImg:o";
     //outBothPartsImgPort.open(outBothPartsImgPortName.c_str());
@@ -74,6 +71,9 @@ void ShapeDescriptorThread::close()
     outWholeDescPort.writeStrict();
     outWholeDescPort.close();
 
+    outPartDescPort.writeStrict();
+    outPartDescPort.close();
+
     /*
     inRoiPort.close();
     // for debug
@@ -97,12 +97,10 @@ void ShapeDescriptorThread::interrupt()
     outAnnotatedImgPort.interrupt();
     outWholeDescPort.interrupt();
 
-    /*
-    inRoiPort.interrupt();
+    //inRoiPort.interrupt();
     outPartDescPort.interrupt();
     // for debug
-    outBothPartsImgPort.interrupt();
-    */
+    //outBothPartsImgPort.interrupt();
 }
 
 bool ShapeDescriptorThread::threadInit()
@@ -199,7 +197,7 @@ void ShapeDescriptorThread::run2d()
         std::vector<Obj2D> objs;
 
         // container of object parts with associated features
-        //std::vector<std::pair<Obj2D,Obj2D> > parts;
+        std::vector<std::pair<Obj2D,Obj2D> > parts;
 
         for (std::vector<int>::iterator it=uniq.begin(); it!=uniq.end(); ++it)
         {
@@ -225,8 +223,141 @@ void ShapeDescriptorThread::run2d()
             // construct whole object and extract features
             objs.push_back( Obj2D(cont[intIdx][largest]) );
 
+
+
+            // TODO optimize
+            RotatedRect enclosingRect = objs.back().getEnclosingRect();
+            float cx = enclosingRect.center.x,
+                  cy = enclosingRect.center.y;
+
+            float wi = enclosingRect.size.width,
+                  he = enclosingRect.size.height,
+                  an = enclosingRect.angle;
+
+            float ca = cos(an / 180.0 * CV_PI),
+                  sa = sin(an / 180.0 * CV_PI);
+
+            if (wi==1 || he==1)
+                yWarning("enclosingRectangle of blob %d is one-dimensional", intIdx);
+
+            Size2f half_size(wi,he); // initially, same size as whole object encl. rect
+
+            // force width to be the smaller dimension, height to be the larger one
+            if (wi < he)
+            {
+                half_size.height = half_size.height/2.;
+                //yDebug("OK: height>width, thus I made splitting of height for cropping obj parts");
+            }
+            else
+            {
+                // this should never happen in the first place
+                yWarning("width>height... need to swap them!");
+                // to complete
+            }
+
+            Point2f top_center, bot_center; // w.r.t. original non-rotated image
+
+            // centers of halves calculated from cx,cy, in whole image coordinates
+            top_center = Point2f( cvRound(cx+sa*half_size.height/2.), cvRound(cy-ca*half_size.height/2.) );
+            bot_center = Point2f( cvRound(cx-sa*half_size.height/2.), cvRound(cy+ca*half_size.height/2.) );
+
+            // top-left corners of upright halves, in whole image coordinates
+            Point2f top_tl2, bot_tl2;
+            top_tl2 = Point2f( cvRound(cx-half_size.width/2.), cvRound(cy-half_size.height) );
+            bot_tl2 = Point2f( cvRound(cx-half_size.width/2.), cvRound(cy) );
+
+            // get transformation matrix provided by rotation "an" and no scaling factor
+            Mat M = getRotationMatrix2D(enclosingRect.center, an, 1.0);
+
+            Mat inBin = iplToMat(*inBinImg);
+
+            // findContours which needs 1 channel 8uC1 or 32sC1
+            cvtColor(inBin, inBin, CV_BGR2GRAY, 1);
+
+            // perform affine transformation (rotation)
+            Mat rotated(inBin.size(), inBin.type()); // output
+            warpAffine(inBin, rotated, M, inBin.size(), INTER_CUBIC);
+
+            // top part
+            Point2f top_center_rot;
+            top_center_rot.x =  M.at<double>(0,0)*(top_center.x-cx) + M.at<double>(0,1)*(top_center.y-cy) + cx;
+            top_center_rot.y = -M.at<double>(1,0)*(top_center.y-cy) + M.at<double>(1,1)*(top_center.x-cx) + cy;
+
+            // bottom part
+            Point2f bot_center_rot;
+            bot_center_rot.x =  M.at<double>(0,0)*(bot_center.x-cx) + M.at<double>(0,1)*(bot_center.y-cy) + cx;
+            bot_center_rot.y = -M.at<double>(1,0)*(bot_center.y-cy) + M.at<double>(1,1)*(bot_center.x-cx) + cy;
+
+            // shift crop centers vertically by halfObjHeight/2, i.e., wholeObjHeight/4
+            top_center_rot.y -= half_size.height/2.; // moving up in image
+            bot_center_rot.y += half_size.height/2.; // moving down in image
+
+            // enlarge crop area to capture pixels around blob borders that could have been missed
+            Size2f crop_size(half_size.width,half_size.height);
+            const int HORIZ_CROPAREA_SHIFT = 8; // to slightly enlarge tool part crop area
+            const int VERT_CROPAREA_SHIFT  = 5;
+            crop_size.width  += HORIZ_CROPAREA_SHIFT; // along x
+            crop_size.height += VERT_CROPAREA_SHIFT;  // small along y, or we'd capture too much of other part
+
+            // crop resulting top image - Tool Top
+            Mat topRectCropped;
+            getRectSubPix(rotated, crop_size, top_center_rot, topRectCropped);
+
+            // crop resulting bottom image - Tool Bottom
+            Mat botRectCropped;
+            getRectSubPix(rotated, crop_size, bot_center_rot, botRectCropped);
+
+            // continue processing of top part, whose image is now safe to modify
+            std::vector<std::vector<Point> > top_cnt;
+            std::vector<Vec4i> top_hrch;
+            topRectCropped.convertTo(topRectCropped, CV_8UC1); // redundant?
+            findContours(topRectCropped, top_cnt, top_hrch, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+
+            if (top_cnt.size()==0)
+                yWarning("blob %d, top part has zero contours", intIdx);
+
+            double top_largest_area = 0;
+            int top_largest_cnt_index = 0;
+            // find index of contour with largest area
+            for( int c = 0; c < top_cnt.size(); c++ )
+            {
+                double curr_area = contourArea(top_cnt[c], false);
+
+                if (curr_area > top_largest_area)
+                {
+                    top_largest_area = curr_area;
+                    top_largest_cnt_index = c;
+                }
+            }
+
+            // continue processing of bottom part, whose image is now safe to modify
+            std::vector<std::vector<Point> > bot_cnt;
+            std::vector<Vec4i> bot_hrch;
+            botRectCropped.convertTo(botRectCropped, CV_8UC1); // redundant?
+            findContours(botRectCropped, bot_cnt, bot_hrch, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+
+            if (bot_cnt.size()==0)
+                yWarning("blob %d, bottom part has zero contours", intIdx);
+
+            double bot_largest_area = 0;
+            int bot_largest_cnt_index = 0;
+            // find index of contour with largest area
+            for( int c = 0; c < bot_cnt.size(); c++ )
+            {
+                double curr_area = contourArea(bot_cnt[c], false);
+
+                if (curr_area > bot_largest_area)
+                {
+                    bot_largest_area = curr_area;
+                    bot_largest_cnt_index = c;
+                }
+            }
+
+
+
             // construct object parts and extract features
-            //parts.push_back( std::make_pair(Obj2D(contUpper),Obj2D(contLower)) );
+            parts.push_back( std::make_pair(Obj2D(top_cnt[top_largest_cnt_index]),
+                                            Obj2D(bot_cnt[bot_largest_cnt_index])) );
         }
 
         // output shape descriptors of whole blobs
@@ -239,174 +370,35 @@ void ShapeDescriptorThread::run2d()
             if (it->areaInRange(minArea,maxArea))
             {
                 Bottle &bObj = bDesc.addList();
-
-                // area info
-                if (useArea)
-                {
-                    Bottle &areaBot = bObj.addList();
-                    areaBot.addString("area");
-                    Bottle &areaBotCnt = areaBot.addList();
-                    areaBotCnt.addDouble(it->getArea());
-                }
-
-                // convexity info
-                if (useConvexity)
-                {
-                    Bottle &convBot = bObj.addList();
-                    convBot.addString("convexity");
-                    Bottle &convBotCnt = convBot.addList();
-                    convBotCnt.addDouble(it->getConvexity());
-                }
-
-                // eccentricity info
-                if (useEccentricity)
-                {
-                    Bottle &eccBot = bObj.addList();
-                    eccBot.addString("eccentricity");
-                    Bottle &eccBotCnt = eccBot.addList();
-                    eccBotCnt.addDouble(it->getEccentricity());
-                }
-
-                // compactness info
-                if (useCompactness)
-                {
-                    Bottle &compBot = bObj.addList();
-                    compBot.addString("compactness");
-                    Bottle &compBotCnt = compBot.addList();
-                    compBotCnt.addDouble(it->getCompactness());
-                }
-
-                // circleness info
-                if (useCircleness)
-                {
-                    Bottle &circBot = bObj.addList();
-                    circBot.addString("circleness");
-                    Bottle &circBotCnt = circBot.addList();
-                    circBotCnt.addDouble(it->getCircleness());
-                }
-
-                // squareness info
-                if (useSquareness)
-                {
-                    Bottle &sqBot = bObj.addList();
-                    sqBot.addString("squareness");
-                    Bottle &sqBotCnt = sqBot.addList();
-                    sqBotCnt.addDouble(it->getSquareness());
-                }
-
-                // perimeter info
-                if (usePerimeter)
-                {
-                    Bottle &perBot = bObj.addList();
-                    perBot.addString("perimeter");
-                    Bottle &perBotCnt = perBot.addList();
-                    perBotCnt.addDouble(it->getPerimeter());
-                }
-
-                // elongation info
-                if (useElongation)
-                {
-                    Bottle &eloBot = bObj.addList();
-                    eloBot.addString("elongation");
-                    Bottle &eloBotCnt = eloBot.addList();
-                    eloBotCnt.addDouble(it->getElongation());
-                }
-
-                // acquire raw moments if needed later
-                Moments mom;
-                if (useSpatialMoments || useCentralMoments || useCentralNormalizedMoments)
-                    mom = it->getMoments();
-
-                // spatial moments and center of mass info
-                if (useSpatialMoments)
-                {
-                    Bottle &smBot = bObj.addList();
-                    smBot.addString("spatialMoments");
-                    Bottle &smBotCnt = smBot.addList();
-                    smBotCnt.addDouble(mom.m00);
-                    smBotCnt.addDouble(mom.m10);
-                    smBotCnt.addDouble(mom.m01);
-                    smBotCnt.addDouble(mom.m20);
-                    smBotCnt.addDouble(mom.m11);
-                    smBotCnt.addDouble(mom.m02);
-                    smBotCnt.addDouble(mom.m30);
-                    smBotCnt.addDouble(mom.m21);
-                    smBotCnt.addDouble(mom.m12);
-                    smBotCnt.addDouble(mom.m03);
-
-                    Bottle &centerBot = bObj.addList();
-                    centerBot.addString("center");
-                    Bottle &centerBotCnt = centerBot.addList();
-                    centerBotCnt.addDouble(mom.m10/mom.m00);
-                    centerBotCnt.addDouble(mom.m01/mom.m00);
-                }
-
-                // central moments info
-                if (useCentralMoments)
-                {
-                    Bottle &cmBot = bObj.addList();
-                    cmBot.addString("centralMoments");
-                    Bottle &cmBotCnt = cmBot.addList();
-                    cmBotCnt.addDouble(mom.mu20);
-                    cmBotCnt.addDouble(mom.mu11);
-                    cmBotCnt.addDouble(mom.mu02);
-                    cmBotCnt.addDouble(mom.mu30);
-                    cmBotCnt.addDouble(mom.mu21);
-                    cmBotCnt.addDouble(mom.mu12);
-                    cmBotCnt.addDouble(mom.mu03);
-                }
-
-                // central normalized moments info
-                if (useCentralNormalizedMoments)
-                {
-                    Bottle &cnmBot = bObj.addList();
-                    cnmBot.addString("centralNormalizedMoments");
-                    Bottle &cnmBotCnt = cnmBot.addList();
-                    cnmBotCnt.addDouble(mom.nu20);
-                    cnmBotCnt.addDouble(mom.nu11);
-                    cnmBotCnt.addDouble(mom.nu02);
-                    cnmBotCnt.addDouble(mom.nu30);
-                    cnmBotCnt.addDouble(mom.nu21);
-                    cnmBotCnt.addDouble(mom.nu12);
-                    cnmBotCnt.addDouble(mom.nu03);
-                }
-
-                // (up-right) bounding rectangle info
-                if (useBoundingRectangle)
-                {
-                    Rect br = it->getBoundingRect();
-                    Bottle &brBot = bObj.addList();
-                    brBot.addString("bounding_rectangle");
-                    Bottle &brBotCnt = brBot.addList();
-                    brBotCnt.addDouble(br.tl().x);
-                    brBotCnt.addDouble(br.tl().y);
-                    brBotCnt.addDouble(br.br().x);
-                    brBotCnt.addDouble(br.br().y);
-                    // OLD: estimate of point over the table
-                    // br.x + br.width/2.;
-                    // br.y + br.height;
-                }
-
-                // (rotated) enclosing rectangle info
-                if (useEnclosingRectangle)
-                {
-                    RotatedRect er = it->getEnclosingRect();
-                    Bottle &erBot = bObj.addList();
-                    erBot.addString("enclosing_rectangle");
-                    Bottle &erBotCnt = erBot.addList();
-                    erBotCnt.addDouble(er.center.x);
-                    erBotCnt.addDouble(er.center.y);
-                    erBotCnt.addDouble(er.size.width);
-                    erBotCnt.addDouble(er.size.height);
-                    erBotCnt.addDouble(er.angle);
-                }
+                addDescriptors(*it, bObj);
             }
         }
-        t1 = yarp::os::Time::now();
-        yDebug("computed descriptors of %d objects in %f msec",
-               bDesc.size(), 1000.0*(t1-t0));
         outWholeDescPort.setEnvelope(tsBin);
         outWholeDescPort.write();
+
+        // output shape descriptors of blob parts
+        Bottle &bPartDesc = outPartDescPort.prepare();
+        bPartDesc.clear();
+        for (int o=0; o<parts.size(); ++o)
+        {
+            // new list for current object
+            Bottle &bothPartsBot = bPartDesc.addList();
+
+            // top part
+            Bottle &topBot = bothPartsBot.addList();
+            topBot.clear();
+            addDescriptors(parts[o].first, topBot);
+
+            // bottom part
+            Bottle &botBot = bothPartsBot.addList();
+            botBot.clear();
+            addDescriptors(parts[o].second, botBot);
+        }
+        t1 = yarp::os::Time::now();
+        yDebug("computed descriptors of %d objects (whole and parts) in %f msec",
+               bDesc.size(), 1000.0*(t1-t0));
+        outPartDescPort.setEnvelope(tsBin);
+        outPartDescPort.write();
 
         // annotated output image
         Mat outAnnotatedMat;
@@ -450,4 +442,174 @@ void ShapeDescriptorThread::run2d()
             outAnnotatedImgPort.write();
         } // end if (useColor)
     } // end if (inBinImg!=NULL)
+}
+
+/**
+  * Add a list of descriptors to a Bottle. Each descriptor is a Property-like
+  * list in the format ("name" (value)), where value can be one or more
+  * numbers.
+  */
+bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
+{
+    if (useArea)
+    {
+        Bottle &areaBot = b.addList();
+        areaBot.addString("area");
+        Bottle &areaBotCnt = areaBot.addList();
+        areaBotCnt.addDouble(o.getArea());
+    }
+
+    // convexity info
+    if (useConvexity)
+    {
+        Bottle &convBot = b.addList();
+        convBot.addString("convexity");
+        Bottle &convBotCnt = convBot.addList();
+        convBotCnt.addDouble(o.getConvexity());
+    }
+
+    // eccentricity info
+    if (useEccentricity)
+    {
+        Bottle &eccBot = b.addList();
+        eccBot.addString("eccentricity");
+        Bottle &eccBotCnt = eccBot.addList();
+        eccBotCnt.addDouble(o.getEccentricity());
+    }
+
+    // compactness info
+    if (useCompactness)
+    {
+        Bottle &compBot = b.addList();
+        compBot.addString("compactness");
+        Bottle &compBotCnt = compBot.addList();
+        compBotCnt.addDouble(o.getCompactness());
+    }
+
+    // circleness info
+    if (useCircleness)
+    {
+        Bottle &circBot = b.addList();
+        circBot.addString("circleness");
+        Bottle &circBotCnt = circBot.addList();
+        circBotCnt.addDouble(o.getCircleness());
+    }
+
+    // squareness info
+    if (useSquareness)
+    {
+        Bottle &sqBot = b.addList();
+        sqBot.addString("squareness");
+        Bottle &sqBotCnt = sqBot.addList();
+        sqBotCnt.addDouble(o.getSquareness());
+    }
+
+    // perimeter info
+    if (usePerimeter)
+    {
+        Bottle &perBot = b.addList();
+        perBot.addString("perimeter");
+        Bottle &perBotCnt = perBot.addList();
+        perBotCnt.addDouble(o.getPerimeter());
+    }
+
+    // elongation info
+    if (useElongation)
+    {
+        Bottle &eloBot = b.addList();
+        eloBot.addString("elongation");
+        Bottle &eloBotCnt = eloBot.addList();
+        eloBotCnt.addDouble(o.getElongation());
+    }
+
+    // acquire raw moments if needed later
+    Moments mom;
+    if (useSpatialMoments || useCentralMoments || useCentralNormalizedMoments)
+        mom = o.getMoments();
+
+    // spatial moments and center of mass info
+    if (useSpatialMoments)
+    {
+        Bottle &smBot = b.addList();
+        smBot.addString("spatialMoments");
+        Bottle &smBotCnt = smBot.addList();
+        smBotCnt.addDouble(mom.m00);
+        smBotCnt.addDouble(mom.m10);
+        smBotCnt.addDouble(mom.m01);
+        smBotCnt.addDouble(mom.m20);
+        smBotCnt.addDouble(mom.m11);
+        smBotCnt.addDouble(mom.m02);
+        smBotCnt.addDouble(mom.m30);
+        smBotCnt.addDouble(mom.m21);
+        smBotCnt.addDouble(mom.m12);
+        smBotCnt.addDouble(mom.m03);
+
+        Bottle &centerBot = b.addList();
+        centerBot.addString("center");
+        Bottle &centerBotCnt = centerBot.addList();
+        centerBotCnt.addDouble(mom.m10/mom.m00);
+        centerBotCnt.addDouble(mom.m01/mom.m00);
+    }
+
+    // central moments info
+    if (useCentralMoments)
+    {
+        Bottle &cmBot = b.addList();
+        cmBot.addString("centralMoments");
+        Bottle &cmBotCnt = cmBot.addList();
+        cmBotCnt.addDouble(mom.mu20);
+        cmBotCnt.addDouble(mom.mu11);
+        cmBotCnt.addDouble(mom.mu02);
+        cmBotCnt.addDouble(mom.mu30);
+        cmBotCnt.addDouble(mom.mu21);
+        cmBotCnt.addDouble(mom.mu12);
+        cmBotCnt.addDouble(mom.mu03);
+    }
+
+    // central normalized moments info
+    if (useCentralNormalizedMoments)
+    {
+        Bottle &cnmBot = b.addList();
+        cnmBot.addString("centralNormalizedMoments");
+        Bottle &cnmBotCnt = cnmBot.addList();
+        cnmBotCnt.addDouble(mom.nu20);
+        cnmBotCnt.addDouble(mom.nu11);
+        cnmBotCnt.addDouble(mom.nu02);
+        cnmBotCnt.addDouble(mom.nu30);
+        cnmBotCnt.addDouble(mom.nu21);
+        cnmBotCnt.addDouble(mom.nu12);
+        cnmBotCnt.addDouble(mom.nu03);
+    }
+
+    // (up-right) bounding rectangle info
+    if (useBoundingRectangle)
+    {
+        Rect br = o.getBoundingRect();
+        Bottle &brBot = b.addList();
+        brBot.addString("bounding_rectangle");
+        Bottle &brBotCnt = brBot.addList();
+        brBotCnt.addDouble(br.tl().x);
+        brBotCnt.addDouble(br.tl().y);
+        brBotCnt.addDouble(br.br().x);
+        brBotCnt.addDouble(br.br().y);
+        // OLD: estimate of point over the table
+        // br.x + br.width/2.;
+        // br.y + br.height;
+    }
+
+    // (rotated) enclosing rectangle info
+    if (useEnclosingRectangle)
+    {
+        RotatedRect er = o.getEnclosingRect();
+        Bottle &erBot = b.addList();
+        erBot.addString("enclosing_rectangle");
+        Bottle &erBotCnt = erBot.addList();
+        erBotCnt.addDouble(er.center.x);
+        erBotCnt.addDouble(er.center.y);
+        erBotCnt.addDouble(er.size.width);
+        erBotCnt.addDouble(er.size.height);
+        erBotCnt.addDouble(er.angle);
+    }
+
+    return true;
 }
