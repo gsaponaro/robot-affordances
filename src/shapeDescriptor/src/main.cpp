@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         yInfo("--convexity <on|off> (default: %s)", DefUseConvexity.c_str());
         yInfo("--eccentricity <on|off> (default: %s)", DefUseEccentricity.c_str());
         yInfo("--compactness <on|off> (default: %s)", DefUseCompactness.c_str());
-        yInfo("--circleness <on|off> (default: %s)", DefUseCircleness.c_str());
+        yInfo("--circularity <on|off> (default: %s)", DefUseCircularity.c_str());
         yInfo("--squareness <on|off> (default: %s)", DefUseSquareness.c_str());
         yInfo("--perimeter <on|off> (default: %s)", DefUsePerimeter.c_str());
         yInfo("--elongation <on|off> (default: %s)", DefUseElongation.c_str());

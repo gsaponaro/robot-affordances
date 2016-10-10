@@ -116,7 +116,7 @@ bool ShapeDescriptorThread::threadInit()
     useConvexity = rf.check("convexity",Value(DefUseConvexity)).asString()=="on"?true:false;
     useEccentricity = rf.check("eccentricity",Value(DefUseEccentricity)).asString()=="on"?true:false;
     useCompactness = rf.check("compactness",Value(DefUseCompactness)).asString()=="on"?true:false;
-    useCircleness = rf.check("circleness",Value(DefUseCircleness)).asString()=="on"?true:false;
+    useCircularity = rf.check("circularity",Value(DefUseCircularity)).asString()=="on"?true:false;
     useSquareness = rf.check("squareness",Value(DefUseSquareness)).asString()=="on"?true:false;
     usePerimeter = rf.check("perimeter",Value(DefUsePerimeter)).asString()=="on"?true:false;
     useElongation = rf.check("elongation",Value(DefUseElongation)).asString()=="on"?true:false;
@@ -515,13 +515,13 @@ bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
         compBotCnt.addDouble(o.getCompactness());
     }
 
-    // circleness info
-    if (useCircleness)
+    // circularity info
+    if (useCircularity)
     {
         Bottle &circBot = b.addList();
-        circBot.addString("circleness");
+        circBot.addString("circularity");
         Bottle &circBotCnt = circBot.addList();
-        circBotCnt.addDouble(o.getCircleness());
+        circBotCnt.addDouble(o.getCircularity());
     }
 
     // squareness info

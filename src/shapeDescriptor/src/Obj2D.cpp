@@ -61,9 +61,9 @@ bool Obj2D::computeDescriptors()
     moments = cv::moments(contour);
 
     minEnclosingCircle(contour, circleCenter, circleRadius);
-    circleness = (circleRadius>0 ? area/(CV_PI*pow(circleRadius,2)) : 0);
-    //yDebug("area=%.2f pi*radius^2=%.2f \t circleness=%.2f",
-    //       area, CV_PI*pow(circleRadius,2), circleness);
+    circularity = (circleRadius>0 ? area/(CV_PI*pow(circleRadius,2)) : 0);
+    //yDebug("area=%.2f pi*radius^2=%.2f \t circularity=%.2f",
+    //       area, CV_PI*pow(circleRadius,2), circularity);
 
     enclosingRect = minAreaRect(contour);
     double majorAxisRect, minorAxisRect;
@@ -78,8 +78,8 @@ bool Obj2D::computeDescriptors()
 
     elongation = majorAxisRect; // TODO: revise computation
 
-    //yDebug("perimeter=%.2f area=%.2f convexity=%.2f eccentricity=%.2f compactness=%.2f circleness=%.2f squareness=%.2f",
-    //       perimeter, area, convexity, eccentricity, compactness, circleness, squareness);
+    //yDebug("perimeter=%.2f area=%.2f convexity=%.2f eccentricity=%.2f compactness=%.2f circularity=%.2f squareness=%.2f",
+    //       perimeter, area, convexity, eccentricity, compactness, circularity, squareness);
 
     return true;
 }
@@ -128,11 +128,11 @@ double Obj2D::getCompactness() const
 }
 
 /**
-  * Return circleness.
+  * Return circularity.
   */
-double Obj2D::getCircleness() const
+double Obj2D::getCircularity() const
 {
-    return circleness;
+    return circularity;
 }
 
 /**

@@ -35,7 +35,7 @@
     <param default="on" desc="enable convexity">convexity</param>
     <param default="on" desc="enable eccentricity">eccentricity</param>
     <param default="on" desc="enable compactness">compactness</param>
-    <param default="on" desc="enable circleness">circleness</param>
+    <param default="on" desc="enable circularity">circularity</param>
     <param default="on" desc="enable squareness">squareness</param>
     <param default="on" desc="enable perimeter">perimeter</param>
     <param default="on" desc="enable elongation">elongation</param>

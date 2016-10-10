@@ -26,7 +26,7 @@ private:
     double convexity;
     double eccentricity;
     double compactness;
-    double circleness;
+    double circularity;
     double squareness;
 
     double perimeter;
@@ -63,7 +63,7 @@ public:
     double getConvexity() const;
     double getEccentricity() const;
     double getCompactness() const;
-    double getCircleness() const;
+    double getCircularity() const;
     double getSquareness() const;
     double getPerimeter() const;
     double getElongation() const;
