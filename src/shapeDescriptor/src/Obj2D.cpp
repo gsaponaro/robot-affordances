@@ -37,6 +37,29 @@ bool Obj2D::computeDescriptors()
     //yDebug("hull_perimeter=%.2f perimeter=%.2f \t convexity=%.2f convexity^2=%.2f",
     //       hull_perimeter, perimeter, convexity_temp, convexity);
 
+    // convexity defects require hull as int, not Point
+    std::vector<int> hull_int;
+    convexHull(contour, hull_int);
+    const int MIN_CONVDEF_HULL_SIZE = 3;
+    const int MIN_CONVDEF_DEPTH = 16;
+    std::vector<cv::Vec4i> defects_all;
+    if (hull.size() > MIN_CONVDEF_HULL_SIZE)
+    {
+        convexityDefects(contour, hull_int, defects_all);
+        for(std::vector<cv::Vec4i>::const_iterator iter = defects_all.begin();
+            iter != defects_all.end();
+            ++iter)
+        {
+            float depth = (*iter)[3]/256.0;
+            //yDebug("depth is %f", depth);
+            if (depth > MIN_CONVDEF_DEPTH)
+            {
+                defects.push_back(*iter);
+            }
+        }
+        //yDebug("defects: %lu -> %lu", defects_all.size(), defects.size());
+    }
+
     double majorAxisEll, minorAxisEll;
     RotatedRect enclosingRectEll = fitEllipse(contour);
     majorAxisEll = (enclosingRectEll.size.width>enclosingRectEll.size.height ?
@@ -109,6 +132,14 @@ double Obj2D::getArea() const
 double Obj2D::getConvexity() const
 {
     return convexity;
+}
+
+/**
+  * Get the convexity defects that have depth > MIN_CONVDEF_DEPTH.
+  */
+std::vector<cv::Vec4i> Obj2D::getConvexityDefects() const
+{
+    return defects;
 }
 
 /**

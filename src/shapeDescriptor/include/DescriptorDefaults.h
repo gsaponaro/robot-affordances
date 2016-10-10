@@ -23,6 +23,7 @@ const std::string ValueOff = "off";
 
 const std::string DefUseArea                    = ValueOn;
 const std::string DefUseConvexity               = ValueOn;
+const std::string DefUseConvexityDefects        = ValueOn;
 const std::string DefUseEccentricity            = ValueOn;
 const std::string DefUseCompactness             = ValueOn;
 const std::string DefUseCircularity             = ValueOn;

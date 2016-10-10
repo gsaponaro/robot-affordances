@@ -114,6 +114,7 @@ bool ShapeDescriptorThread::threadInit()
 
     useArea = rf.check("area",Value(DefUseArea)).asString()=="on"?true:false;
     useConvexity = rf.check("convexity",Value(DefUseConvexity)).asString()=="on"?true:false;
+    useConvexityDefects = rf.check("convexityDefects",Value(DefUseConvexityDefects)).asString()=="on"?true:false;
     useEccentricity = rf.check("eccentricity",Value(DefUseEccentricity)).asString()=="on"?true:false;
     useCompactness = rf.check("compactness",Value(DefUseCompactness)).asString()=="on"?true:false;
     useCircularity = rf.check("circularity",Value(DefUseCircularity)).asString()=="on"?true:false;
@@ -495,6 +496,25 @@ bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
         convBot.addString("convexity");
         Bottle &convBotCnt = convBot.addList();
         convBotCnt.addDouble(o.getConvexity());
+    }
+
+    // convexity defects info
+    if (useConvexityDefects)
+    {
+        Bottle &convDefBot = b.addList();
+        convDefBot.addString("convexityDefects");
+        Bottle &convDefBotCnt = convDefBot.addList();
+        std::vector<cv::Vec4i> defs = o.getConvexityDefects();
+        for(std::vector<cv::Vec4i>::const_iterator iter = defs.begin();
+            iter != defs.end();
+            ++iter)
+        {
+            Bottle &d = convDefBotCnt.addList();
+            d.addDouble((*iter)[0]);
+            d.addDouble((*iter)[1]);
+            d.addDouble((*iter)[2]);
+            d.addDouble((*iter)[3]);
+        }
     }
 
     // eccentricity info

@@ -60,6 +60,7 @@ class ShapeDescriptorThread : public yarp::os::RateThread
 
         bool useArea;
         bool useConvexity;
+        bool useConvexityDefects;
         bool useEccentricity;
         bool useCompactness;
         bool useCircularity;

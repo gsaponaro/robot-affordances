@@ -61,6 +61,7 @@ public:
     // getters
     double getArea() const;
     double getConvexity() const;
+    std::vector<cv::Vec4i> getConvexityDefects() const;
     double getEccentricity() const;
     double getCompactness() const;
     double getCircularity() const;
