@@ -1,6 +1,6 @@
 # Robot Affordances
 
-Software for visual robot affordances of objects and tools.
+Software for visual robot affordances.
 
 ## Introduction
 
@@ -18,8 +18,10 @@ Dependencies:
 
 Installation:
 
-  git clone https://github.com/gsaponaro/robot-affordances
-  cd robot-affordances && mkdir build && cd build && cmake .. && make
+```
+git clone https://github.com/gsaponaro/robot-affordances
+cd robot-affordances && mkdir build && cd build && cmake .. && make
+```
 
 Online documentation is available here: [https://gsaponaro.github.io/robot-affordances/](https://gsaponaro.github.io/robot-affordances/).
 
