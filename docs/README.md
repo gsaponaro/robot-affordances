@@ -2,6 +2,8 @@
 
 Software for visual robot affordances.
 
+![alt text](icub_with_objects_reduced_once.jpg "The iCub robot in Lisbon when using objects and reasoning about their affordances")
+
 ## Introduction
 
 This website illustrates a software framework for experiments in visual robot affordances. It is directed at the robotics, psychophysics and neuroscience communities. We provide documentation, tutorials and videos of some practical applications.
