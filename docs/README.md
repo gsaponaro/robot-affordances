@@ -35,7 +35,6 @@ Online documentation is available here: [https://gsaponaro.github.io/robot-affor
 ## Other publications that use our framework
 
 * Atabak Dehban, Lorenzo Jamone, Adam R. Kampff, José Santos-Victor. *Denoising Auto-Encoders for Learning of Objects and Tools Affordances in Continuous Space*. IEEE International Conference on Robotics and Automation (ICRA 2016).
-
 * Anthony F. Morse, Angelo Cangelosi. *Why Are There Developmental Stages in Language Learning? A Developmental Robotics Model of Language Development*. Cognitive Science, 2016.
 
 ## License
