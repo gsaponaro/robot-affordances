@@ -16,7 +16,7 @@ Dependencies:
 - [icub-contrib-common](https://github.com/robotology/icub-contrib-common)
 - [OpenCV](http://opencv.org/downloads.html)
 
-Installation:
+Installation in Linux:
 
 ```
 git clone https://github.com/gsaponaro/robot-affordances
@@ -32,7 +32,7 @@ Online documentation is available here: [https://gsaponaro.github.io/robot-affor
 * Afonso Gonçalves, João Abrantes, Giovanni Saponaro, Lorenzo Jamone, Alexandre Bernardino. *Learning Intermediate Object Affordances: Towards the Development of a Tool Concept*. IEEE International Conference on Development and Learning and on Epigenetic Robotics (ICDL-EpiRob 2014).
 * Afonso Gonçalves, Giovanni Saponaro, Lorenzo Jamone, Alexandre Bernardino. *Learning Visual Affordances of Objects and Tools through Autonomous Robot Exploration*. IEEE International Conference on Autonomous Robot Systems and Competitions (ICARSC 2014).
 
-## Other publications which have used our framework
+## Other publications that use our framework
 
 * Atabak Dehban, Lorenzo Jamone, Adam R. Kampff, José Santos-Victor. *Denoising Auto-Encoders for Learning of Objects and Tools Affordances in Continuous Space*. IEEE International Conference on Robotics and Automation (ICRA 2016).
 
