@@ -6,7 +6,7 @@ Software for visual robot affordances.
 
 This website illustrates a software framework for experiments in visual robot affordances. It is directed at the robotics, psychophysics and neuroscience communities. We provide documentation, tutorials and videos of some practical applications.
 
-In a nutshell, the pipeline of the framework is as follows. 1) A visual segmentation algorithm is run on an image stream; 2) features of the segmented objects (and their sub-parts in the case of tools) are extracted; 3) features are then used for higher-level Bayesian inference, addressing the actual object affordances. Complete examples are provided.
+In a nutshell, the pipeline of the framework is as follows. 1) A visual segmentation algorithm is run on an image stream; 2) features of the segmented objects and of their constituent parts (e.g., effector and handle of tools) are extracted; 3) the features are then used for higher-level inference and for reasoning about object affordances. Complete examples are provided.
 
 ## Tutorials & Documentation
 
@@ -27,9 +27,16 @@ Online documentation is available here: [https://gsaponaro.github.io/robot-affor
 
 ## Publications
 
+* Giovanni Saponaro, Alexandre Antunes, Rodrigo Ventura, Lorenzo Jamone, Alexandre Bernardino. *Combining Affordances and Probabilistic Planning for Robust Problem Solving in a Cognitive Robot*. IEEE Transactions on Cognitive and Developmental Systems, 2017 (submitted).
 * Alexandre Antunes, Lorenzo Jamone, Giovanni Saponaro, Alexandre Bernardino, Rodrigo Ventura. *From Human Instructions to Robot Actions: Formulation of Goals, Affordances and Probabilistic Planning*. IEEE International Conference on Robotics and Automation (ICRA 2016).
 * Afonso Gonçalves, João Abrantes, Giovanni Saponaro, Lorenzo Jamone, Alexandre Bernardino. *Learning Intermediate Object Affordances: Towards the Development of a Tool Concept*. IEEE International Conference on Development and Learning and on Epigenetic Robotics (ICDL-EpiRob 2014).
 * Afonso Gonçalves, Giovanni Saponaro, Lorenzo Jamone, Alexandre Bernardino. *Learning Visual Affordances of Objects and Tools through Autonomous Robot Exploration*. IEEE International Conference on Autonomous Robot Systems and Competitions (ICARSC 2014).
+
+## Other publications which have used our framework
+
+* Atabak Dehban, Lorenzo Jamone, Adam R. Kampff, José Santos-Victor. *Denoising Auto-Encoders for Learning of Objects and Tools Affordances in Continuous Space*. IEEE International Conference on Robotics and Automation (ICRA 2016).
+
+* Anthony F. Morse, Angelo Cangelosi. *Why Are There Developmental Stages in Language Learning? A Developmental Robotics Model of Language Development*. Cognitive Science, 2016.
 
 ## License
 
