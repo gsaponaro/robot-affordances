@@ -6,9 +6,11 @@ Software for visual robot affordances.
 
 ## Introduction
 
-This website illustrates a software framework for experiments in visual robot affordances. It is directed at the robotics, psychophysics and neuroscience communities. We provide documentation, tutorials and videos of some practical applications.
+This website illustrates a software framework for experiments in visual robot affordances. It is directed at the robotics, psychophysics and neuroscience communities. We provide documentation and tutorials of some practical applications.
 
-In a nutshell, the pipeline of the framework is as follows. 1) A visual segmentation algorithm is run on an image stream; 2) features of the segmented objects and of their constituent parts (e.g., effector and handle of tools) are extracted; 3) the features are then used for higher-level inference and for reasoning about object affordances. Complete examples are provided.
+The pipeline of the framework is as follows. 1) A visual segmentation algorithm is run on an image stream; 2) features of the segmented objects and of their constituent parts (e.g., effector and handle of tools) are extracted; 3) the features are then used for higher-level inference and for reasoning about object affordances. Complete examples are provided.
+
+To run the first two steps, please launch [this script](https://github.com/robotology/poeticon/blob/master/app/scripts/segmentation.xml.template) from the POETICON++ project repository. To train an affordance knowledge base, launch [affordancesExploration](https://github.com/robotology/poeticon/blob/master/app/scripts/affordancesExploration.xml.template). Finally, to make inference queries about the learned affordance knowledge, follow the instructions in [this page](https://github.com/robotology/poeticon/tree/master/src/affNetwork).
 
 ## Tutorials & Documentation
 
