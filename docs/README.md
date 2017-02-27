@@ -31,13 +31,14 @@ Online documentation is available here: [https://gsaponaro.github.io/robot-affor
 
 ## Publications
 
-* Giovanni Saponaro, Alexandre Antunes, Rodrigo Ventura, Lorenzo Jamone, Alexandre Bernardino. *Combining Affordances and Probabilistic Planning for Robust Problem Solving in a Cognitive Robot*. IEEE Transactions on Cognitive and Developmental Systems, 2017 (submitted).
+* Giovanni Saponaro, Alexandre Antunes, Rodrigo Ventura, Lorenzo Jamone, Alexandre Bernardino. *Combining Affordances and Probabilistic Planning for Robust Problem Solving in a Cognitive Robot*. IEEE Transactions on Cognitive and Developmental Systems, 2017 (under review).
 * Alexandre Antunes, Lorenzo Jamone, Giovanni Saponaro, Alexandre Bernardino, Rodrigo Ventura. *From Human Instructions to Robot Actions: Formulation of Goals, Affordances and Probabilistic Planning*. IEEE International Conference on Robotics and Automation (ICRA 2016).
 * Afonso Gonçalves, João Abrantes, Giovanni Saponaro, Lorenzo Jamone, Alexandre Bernardino. *Learning Intermediate Object Affordances: Towards the Development of a Tool Concept*. IEEE International Conference on Development and Learning and on Epigenetic Robotics (ICDL-EpiRob 2014).
 * Afonso Gonçalves, Giovanni Saponaro, Lorenzo Jamone, Alexandre Bernardino. *Learning Visual Affordances of Objects and Tools through Autonomous Robot Exploration*. IEEE International Conference on Autonomous Robot Systems and Competitions (ICARSC 2014).
 
 ## Other publications that use our framework
 
+* Atabak Dehban, Giovanni Saponaro, Shanghang Zhang, Lorenzo Jamone, Adam R. Kampff, José Santos-Victor. *Towards learning deep features for multi-modal inference with robotic data*. International Journal of Robotics Research, 2017 (accepted).
 * Atabak Dehban, Lorenzo Jamone, Adam R. Kampff, José Santos-Victor. *Denoising Auto-Encoders for Learning of Objects and Tools Affordances in Continuous Space*. IEEE International Conference on Robotics and Automation (ICRA 2016).
 * Anthony F. Morse, Angelo Cangelosi. *Why Are There Developmental Stages in Language Learning? A Developmental Robotics Model of Language Development*. Cognitive Science, 2016.
 
