@@ -332,7 +332,10 @@ void ShapeDescriptorThread::run2d()
             findContours(topRectCropped, top_cnt, top_hrch, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 
             if (top_cnt.size()==0)
+            {
                 yWarning("blob %d, top part has zero contours", intIdx);
+                continue;
+            }
 
             double top_largest_area = 0;
             int top_largest_cnt_index = 0;
@@ -355,7 +358,10 @@ void ShapeDescriptorThread::run2d()
             findContours(botRectCropped, bot_cnt, bot_hrch, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 
             if (bot_cnt.size()==0)
+            {
                 yWarning("blob %d, bottom part has zero contours", intIdx);
+                continue;
+            }
 
             double bot_largest_area = 0;
             int bot_largest_cnt_index = 0;
