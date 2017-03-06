@@ -629,7 +629,7 @@ bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
     {
         Rect br = o.getBoundingRect();
         Bottle &brBot = b.addList();
-        brBot.addString("bounding_rectangle");
+        brBot.addString("boundingRectangle");
         Bottle &brBotCnt = brBot.addList();
         brBotCnt.addDouble(br.tl().x);
         brBotCnt.addDouble(br.tl().y);
@@ -645,7 +645,7 @@ bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
     {
         RotatedRect er = o.getEnclosingRect();
         Bottle &erBot = b.addList();
-        erBot.addString("enclosing_rectangle");
+        erBot.addString("enclosingRectangle");
         Bottle &erBotCnt = erBot.addList();
         erBotCnt.addDouble(er.center.x);
         erBotCnt.addDouble(er.center.y);
