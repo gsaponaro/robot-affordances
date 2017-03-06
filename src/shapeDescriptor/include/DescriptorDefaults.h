@@ -31,8 +31,8 @@ const std::string DefUseSquareness              = ValueOn;
 const std::string DefUsePerimeter               = ValueOn;
 const std::string DefUseElongation              = ValueOn;
 const std::string DefSpatialMomentsCenterOfMass = ValueOn;
-const std::string DefCentralMoments             = ValueOff;
-const std::string DefCentralNormalizedMoments   = ValueOff;
+const std::string DefCentralMoments             = ValueOn;
+const std::string DefCentralNormalizedMoments   = ValueOn;
 
 const std::string DefBoundingRectangle          = ValueOff;
 const std::string DefEnclosingRectangle         = ValueOff;
