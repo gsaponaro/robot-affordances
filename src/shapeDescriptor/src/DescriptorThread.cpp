@@ -431,6 +431,7 @@ void ShapeDescriptorThread::run2d()
             outAnnotatedMat = iplToMat(*inRawImg);
 
             const Scalar Blue(255,0,0);
+            const Scalar Red(0,0,255);
             const Scalar Yellow(255,255,0);
             const int thickness = 2;
             for (std::vector<Obj2D>::iterator it = objs.begin();
@@ -455,6 +456,59 @@ void ShapeDescriptorThread::run2d()
                                  -1, // draw all the contours of cont[intIdx]
                                  Yellow,
                                  thickness);
+                }
+
+                // draw best fit line
+                bool drawBestFitLine = false;
+                if (drawBestFitLine)
+                {
+                    const int LE = it->getEnclosingRect().size.height/2;
+                    const Vec4f bestLine = it->getBestLineFit();
+                    // draw segment from center to first extreme
+                    line(outAnnotatedMat,
+                         Point(bestLine[2],bestLine[3]),
+                         Point(bestLine[2]+bestLine[0]*LE,bestLine[3]+bestLine[1]*LE),
+                         Red,
+                         thickness);
+                    // draw segment from center to second extreme
+                    line(outAnnotatedMat,
+                         Point(bestLine[2],bestLine[3]),
+                         Point(bestLine[2]-bestLine[0]*LE,bestLine[3]-bestLine[1]*LE),
+                         Red,
+                         thickness);
+                }
+
+                // draw convexity defects
+                bool drawConvexityDefects = true;
+                if (drawConvexityDefects)
+                {
+                    std::vector<Vec4i> defs = it->getConvexityDefects();
+                    for (std::vector<Vec4i>::iterator d = defs.begin();
+                         d != defs.end();
+                         ++d)
+                    {
+                        // http://stackoverflow.com/a/31358401/1638888
+                        int startidx = (*d)[0]; Point ptStart( it->getContour()[startidx] );
+                        int endidx = (*d)[1]; Point ptEnd( it->getContour()[endidx] );
+                        int faridx = (*d)[2]; Point ptFar( it->getContour()[faridx] );
+                        float depth = (*d)[3] / 256;
+
+                        const int Radius = 5;
+
+                        line( outAnnotatedMat, ptStart, ptEnd, Red, thickness );
+                        //line( outAnnotatedMat, ptStart, ptFar, Red, thickness );
+                        //line( outAnnotatedMat, ptEnd, ptFar, Red, thickness );
+                        circle( outAnnotatedMat, ptFar, Radius, Red, thickness );
+
+                        arrowedLine(outAnnotatedMat,
+                                    ptFar,
+                                    Point((ptStart.x+ptEnd.x)/2,(ptStart.y+ptEnd.y)/2),
+                                    Red,
+                                    thickness,
+                                    8,    // lineType
+                                    0,    // shift
+                                    0.3); // tipLength
+                    }
                 }
             }
 

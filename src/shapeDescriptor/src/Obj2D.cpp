@@ -37,11 +37,18 @@ bool Obj2D::computeDescriptors()
     //yDebug("hull_perimeter=%.2f perimeter=%.2f \t convexity=%.2f convexity^2=%.2f",
     //       hull_perimeter, perimeter, convexity_temp, convexity);
 
+    fitLine(contour,
+            bestLineFit,
+            DIST_L2, // distance type
+            0,       // parameter for distance metric
+            1e-2,    // radio accuracy parameter
+            1e-2);   // angle accuracy parameter
+
     // convexity defects require hull as int, not Point
     std::vector<int> hull_int;
     convexHull(contour, hull_int);
     const int MIN_CONVDEF_HULL_SIZE = 3;
-    const int MIN_CONVDEF_DEPTH = 16;
+    const int MIN_CONVDEF_DEPTH = 8;
     std::vector<cv::Vec4i> defects_all;
     if (hull.size() > MIN_CONVDEF_HULL_SIZE)
     {
@@ -119,6 +126,14 @@ bool Obj2D::areaInRange(const double &minArea, const double &maxArea) const
 // getters
 
 /**
+  * Return contour.
+  */
+std::vector<cv::Point> Obj2D::getContour() const
+{
+    return contour;
+}
+
+/**
   * Return area.
   */
 double Obj2D::getArea() const
@@ -132,6 +147,14 @@ double Obj2D::getArea() const
 double Obj2D::getConvexity() const
 {
     return convexity;
+}
+
+/**
+  * Return best line fit.
+  */
+cv::Vec4f Obj2D::getBestLineFit() const
+{
+    return bestLineFit;
 }
 
 /**

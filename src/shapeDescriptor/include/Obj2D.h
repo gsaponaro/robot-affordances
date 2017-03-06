@@ -22,6 +22,9 @@ private:
     std::vector<cv::Point> contour;
     double area;
 
+    // best line fit
+    cv::Vec4f bestLineFit;
+
     // shape descriptors
     double convexity;
     double eccentricity;
@@ -59,8 +62,10 @@ public:
     bool areaInRange(const double &minArea, const double &maxArea) const;
 
     // getters
+    std::vector<cv::Point> getContour() const;
     double getArea() const;
     double getConvexity() const;
+    cv::Vec4f getBestLineFit() const;
     std::vector<cv::Vec4i> getConvexityDefects() const;
     double getEccentricity() const;
     double getCompactness() const;
