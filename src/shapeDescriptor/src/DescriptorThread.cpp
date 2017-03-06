@@ -272,8 +272,25 @@ void ShapeDescriptorThread::run2d()
 
             Mat inBin = iplToMat(*inBinImg);
 
-            // findContours which needs 1 channel 8uC1 or 32sC1
+            // findContours needs 1 channel 8uC1 or 32sC1
             cvtColor(inBin, inBin, CV_BGR2GRAY, 1);
+
+            // fast connected component analysis
+            /*
+            int numLab;
+            Mat labMap;
+            Mat ccStats;
+            Mat centroids;
+            double cct0 = yarp::os::Time::now();
+            double cct1;
+            numLab = connectedComponentsWithStats(inBin,
+                                                  labMap,
+                                                  ccStats,
+                                                  centroids);
+            cct1 = yarp::os::Time::now();
+            yDebug("computed %d connected components in %f msec",
+                   numLab-1, 1000.0*(cct1-cct0));
+            */
 
             // perform affine transformation (rotation)
             Mat rotated(inBin.size(), inBin.type()); // output
