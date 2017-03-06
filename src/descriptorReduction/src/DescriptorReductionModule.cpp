@@ -22,6 +22,9 @@ bool DescriptorReductionModule::configure(ResourceFinder &rf)
     inPartDescPortName = "/" + moduleName + "/partDescriptors:i";
     inPartDescPort.open(inPartDescPortName.c_str());
 
+    outReducedDescPortName = "/" + moduleName + "/desc:o";
+    outReducedDescPort.open(outReducedDescPortName.c_str());
+
     yInfo("ready, waiting for descriptors");
 
     return true;
@@ -53,6 +56,20 @@ bool DescriptorReductionModule::updateModule()
     if (inWholeDescPort.getInputCount()>0 && inPartDescPort.getInputCount()>0)
     {
         yDebug("both inputs connected");
+        Bottle *inWholeDesc = inWholeDescPort.read(true);
+        Bottle *inPartDesc = inWholeDescPort.read(true);
+        if (inWholeDesc!=NULL && inPartDesc!=NULL)
+        {
+            const int numBlobs = inWholeDesc->size();
+            const int desiredBlobs = 1;
+            if (numBlobs > desiredBlobs)
+            {
+                yWarning("got more than %d blobs, will not do anything", inWholeDesc->size());
+                return true;
+            }
+
+            
+        }
     }
 
     return true;

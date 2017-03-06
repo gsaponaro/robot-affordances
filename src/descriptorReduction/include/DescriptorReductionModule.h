@@ -20,8 +20,10 @@ class DescriptorReductionModule : public yarp::os::RFModule
         std::string moduleName;
         std::string inWholeDescPortName;
         std::string inPartDescPortName;
+        std::string outReducedDescPortName;
         yarp::os::BufferedPort<yarp::os::Bottle> inWholeDescPort;
         yarp::os::BufferedPort<yarp::os::Bottle> inPartDescPort;
+        yarp::os::BufferedPort<yarp::os::Bottle> outReducedDescPort;
 
     public:
         virtual bool configure(yarp::os::ResourceFinder &rf);
