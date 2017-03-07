@@ -1,0 +1,14 @@
+<application>
+
+  <name>handActions App</name>
+
+  <dependencies>
+      <port>/iKinGazeCtrl/rpc</port>
+  </dependencies>
+
+  <module>
+      <name>handActions</name>
+      <environment>YARP_FORWARD_LOG_ENABLE=1</environment>
+      <node>localhost</node>
+  </module>
+</application>
