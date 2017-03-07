@@ -15,7 +15,6 @@
 #include <yarp/sig/all.h>
 #include <yarp/math/Math.h>
 
-
 const double ARM_DEF_HOME[] = {-50.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0,     20.0,  30.0,10.0,10.0,  10.0,10.0, 10.0,10.0,  10.0};
 
 const double TORSO_DEF_HOME[] = {0.0, 0.0, 0.0};
@@ -25,7 +24,6 @@ using namespace yarp::os;
 using namespace yarp::dev;
 using namespace yarp::sig;
 using namespace yarp::math;
-
 
 /***************************************************/
 class CtrlModule: public RFModule
@@ -48,6 +46,7 @@ protected:
     bool okL,okR;
     int *controlModesArm;
     int nAxesA;
+
     /***************************************************/
     Vector retrieveTarget3D(const Vector &cogL, const Vector &cogR)
     {
@@ -123,7 +122,7 @@ protected:
             yInfo() << "roll bottom";
             iarm->setTrajTime(1.3);
         }
-            
+
         iarm->goToPoseSync(target,o);
         iarm->waitMotionDone();
         iarm->setTrajTime(tempotempo);
@@ -141,7 +140,6 @@ protected:
     /***************************************************/
     void make_it_roll(const Vector &x)
     {
-
         fixate(x);
         yInfo()<<"fixating at ("<<x.toString(3,3)<<")";
 
@@ -157,7 +155,6 @@ protected:
     /***************************************************/
     void tapFromRight(const Vector &x)
     {
-
         fixate(x);
         yInfo()<<"fixating at ("<<x.toString(3,3)<<")";
 
@@ -170,10 +167,10 @@ protected:
         roll(x,o,"right");
         yInfo()<<"roll!";
     }
+
     /***************************************************/
     void tapFromLeft(const Vector &x)
     {
-
         fixate(x);
         yInfo()<<"fixating at ("<<x.toString(3,3)<<")";
 
@@ -186,10 +183,10 @@ protected:
         roll(x,o,"left");
         yInfo()<<"roll!";
     }
+
     /***************************************************/
     void push(const Vector &x)
     {
-
         fixate(x);
         yInfo()<<"fixating at ("<<x.toString(3,3)<<")";
 
@@ -202,6 +199,7 @@ protected:
         roll(x,o,"bottom");
         yInfo()<<"roll!";
     }
+
     /***************************************************/
     void home()
     {
@@ -251,6 +249,8 @@ protected:
             elapsedTime= Time::now()-startTime;
         }
     }
+
+    /***************************************************/
     void retrieveObjLocation(const Bottle &command)
     {
         objLocation[0] = command.get(1).asDouble();
@@ -258,7 +258,9 @@ protected:
         objLocation[2] = command.get(3).asDouble();
         yInfo() << "Object Location" << objLocation.toString();
     }
+
 public:
+
     /***************************************************/
     bool configure(ResourceFinder &rf)
     {
@@ -323,6 +325,7 @@ public:
         optGaze.put("device","gazecontrollerclient");
         optGaze.put("remote","/iKinGazeCtrl");
         optGaze.put("local","/"+moduleName+"/gaze_client");
+
         /******** Position Torso Control Interface *******/
 
         Property optionTorso("(device remote_controlboard)");
@@ -339,6 +342,7 @@ public:
            cout << moduleName << ": problems acquiring interfaces to remote_controlboard of Torso"<< endl;
             return false;
         }
+
         /******** Gaze Control *******/
         if (!drvGaze.open(optGaze))
         {
@@ -385,7 +389,7 @@ public:
     bool respond(const Bottle &command, Bottle &reply)
     {
         string cmd=command.get(0).asString();
-        
+
         if (cmd=="help")
         {
             reply.addVocab(Vocab::encode("many"));
@@ -499,7 +503,6 @@ public:
         return true;
     }
 };
-
 
 /***************************************************/
 int main(int argc, char *argv[])
