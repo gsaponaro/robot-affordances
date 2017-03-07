@@ -15,5 +15,6 @@ include(ICUBcontribHelpers)
 include(ICUBcontribOptions)
 icubcontrib_set_default_prefix()
 
+add_subdirectory(handActions)
 add_subdirectory(descriptorReduction)
 add_subdirectory(shapeDescriptor)
