@@ -1,6 +1,6 @@
 # Robot Affordances
 
-Software for visual robot affordances.
+Software for learning visual robot affordances.
 
 ![alt text](icub_with_objects_reduced_once.jpg "The iCub robot in Lisbon when using objects and reasoning about their affordances")
 
