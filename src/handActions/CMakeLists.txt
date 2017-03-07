@@ -1,3 +1,8 @@
+# Copyright: (C) 2017 VisLab, Institute for Systems and Robotics,
+#                Instituto Superior Técnico, Universidade de Lisboa, Lisbon, Portugal
+# Author: Pedro Vicente <pvicente@isr.tecnico.ulisboa.pt>
+# CopyPolicy: Released under the terms of the GNU GPL v3.0.
+
 # requires minimum cmake version
 cmake_minimum_required(VERSION 2.8.9)
 

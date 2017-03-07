@@ -1,8 +1,12 @@
-// -*- mode:C++; tab-width:4; c-basic-offset:4; indent-tabs-mode:nil -*-
-//
-// Author:   Pedro Vicente - <pvicente@isr.tecnico.ulisboa.pt>
-//           Ugo Pattacini - <ugo.pattacini@iit.it>
-//         
+/*
+ * Copyright: (C) 2017 VisLab, Institute for Systems and Robotics,
+ *                Istituto Superior Técnico, Universidade de Lisboa, Lisbon, Portugal
+ * Author: Pedro Vicente <gsaponaro@isr.tecnico.ulisboa.pt>
+ * CopyPolicy: Released under the terms of the GNU GPL v3.0
+ *
+ * Based on code by Ugo Pattacini <ugo.pattacini@iit.it>
+ *
+ */
 
 #include <string>
 
