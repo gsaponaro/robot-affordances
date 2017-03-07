@@ -3,6 +3,7 @@
 # Author: Giovanni Saponaro <gsaponaro@isr.tecnico.ulisboa.pt>
 # CopyPolicy: Released under the terms of the GNU GPL v3.0.
 
-file(GLOB scripts ${CMAKE_CURRENT_SOURCE_DIR}/scripts/*.template)
+file(GLOB scripts ${CMAKE_CURRENT_SOURCE_DIR}/scripts/*.template
+                  ${CMAKE_CURRENT_SOURCE_DIR}/scripts/*.xml)
 
 yarp_install(FILES ${scripts} DESTINATION ${ICUBCONTRIB_APPLICATIONS_TEMPLATES_INSTALL_DIR})
