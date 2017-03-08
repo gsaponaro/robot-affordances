@@ -248,6 +248,9 @@ bool HandActionsModule::close()
 {
     drvArm.close();
     drvGaze.close();
+    drvArmPos.close();
+    drvTorso.close();
+
     //imgLPortIn.close();
     //imgRPortIn.close();
     //imgLPortOut.close();
@@ -310,11 +313,13 @@ bool HandActionsModule::home()
             ctrlMA->setControlMode(i,VOCAB_CM_POSITION);
         }
     }
+
     for(int i=0; i<3; i++)
     {
         ctrlMT->setControlMode(i,VOCAB_CM_POSITION);
     }
-    posT->positionMove(TORSO_DEF_HOME);
+
+    posA->positionMove(ARM_DEF_HOME);
 
     bool done=false;
     double elapsedTime=0.0;
@@ -322,17 +327,20 @@ bool HandActionsModule::home()
 
     while(!done && elapsedTime<2.0)
     {
-        posT->checkMotionDone(&done);
+        posA->checkMotionDone(&done);
         Time::delay(0.04);
         elapsedTime= Time::now()-startTime;
     }
 
-    posA->positionMove(ARM_DEF_HOME);
+    posT->positionMove(TORSO_DEF_HOME);
 
+    done=false;
+    elapsedTime=0.0;
     startTime=Time::now();
+
     while(!done && elapsedTime<2.0)
     {
-        posA->checkMotionDone(&done);
+        posT->checkMotionDone(&done);
         Time::delay(0.04);
         elapsedTime= Time::now()-startTime;
     }
