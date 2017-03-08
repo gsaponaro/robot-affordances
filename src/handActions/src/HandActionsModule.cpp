@@ -117,18 +117,31 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     string moduleName = rf.check("name",Value("handActions")).asString();
     string robot = rf.check("robot",Value("icubSim")).asString();
     string arm = rf.check("arm",Value("right_arm")).asString();
-    if(arm.compare("left")==0 ||arm.compare("leftarm")==0 || arm.compare("armleft")==0 || arm.compare("Left")==0)
+    if (arm.compare("left")==0 ||arm.compare("leftarm")==0 || arm.compare("armleft")==0 || arm.compare("Left")==0)
         arm = "left_arm";
     else
         arm = "right_arm";
 
-    /******** Cartesian Interface *******/
+    /******** Gaze Control *******/
+    Property optGaze;
+    optGaze.put("device","gazecontrollerclient");
+    optGaze.put("remote","/iKinGazeCtrl");
+    optGaze.put("local","/"+moduleName+"/gaze_client");
 
+    if (!drvGaze.open(optGaze))
+    {
+        yError()<<"Unable to open the Gaze Controller";
+        drvArm.close(); // IMPORTANT - Because drvArm was already open
+        return false;
+    }
+
+    drvGaze.view(igaze);
+
+    /******** Cartesian Interface *******/
     Property optArm;
     optArm.put("device","cartesiancontrollerclient");
     optArm.put("remote","/"+robot+"/cartesianController/"+arm);
     optArm.put("local","/"+moduleName+"/cartesian_client/"+arm);
-
 
     // let's give the controller some time to warm up
     bool ok=false;
@@ -152,56 +165,47 @@ bool HandActionsModule::configure(ResourceFinder &rf)
         return false;
     }
 
+    drvArm.view(iarm);
+
     /******** Position Arm Control Interface *******/
-    /* connect to remote device  */
     Property options;
-    options.put("device", "remote_controlboard");             // device to open
-    options.put("local", "/"+moduleName+"/position_control/"+arm);           // local port name
-    options.put("remote", "/" + robot + "/"+arm);         // where we connect to
+    options.put("device", "remote_controlboard");
+    options.put("local", "/"+moduleName+"/position_control/"+arm);
+    options.put("remote", "/"+robot+"/"+arm);
     drvArmPos.open(options);
-    if (!drvArmPos.isValid()) 
+
+    if (!drvArmPos.isValid())
     {
         cout << moduleName << ": unable to connect to device: remote_controlboard of " << arm << endl;
         return false;
     }
-    if (!drvArmPos.view(posA) || !drvArmPos.view(encsA) || !drvArmPos.view(ctrlMA)) 
+
+    if (!drvArmPos.view(posA) || !drvArmPos.view(encsA) || !drvArmPos.view(ctrlMA))
     {
         cout << moduleName << ": problems acquiring interfaces to remote_controlboard of " << arm << endl;
         return false;
     }
+
     posA->getAxes(&nAxesA);
     controlModesArm = new int[nAxesA];
-    Property optGaze;
-    optGaze.put("device","gazecontrollerclient");
-    optGaze.put("remote","/iKinGazeCtrl");
-    optGaze.put("local","/"+moduleName+"/gaze_client");
 
     /******** Position Torso Control Interface *******/
-
     Property optionTorso("(device remote_controlboard)");
     optionTorso.put("remote",("/"+robot+"/torso").c_str());
     optionTorso.put("local","/"+moduleName+"/position_control/torso");
+
     if (!drvTorso.open(optionTorso))
     {
         yError()<<"Joints Torso controller not available";
         terminate();
         return false;
     }
+
     if (!drvTorso.view(posT) || !drvTorso.view(ctrlMT)) 
     {
        cout << moduleName << ": problems acquiring interfaces to remote_controlboard of Torso"<< endl;
         return false;
     }
-
-    /******** Gaze Control *******/
-    if (!drvGaze.open(optGaze))
-    {
-        yError()<<"Unable to open the Gaze Controller";
-        drvArm.close(); // IMPORTANT - Because drvArm was already open
-        return false;
-    }
-    drvGaze.view(igaze);
-    drvArm.view(iarm);
 
     straightHandPoss.resize(9, 0.0);
     straightHandPoss[0] =  0.0; // j7
@@ -236,8 +240,16 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     bentHandPoss[7] = 10.0;
     bentHandPoss[8] =120.0; // j15
 
-    //handVels.resize(9, 0.0);
-    //20.0 40.0 50.0 50.0 50.0 50.0 50.0 50.0  80.0
+    handVels.resize(9, 0.0);
+    handVels[0] = 20.0;
+    handVels[1] = 40.0;
+    handVels[2] = 50.0;
+    handVels[3] = 50.0;
+    handVels[4] = 50.0;
+    handVels[5] = 50.0;
+    handVels[6] = 50.0;
+    handVels[7] = 50.0;
+    handVels[8] = 80.0;
 
     rpcPort.open("/"+moduleName+"/rpc:i");
     attach(rpcPort);
@@ -256,8 +268,8 @@ bool HandActionsModule::interruptModule()
 /***************************************************/
 bool HandActionsModule::close()
 {
-    drvArm.close();
     drvGaze.close();
+    drvArm.close();
     drvArmPos.close();
     drvTorso.close();
 
@@ -279,7 +291,7 @@ bool HandActionsModule::updateModule()
 }
 
 /***************************************************/
-void HandActionsModule::moveHand(const int postureType, const int sel)
+void HandActionsModule::moveHand(const int postureType)
 {
     Vector *poss = NULL;
 
@@ -301,29 +313,16 @@ void HandActionsModule::moveHand(const int postureType, const int sel)
         return;
     }
 
-    if (sel==LEFTARM)
-    {
-        yError("moveHand left_arm not implemented yet");
-        return;
-    }
-    else if (sel==RIGHTARM)
-    {
-        //drvArm.view(imode);
-        //drvArm.view(posA);
-    }
-    else
-    {
-        yError("invalid arm sel");
-        return;
-    }
+    //drvArm.view(imode);
+    //drvArm.view(posA);
 
-    for (size_t j=0; j<straightHandPoss.length(); ++j)
+    for (size_t j=0; j<straightHandPoss.length(); j++)
         ctrlMA->setControlMode(straightHandPoss.length()+j, VOCAB_CM_POSITION);
 
-    for (size_t j=0; j<straightHandPoss.length(); ++j)
+    for (size_t j=0; j<straightHandPoss.length(); j++)
     {
         int k = straightHandPoss.length()+j;
-        //posA->setRefSpeed(k,handVels[j]);
+        posA->setRefSpeed(k,handVels[j]);
         posA->positionMove(k,(*poss)[j]);
     }
 }
@@ -403,8 +402,14 @@ bool HandActionsModule::home()
         ctrlMT->setControlMode(i,VOCAB_CM_POSITION);
     }
 
+    //posA->setRefSpeeds(handVels.data()); // 9 or 16 values?
+
     const double ARM_DEF_HOME[] = {-50.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0,     20.0,  30.0,10.0,10.0,  10.0,10.0, 10.0,10.0,  10.0};
-    posA->positionMove(ARM_DEF_HOME);
+    //posA->positionMove(ARM_DEF_HOME);
+    for (int i=0; i<7; i++) // arm joints, no hand joints
+    {
+        posA->positionMove(i, ARM_DEF_HOME[i]);
+    }
 
     bool done=false;
     double elapsedTime=0.0;
@@ -437,31 +442,25 @@ bool HandActionsModule::home()
 /***************************************************/
 bool HandActionsModule::setFingers(const std::string &posture)
 {
-    if (posture!="straight" &&
-        posture!="fortyfive" &&
-        posture!="bent")
-    {
-        yError("valid finger postures are: straight, fortyfive, bent");
-        return false;
-    }
-
-    // hardcoded right_arm for now
-    int sel = RIGHTARM;
-
     if (posture=="straight")
     {
         yDebug("setting fingers to straight posture");
-        moveHand(STRAIGHT,sel);
+        moveHand(STRAIGHT);
     }
     else if (posture=="fortyfive")
     {
         yDebug("setting fingers to fortyfive posture");
-        moveHand(FORTYFIVE,sel);
+        moveHand(FORTYFIVE);
     }
     else if (posture=="bent")
     {
         yDebug("setting fingers to bent posture");
-        moveHand(BENT,sel);
+        moveHand(BENT);
+    }
+    else
+    {
+        yError("valid finger postures are: straight, fortyfive, bent");
+        return false;
     }
 
     return true;

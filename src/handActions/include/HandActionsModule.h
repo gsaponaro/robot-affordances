@@ -27,12 +27,19 @@ class HandActionsModule : public yarp::os::RFModule,
 {
 protected:
 
-    yarp::dev::PolyDriver drvArm,drvGaze,drvArmPos,drvTorso;
-    yarp::dev::ICartesianControl *iarm;
-    yarp::dev::IGazeControl      *igaze;
-    yarp::dev::IPositionControl2 *posA,*posT;
+    yarp::dev::PolyDriver drvGaze;
+    yarp::dev::PolyDriver drvArm;
+    yarp::dev::PolyDriver drvArmPos;
+    yarp::dev::PolyDriver drvTorso;
+
+    yarp::dev::IGazeControl *igaze;
     yarp::dev::IEncoders *encsA;
-    yarp::dev::IControlMode2 *ctrlMA,*ctrlMT;
+    yarp::dev::ICartesianControl *iarm;
+    yarp::dev::IPositionControl2 *posA;
+    yarp::dev::IPositionControl2 *posT;
+
+    yarp::dev::IControlMode2 *ctrlMA;
+    yarp::dev::IControlMode2 *ctrlMT;
 
     yarp::os::RpcServer rpcPort;
 
@@ -41,7 +48,7 @@ protected:
     int nAxesA;
 
     yarp::sig::Vector straightHandPoss, fortyfiveHandPoss, bentHandPoss;
-    //yarp::sig::Vector handVels;
+    yarp::sig::Vector handVels;
 
     void fixate(const yarp::sig::Vector &x);
     yarp::sig::Vector computeHandOrientation();
@@ -52,16 +59,9 @@ protected:
 public:
 
     // indexes used for finger postures
-    static const int NOARM    = 0;
-    static const int LEFTARM  = 1;
-    static const int RIGHTARM = 2;
-    static const int USEDARM  = 3;
-
     static const int STRAIGHT  = 0;
     static const int FORTYFIVE = 1;
     static const int BENT      = 2;
-
-    int armSel;
 
     bool configure(yarp::os::ResourceFinder &rf);
     bool interruptModule();
@@ -69,7 +69,7 @@ public:
     double getPeriod();
     bool updateModule();
 
-    void moveHand(const int postureType, const int sel=USEDARM);
+    void moveHand(const int postureType);
     bool safetyCheck(const yarp::sig::Vector &targetPos, const std::string &side);
 
     // IDL functions
