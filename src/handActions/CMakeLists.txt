@@ -1,6 +1,7 @@
 # Copyright: (C) 2017 VisLab, Institute for Systems and Robotics,
 #                Instituto Superior Técnico, Universidade de Lisboa, Lisbon, Portugal
-# Author: Pedro Vicente <pvicente@isr.tecnico.ulisboa.pt>
+# Author: Pedro Vicente <pvicente@isr.tecnico.ulisboa.pt>,
+#         Giovanni Saponaro <gsaponaro@isr.tecnico.ulisboa.pt>
 # CopyPolicy: Released under the terms of the GNU GPL v3.0.
 
 # requires minimum cmake version
@@ -22,11 +23,21 @@ include(YarpInstallationHelpers)
 include(ICUBcontribHelpers)
 include(ICUBcontribOptions)
 
+# Thrift IDL
+include(YarpIDL)
+yarp_add_idl(IDL_GEN_FILES ${PROJECT_NAME}.thrift)
+set(idl ${PROJECT_NAME}.thrift)
+
 # specify to install in $ICUBcontrib_DIR/bin
 icubcontrib_set_default_prefix()
 
-include_directories(${YARP_INCLUDE_DIRS})
-add_executable(${PROJECT_NAME} src/main.cpp)
+include_directories(${PROJECT_SOURCE_DIR}/include
+                    ${YARP_INCLUDE_DIRS}
+                    ${IDL_GENERATED_CODE_DIR}/include)
+add_executable(${PROJECT_NAME} src/main.cpp
+                               src/HandActionsModule.cpp
+                               include/HandActionsModule.h
+                               ${idl} ${IDL_GEN_FILES})
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES})
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
