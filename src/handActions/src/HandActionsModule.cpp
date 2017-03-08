@@ -18,17 +18,6 @@ using namespace yarp::sig;
 using namespace yarp::math;
 
 /***************************************************/
-/*
-Vector HandActionsModule::retrieveTarget3D(const Vector &cogL, const Vector &cogR)
-{
-    Vector position(3);        
-    igaze->triangulate3DPoint(cogL,cogR,position);
-    // Use iGaze to retrieve the 3D point
-    return position;
-}
-*/
-
-/***************************************************/
 void HandActionsModule::fixate(const Vector &x)
 {
     igaze->lookAtFixationPoint(x);
@@ -47,8 +36,14 @@ Vector HandActionsModule::computeHandOrientation()
 }
 
 /***************************************************/
-void HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,string side)
+bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o, string side)
 {
+    if (!safetyCheck(x,side))
+    {
+        yWarning("action is dangerous, I will not do it!");
+        return false;
+    }
+
     Vector dof(10,1.0),dummy;
     // disable torso
     //dof[0]=0;
@@ -76,8 +71,11 @@ void HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
         yDebug("draw");
         approach[0] -= 0.10;
     }
+
     iarm->goToPoseSync(approach,o);
     iarm->waitMotionDone();
+
+    return true;
 }
 
 /***************************************************/
@@ -114,35 +112,6 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
 }
 
 /***************************************************/
-/*
-void HandActionsModule::make_it_roll(const Vector &targetPos)
-{
-    fixate(targetPos);
-    yInfo()<<"fixating at ("<<targetPos.toString(3,3)<<")";
-
-    Vector o=computeHandOrientation();
-    yInfo()<<"computed orientation = ("<<o.toString(3,3)<<")";
-
-    approachTargetWithHand(targetPos,o,"right");
-    yInfo()<<"approached";
-
-    roll(targetPos,o,"right");
-    yInfo()<<"roll!";
-}
-*/
-
-/***************************************************/
-/*
-void HandActionsModule::retrieveObjLocation(const Bottle &command)
-{
-    objLocation[0] = command.get(1).asDouble();
-    objLocation[1] = command.get(2).asDouble();
-    objLocation[2] = command.get(3).asDouble();
-    yInfo() << "Object Location" << objLocation.toString();
-}
-*/
-
-/***************************************************/
 bool HandActionsModule::configure(ResourceFinder &rf)
 {
     string moduleName = rf.check("name",Value("handActions")).asString();
@@ -160,7 +129,6 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     optArm.put("remote","/"+robot+"/cartesianController/"+arm);
     optArm.put("local","/"+moduleName+"/cartesian_client/"+arm);
 
-    //objLocation.resize(3);
 
     // let's give the controller some time to warm up
     bool ok=false;
@@ -235,11 +203,6 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     drvGaze.view(igaze);
     drvArm.view(iarm);
 
-    //imgLPortIn.open("/imgL:i");
-    //imgRPortIn.open("/imgR:i");
-    //imgLPortOut.open("/imgL:o");
-    //imgRPortOut.open("/imgR:o");
-
     rpcPort.open("/"+moduleName+"/rpc:i");
     attach(rpcPort);
 
@@ -249,10 +212,6 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 /***************************************************/
 bool HandActionsModule::interruptModule()
 {
-    //imgLPortIn.interrupt();
-    //imgRPortIn.interrupt();
-    //imgLPortOut.interrupt();
-    //imgRPortOut.interrupt();
     rpcPort.interrupt();
 
     return true;
@@ -266,10 +225,6 @@ bool HandActionsModule::close()
     drvArmPos.close();
     drvTorso.close();
 
-    //imgLPortIn.close();
-    //imgRPortIn.close();
-    //imgLPortOut.close();
-    //imgRPortOut.close();
     rpcPort.close();
 
     return true;
@@ -284,6 +239,43 @@ double HandActionsModule::getPeriod()
 /***************************************************/
 bool HandActionsModule::updateModule()
 {
+    return true;
+}
+
+bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &side)
+{
+    // all actions
+    const double xMinThresh = -0.20;
+    if (targetPos[0] > xMinThresh)
+    {
+        yWarning("unsafe x");
+        return false;
+    }
+
+    // tapFromLeft, tapFromRight with right arm
+    const double yThresh = 0.10;
+    if (side=="left" || side=="right")
+    {
+        if (targetPos[1] < yThresh)
+        {
+            yWarning("unsafe y");
+            return false;
+        }
+    }
+
+    // push, draw with any arm
+    const double xMaxThresh = -0.35;
+    if (side=="top" || side=="bottom")
+    {
+        if (targetPos[0] > xMaxThresh)
+        {
+            yWarning("unsafe x");
+            return false;
+        }
+    }
+
+    yDebug("safety check ok");
+
     return true;
 }
 
@@ -309,17 +301,7 @@ bool HandActionsModule::look_down()
 /***************************************************/
 bool HandActionsModule::home()
 {
-/*
-    Vector xd(3);
-    xd[0] = -0.3;
-    xd[1] = +0.2;
-    xd[2] = 0.0;
-    iarm->goToPositionSync(xd);
-    iarm->waitMotionDone();
-*/
     ctrlMA->getControlModes(controlModesArm);
-
-    //fprintf(stderr,"\ngoHomeArm - step_1\n");
 
     for(int i=0; i<nAxesA; i++)
     {
@@ -377,13 +359,9 @@ bool HandActionsModule::tapFromLeft(const double x, const double y, const double
     Vector o=computeHandOrientation();
     yInfo()<<"computed orientation = ("<<o.toString(3,3)<<")";
 
-    approachTargetWithHand(targetPos,o,"left");
-    yInfo()<<"approached";
+    if ( approachTargetWithHand(targetPos,o,"left") )
+        roll(targetPos,o,"left");
 
-    roll(targetPos,o,"left");
-    yInfo()<<"roll!";
-
-    yInfo()<<"homing...";
     home();
     look_down();
 
@@ -404,13 +382,9 @@ bool HandActionsModule::tapFromRight(const double x, const double y, const doubl
     Vector o=computeHandOrientation();
     yInfo()<<"computed orientation = ("<<o.toString(3,3)<<")";
 
-    approachTargetWithHand(targetPos,o,"right");
-    yInfo()<<"approached";
+    if ( approachTargetWithHand(targetPos,o,"right") )
+        roll(targetPos,o,"right");
 
-    roll(targetPos,o,"right");
-    yInfo()<<"roll!";
-
-    yInfo()<<"homing...";
     home();
     look_down();
 
@@ -431,13 +405,9 @@ bool HandActionsModule::push(const double x, const double y, const double z)
     Vector o=computeHandOrientation();
     yInfo()<<"computed orientation = ("<<o.toString(3,3)<<")";
 
-    approachTargetWithHand(targetPos,o,"bottom");
-    yInfo()<<"approached";
+    if ( approachTargetWithHand(targetPos,o,"bottom") )
+        roll(targetPos,o,"bottom");
 
-    roll(targetPos,o,"bottom");
-    yInfo()<<"roll!";
-
-    yInfo()<<"homing...";
     home();
     look_down();
 
@@ -458,13 +428,9 @@ bool HandActionsModule::draw(const double x, const double y, const double z)
     Vector o=computeHandOrientation();
     yInfo()<<"computed orientation = ("<<o.toString(3,3)<<")";
 
-    approachTargetWithHand(targetPos,o,"top");
-    yInfo()<<"approached";
+    if ( approachTargetWithHand(targetPos,o,"top") )
+        roll(targetPos,o,"top");
 
-    roll(targetPos,o,"top");
-    yInfo()<<"roll!";
-
-    yInfo()<<"homing...";
     home();
     look_down();
 

@@ -37,23 +37,16 @@ protected:
     yarp::dev::IEncoders *encsA;
     yarp::dev::IControlMode2 *ctrlMA,*ctrlMT;
 
-    //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > imgLPortIn,imgRPortIn;
-    //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > imgLPortOut,imgRPortOut;
     yarp::os::RpcServer rpcPort;
 
     yarp::os::Mutex mutex;
-    //yarp::sig::Vector cogL,cogR;
-    //yarp::sig::Vector objLocation;
-    //bool okL,okR;
     int *controlModesArm;
     int nAxesA;
 
-    //yarp::sig::Vector retrieveTarget3D(const yarp::sig::Vector &cogL, const yarp::sig::Vector &cogR);
     void fixate(const yarp::sig::Vector &x);
     yarp::sig::Vector computeHandOrientation();
-    void approachTargetWithHand(const yarp::sig::Vector &x, const yarp::sig::Vector &o, std::string side);
+    bool approachTargetWithHand(const yarp::sig::Vector &x, const yarp::sig::Vector &o, std::string side);
     void roll(const yarp::sig::Vector &targetPos, const yarp::sig::Vector &o, std::string side);
-    //void make_it_roll(const yarp::sig::Vector &targetPos);
     void retrieveObjLocation(const yarp::os::Bottle &command);
 
 public:
@@ -63,6 +56,8 @@ public:
     bool close();
     double getPeriod();
     bool updateModule();
+
+    bool safetyCheck(const yarp::sig::Vector &targetPos, const std::string &side);
 
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
