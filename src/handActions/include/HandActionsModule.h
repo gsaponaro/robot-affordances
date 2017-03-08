@@ -68,10 +68,10 @@ public:
     bool attach(yarp::os::RpcServer &source);
     bool look_down();
     bool home();
-    bool tapFromLeft(const double &x, const double &y, const double &z);
-    bool tapFromRight(const double &x, const double &y, const double &z);
-    bool push(const double &x, const double &y, const double &z);
-    bool draw(const double &x, const double &y, const double &z);
+    bool tapFromLeft(const double x, const double y, const double z);
+    bool tapFromRight(const double x, const double y, const double z);
+    bool push(const double x, const double y, const double z);
+    bool draw(const double x, const double y, const double z);
     bool quit();
 };
 

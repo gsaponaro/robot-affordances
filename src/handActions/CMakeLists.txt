@@ -25,8 +25,11 @@ include(ICUBcontribOptions)
 
 # Thrift IDL
 include(YarpIDL)
-yarp_add_idl(IDL_GEN_FILES ${PROJECT_NAME}.thrift)
-set(idl ${PROJECT_NAME}.thrift)
+#yarp_add_idl(IDL_GEN_FILES ${PROJECT_NAME}.thrift)
+#set(idl ${PROJECT_NAME}.thrift)
+set(idl_files ${PROJECT_NAME}.thrift)
+yarp_add_idl(IDL_GEN_FILES ${idl_files})
+source_group("IDL Files" FILES ${idl_files})
 
 # specify to install in $ICUBcontrib_DIR/bin
 icubcontrib_set_default_prefix()
@@ -37,7 +40,8 @@ include_directories(${PROJECT_SOURCE_DIR}/include
 add_executable(${PROJECT_NAME} src/main.cpp
                                src/HandActionsModule.cpp
                                include/HandActionsModule.h
-                               ${idl} ${IDL_GEN_FILES})
+                               ${IDL_GEN_FILES}
+                               ${idl_files})
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES})
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 

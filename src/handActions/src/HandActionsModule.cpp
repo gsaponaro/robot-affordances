@@ -341,7 +341,7 @@ bool HandActionsModule::home()
 }
 
 /***************************************************/
-bool HandActionsModule::tapFromLeft(const double &x, const double &y, const double &z)
+bool HandActionsModule::tapFromLeft(const double x, const double y, const double z)
 {
     Vector targetPos(3);
     targetPos[0] = x;
@@ -364,7 +364,7 @@ bool HandActionsModule::tapFromLeft(const double &x, const double &y, const doub
 }
 
 /***************************************************/
-bool HandActionsModule::tapFromRight(const double &x, const double &y, const double &z)
+bool HandActionsModule::tapFromRight(const double x, const double y, const double z)
 {
     Vector targetPos(3);
     targetPos[0] = x;
@@ -387,7 +387,7 @@ bool HandActionsModule::tapFromRight(const double &x, const double &y, const dou
 }
 
 /***************************************************/
-bool HandActionsModule::push(const double &x, const double &y, const double &z)
+bool HandActionsModule::push(const double x, const double y, const double z)
 {
     Vector targetPos(3);
     targetPos[0] = x;
@@ -410,7 +410,7 @@ bool HandActionsModule::push(const double &x, const double &y, const double &z)
 }
 
 /***************************************************/
-bool HandActionsModule::draw(const double &x, const double &y, const double &z)
+bool HandActionsModule::draw(const double x, const double y, const double z)
 {
     Vector targetPos(3);
     targetPos[0] = x;
