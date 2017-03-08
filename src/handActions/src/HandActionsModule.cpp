@@ -56,17 +56,25 @@ void HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
     //dof[2]=0;
     iarm->setDOF(dof,dummy);
     Vector approach=x;
-    if(side.compare("right")==0) {          //right
-        approach[1]+=0.1;// 10 cm
-        yInfo() << "app right";
+    if(side.compare("right")==0) // tapFromRight
+    {
+        yDebug("tapFromRight");
+        approach[1] += 0.1;
     }
-    else if(side.compare("left")==0) {      //left
-        approach[1]-=0.1;// 10 cm
-        yInfo() << "app left";
+    else if(side.compare("left")==0) // tapFromLeft
+    {
+        yDebug("tapFromLeft");
+        approach[1] -= 0.1;
     }
-    else if(side.compare("bottom")==0) {    //bottom
-        approach[0]+=0.15;// 10 cm
-        yInfo() << "app bottom";
+    else if(side.compare("bottom")==0) // push
+    {
+        yDebug("push");
+        approach[0] += 0.15;
+    }
+    else if(side.compare("top")==0) // draw
+    {
+        yDebug("draw");
+        approach[0] -= 0.10;
     }
     iarm->goToPoseSync(approach,o);
     iarm->waitMotionDone();
@@ -77,30 +85,36 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
 {
     double tempotempo;
     iarm->getTrajTime(&tempotempo);
-    iarm->setTrajTime(0.7); //
-    Vector target=targetPos;
-    if(side.compare("right")==0) {          //right
-        target[1]-=0.1;// 10 cm
-        yInfo() << "roll right";
+    iarm->setTrajTime(0.7);
+    Vector targetModified=targetPos;
+    if(side.compare("right")==0) // tapFromRight
+    {
+        targetModified[1] -= 0.1;
         iarm->setTrajTime(0.7);
     }
-    else if(side.compare("left")==0) {      //left
-        target[1]+=0.1;// 10 cm
-        yInfo() << "roll right";
+    else if(side.compare("left")==0) // tapFromLeft
+    {
+        targetModified[1] += 0.1;
         iarm->setTrajTime(0.7);
     }
-    else if(side.compare("bottom")==0) {    //bottom
-        target[0]-=0.1;// 10 cm
-        yInfo() << "roll bottom";
+    else if(side.compare("bottom")==0) // push
+    {
+        targetModified[0] -= 0.1;
+        iarm->setTrajTime(1.3);
+    }
+    else if(side.compare("top")==0) // draw
+    {
+        targetModified[0] += 0.1;
         iarm->setTrajTime(1.3);
     }
 
-    iarm->goToPoseSync(target,o);
+    iarm->goToPoseSync(targetModified,o);
     iarm->waitMotionDone();
     iarm->setTrajTime(tempotempo);
 }
 
 /***************************************************/
+/*
 void HandActionsModule::make_it_roll(const Vector &targetPos)
 {
     fixate(targetPos);
@@ -115,6 +129,7 @@ void HandActionsModule::make_it_roll(const Vector &targetPos)
     roll(targetPos,o,"right");
     yInfo()<<"roll!";
 }
+*/
 
 /***************************************************/
 /*
@@ -368,6 +383,10 @@ bool HandActionsModule::tapFromLeft(const double x, const double y, const double
     roll(targetPos,o,"left");
     yInfo()<<"roll!";
 
+    yInfo()<<"homing...";
+    home();
+    look_down();
+
     return true;
 }
 
@@ -390,6 +409,10 @@ bool HandActionsModule::tapFromRight(const double x, const double y, const doubl
 
     roll(targetPos,o,"right");
     yInfo()<<"roll!";
+
+    yInfo()<<"homing...";
+    home();
+    look_down();
 
     return true;
 }
@@ -414,6 +437,10 @@ bool HandActionsModule::push(const double x, const double y, const double z)
     roll(targetPos,o,"bottom");
     yInfo()<<"roll!";
 
+    yInfo()<<"homing...";
+    home();
+    look_down();
+
     return true;
 }
 
@@ -425,10 +452,6 @@ bool HandActionsModule::draw(const double x, const double y, const double z)
     targetPos[1] = y;
     targetPos[2] = z;
 
-    yDebug("draw not implemented yet");
-    return false;
-
-    /*
     fixate(targetPos);
     yInfo()<<"fixating at ("<<targetPos.toString(3,3)<<")";
 
@@ -441,8 +464,11 @@ bool HandActionsModule::draw(const double x, const double y, const double z)
     roll(targetPos,o,"top");
     yInfo()<<"roll!";
 
+    yInfo()<<"homing...";
+    home();
+    look_down();
+
     return true;
-    */
 }
 
 bool HandActionsModule::quit()

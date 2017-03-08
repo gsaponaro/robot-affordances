@@ -53,7 +53,7 @@ protected:
     yarp::sig::Vector computeHandOrientation();
     void approachTargetWithHand(const yarp::sig::Vector &x, const yarp::sig::Vector &o, std::string side);
     void roll(const yarp::sig::Vector &targetPos, const yarp::sig::Vector &o, std::string side);
-    void make_it_roll(const yarp::sig::Vector &targetPos);
+    //void make_it_roll(const yarp::sig::Vector &targetPos);
     void retrieveObjLocation(const yarp::os::Bottle &command);
 
 public:
