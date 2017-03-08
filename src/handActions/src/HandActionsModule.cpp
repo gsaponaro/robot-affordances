@@ -126,9 +126,9 @@ void HandActionsModule::retrieveObjLocation(const Bottle &command)
 /***************************************************/
 bool HandActionsModule::configure(ResourceFinder &rf)
 {
-    string robot=rf.check("robot",Value("icubSim")).asString();
-    string moduleName = rf.check("name", Value("handActions"),"module name (string)").asString();
-    string arm=rf.check("arm",Value("right_arm")).asString();
+    string moduleName = rf.check("name",Value("handActions")).asString();
+    string robot = rf.check("robot",Value("icubSim")).asString();
+    string arm = rf.check("arm",Value("right_arm")).asString();
     if(arm.compare("left")==0 ||arm.compare("leftarm")==0 || arm.compare("armleft")==0 || arm.compare("Left")==0)
         arm = "left_arm";
     else

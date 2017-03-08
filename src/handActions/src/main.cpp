@@ -21,15 +21,26 @@ using namespace yarp::os;
 int main(int argc, char *argv[])
 {
     Network yarp;
-    if (!yarp.checkNetwork())
-    {
-        yError()<<"YARP doesn't seem to be available";
-        return 1;
-    }
 
-    HandActionsModule mod;
     ResourceFinder rf;
     rf.configure(argc,argv);
 
+    if(rf.check("help"))
+    {
+        yInfo("Available options:");
+        yInfo("--name <name of module> (default handActions)");
+        yInfo("--robot <name of robot> (default icubSim)");
+        yInfo("--arm <arm to use> (default right_arm)");
+
+        return 0; // EXIT_SUCCESS
+    }
+
+    if (! yarp::os::Network::checkNetwork() )
+    {
+        yError("yarpserver not available!");
+        return 1; // EXIT_FAILURE
+    }
+
+    HandActionsModule mod;
     return mod.runModule(rf);
 }
