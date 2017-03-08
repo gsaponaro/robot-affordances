@@ -37,18 +37,18 @@ protected:
     yarp::dev::IEncoders *encsA;
     yarp::dev::IControlMode2 *ctrlMA,*ctrlMT;
 
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > imgLPortIn,imgRPortIn;
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > imgLPortOut,imgRPortOut;
+    //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > imgLPortIn,imgRPortIn;
+    //yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> > imgLPortOut,imgRPortOut;
     yarp::os::RpcServer rpcPort;
 
     yarp::os::Mutex mutex;
-    yarp::sig::Vector cogL,cogR;
-    yarp::sig::Vector objLocation;
-    bool okL,okR;
+    //yarp::sig::Vector cogL,cogR;
+    //yarp::sig::Vector objLocation;
+    //bool okL,okR;
     int *controlModesArm;
     int nAxesA;
 
-    yarp::sig::Vector retrieveTarget3D(const yarp::sig::Vector &cogL, const yarp::sig::Vector &cogR);
+    //yarp::sig::Vector retrieveTarget3D(const yarp::sig::Vector &cogL, const yarp::sig::Vector &cogR);
     void fixate(const yarp::sig::Vector &x);
     yarp::sig::Vector computeHandOrientation();
     void approachTargetWithHand(const yarp::sig::Vector &x, const yarp::sig::Vector &o, std::string side);

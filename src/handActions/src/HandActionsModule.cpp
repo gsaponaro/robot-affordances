@@ -18,6 +18,7 @@ using namespace yarp::sig;
 using namespace yarp::math;
 
 /***************************************************/
+/*
 Vector HandActionsModule::retrieveTarget3D(const Vector &cogL, const Vector &cogR)
 {
     Vector position(3);        
@@ -25,6 +26,7 @@ Vector HandActionsModule::retrieveTarget3D(const Vector &cogL, const Vector &cog
     // Use iGaze to retrieve the 3D point
     return position;
 }
+*/
 
 /***************************************************/
 void HandActionsModule::fixate(const Vector &x)
@@ -115,6 +117,7 @@ void HandActionsModule::make_it_roll(const Vector &targetPos)
 }
 
 /***************************************************/
+/*
 void HandActionsModule::retrieveObjLocation(const Bottle &command)
 {
     objLocation[0] = command.get(1).asDouble();
@@ -122,6 +125,7 @@ void HandActionsModule::retrieveObjLocation(const Bottle &command)
     objLocation[2] = command.get(3).asDouble();
     yInfo() << "Object Location" << objLocation.toString();
 }
+*/
 
 /***************************************************/
 bool HandActionsModule::configure(ResourceFinder &rf)
@@ -141,7 +145,8 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     optArm.put("remote","/"+robot+"/cartesianController/"+arm);
     optArm.put("local","/"+moduleName+"/cartesian_client/"+arm);
 
-    objLocation.resize(3);  
+    //objLocation.resize(3);
+
     // let's give the controller some time to warm up
     bool ok=false;
     double t0=Time::now();
@@ -215,11 +220,10 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     drvGaze.view(igaze);
     drvArm.view(iarm);
 
-    imgLPortIn.open("/imgL:i");
-    imgRPortIn.open("/imgR:i");
-
-    imgLPortOut.open("/imgL:o");
-    imgRPortOut.open("/imgR:o");
+    //imgLPortIn.open("/imgL:i");
+    //imgRPortIn.open("/imgR:i");
+    //imgLPortOut.open("/imgL:o");
+    //imgRPortOut.open("/imgR:o");
 
     rpcPort.open("/"+moduleName+"/rpc:i");
     attach(rpcPort);
@@ -230,10 +234,10 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 /***************************************************/
 bool HandActionsModule::interruptModule()
 {
-    imgLPortIn.interrupt();
-    imgRPortIn.interrupt();
-    imgLPortOut.interrupt();
-    imgRPortOut.interrupt();
+    //imgLPortIn.interrupt();
+    //imgRPortIn.interrupt();
+    //imgLPortOut.interrupt();
+    //imgRPortOut.interrupt();
     rpcPort.interrupt();
 
     return true;
@@ -244,10 +248,10 @@ bool HandActionsModule::close()
 {
     drvArm.close();
     drvGaze.close();
-    imgLPortIn.close();
-    imgRPortIn.close();
-    imgLPortOut.close();
-    imgRPortOut.close();
+    //imgLPortIn.close();
+    //imgRPortIn.close();
+    //imgLPortOut.close();
+    //imgRPortOut.close();
     rpcPort.close();
 
     return true;
