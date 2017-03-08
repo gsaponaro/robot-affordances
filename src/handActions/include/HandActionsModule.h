@@ -21,9 +21,6 @@
 
 #include "handActions_IDL.h"
 
-const double ARM_DEF_HOME[] = {-50.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0,     20.0,  30.0,10.0,10.0,  10.0,10.0, 10.0,10.0,  10.0};
-const double TORSO_DEF_HOME[] = {0.0, 0.0, 0.0};
-
 /***************************************************/
 class HandActionsModule : public yarp::os::RFModule,
                           public handActions_IDL
@@ -43,6 +40,9 @@ protected:
     int *controlModesArm;
     int nAxesA;
 
+    yarp::sig::Vector straightHandPoss, fortyfiveHandPoss, bentHandPoss;
+    //yarp::sig::Vector handVels;
+
     void fixate(const yarp::sig::Vector &x);
     yarp::sig::Vector computeHandOrientation();
     bool approachTargetWithHand(const yarp::sig::Vector &x, const yarp::sig::Vector &o, std::string side);
@@ -51,18 +51,32 @@ protected:
 
 public:
 
+    // indexes used for finger postures
+    static const int NOARM    = 0;
+    static const int LEFTARM  = 1;
+    static const int RIGHTARM = 2;
+    static const int USEDARM  = 3;
+
+    static const int STRAIGHT  = 0;
+    static const int FORTYFIVE = 1;
+    static const int BENT      = 2;
+
+    int armSel;
+
     bool configure(yarp::os::ResourceFinder &rf);
     bool interruptModule();
     bool close();
     double getPeriod();
     bool updateModule();
 
+    void moveHand(const int postureType, const int sel=USEDARM);
     bool safetyCheck(const yarp::sig::Vector &targetPos, const std::string &side);
 
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
     bool look_down();
     bool home();
+    bool setFingers(const std::string &posture);
     bool tapFromLeft(const double x, const double y, const double z);
     bool tapFromRight(const double x, const double y, const double z);
     bool push(const double x, const double y, const double z);

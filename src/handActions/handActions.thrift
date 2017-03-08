@@ -21,6 +21,13 @@ service handActions_IDL
     bool home();
 
     /**
+     * Set fingers to one of the desired postures.
+     * @param posture type of fingers bending
+     * @return true/false on success/failure
+     */
+    bool setFingers(1:string posture);
+
+    /**
      * Tap an object from the left.
      * @param x object 3D x position in meters
      * @param y object 3D y position in meters

@@ -203,6 +203,42 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     drvGaze.view(igaze);
     drvArm.view(iarm);
 
+    straightHandPoss.resize(9, 0.0);
+    straightHandPoss[0] =  0.0; // j7
+    straightHandPoss[1] = 30.0;
+    straightHandPoss[2] = 10.0;
+    straightHandPoss[3] = 10.0;
+    straightHandPoss[4] = 10.0; // j11
+    straightHandPoss[5] = 10.0;
+    straightHandPoss[6] = 10.0; // j13
+    straightHandPoss[7] = 10.0;
+    straightHandPoss[8] = 10.0; // j15
+
+    fortyfiveHandPoss.resize(9, 0.0);
+    fortyfiveHandPoss[0] =  0.0; // j7
+    fortyfiveHandPoss[1] = 30.0;
+    fortyfiveHandPoss[2] = 10.0;
+    fortyfiveHandPoss[3] = 10.0;
+    fortyfiveHandPoss[4] = 45.0; // j11
+    fortyfiveHandPoss[5] = 10.0;
+    fortyfiveHandPoss[6] = 45.0; // j13
+    fortyfiveHandPoss[7] = 10.0;
+    fortyfiveHandPoss[8] = 55.0; // j15
+
+    bentHandPoss.resize(9, 0.0);
+    bentHandPoss[0] =  0.0; // j7
+    bentHandPoss[1] = 30.0;
+    bentHandPoss[2] = 10.0;
+    bentHandPoss[3] = 10.0;
+    bentHandPoss[4] = 74.0; // j11
+    bentHandPoss[5] = 10.0;
+    bentHandPoss[6] = 72.0; // j13
+    bentHandPoss[7] = 10.0;
+    bentHandPoss[8] =120.0; // j15
+
+    //handVels.resize(9, 0.0);
+    //20.0 40.0 50.0 50.0 50.0 50.0 50.0 50.0  80.0
+
     rpcPort.open("/"+moduleName+"/rpc:i");
     attach(rpcPort);
 
@@ -242,6 +278,57 @@ bool HandActionsModule::updateModule()
     return true;
 }
 
+/***************************************************/
+void HandActionsModule::moveHand(const int postureType, const int sel)
+{
+    Vector *poss = NULL;
+
+    switch (postureType)
+    {
+    case STRAIGHT:
+        poss = &straightHandPoss;
+        break;
+
+    case FORTYFIVE:
+        poss = &fortyfiveHandPoss;
+        break;
+
+    case BENT:
+        poss = &bentHandPoss;
+        break;
+
+    default:
+        return;
+    }
+
+    if (sel==LEFTARM)
+    {
+        yError("moveHand left_arm not implemented yet");
+        return;
+    }
+    else if (sel==RIGHTARM)
+    {
+        //drvArm.view(imode);
+        //drvArm.view(posA);
+    }
+    else
+    {
+        yError("invalid arm sel");
+        return;
+    }
+
+    for (size_t j=0; j<straightHandPoss.length(); ++j)
+        ctrlMA->setControlMode(straightHandPoss.length()+j, VOCAB_CM_POSITION);
+
+    for (size_t j=0; j<straightHandPoss.length(); ++j)
+    {
+        int k = straightHandPoss.length()+j;
+        //posA->setRefSpeed(k,handVels[j]);
+        posA->positionMove(k,(*poss)[j]);
+    }
+}
+
+/***************************************************/
 bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &side)
 {
     // all actions
@@ -316,6 +403,7 @@ bool HandActionsModule::home()
         ctrlMT->setControlMode(i,VOCAB_CM_POSITION);
     }
 
+    const double ARM_DEF_HOME[] = {-50.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0,     20.0,  30.0,10.0,10.0,  10.0,10.0, 10.0,10.0,  10.0};
     posA->positionMove(ARM_DEF_HOME);
 
     bool done=false;
@@ -329,6 +417,7 @@ bool HandActionsModule::home()
         elapsedTime= Time::now()-startTime;
     }
 
+    const double TORSO_DEF_HOME[] = {0.0, 0.0, 0.0};
     posT->positionMove(TORSO_DEF_HOME);
 
     done=false;
@@ -340,6 +429,39 @@ bool HandActionsModule::home()
         posT->checkMotionDone(&done);
         Time::delay(0.04);
         elapsedTime= Time::now()-startTime;
+    }
+
+    return true;
+}
+
+/***************************************************/
+bool HandActionsModule::setFingers(const std::string &posture)
+{
+    if (posture!="straight" &&
+        posture!="fortyfive" &&
+        posture!="bent")
+    {
+        yError("valid finger postures are: straight, fortyfive, bent");
+        return false;
+    }
+
+    // hardcoded right_arm for now
+    int sel = RIGHTARM;
+
+    if (posture=="straight")
+    {
+        yDebug("setting fingers to straight posture");
+        moveHand(STRAIGHT,sel);
+    }
+    else if (posture=="fortyfive")
+    {
+        yDebug("setting fingers to fortyfive posture");
+        moveHand(FORTYFIVE,sel);
+    }
+    else if (posture=="bent")
+    {
+        yDebug("setting fingers to bent posture");
+        moveHand(BENT,sel);
     }
 
     return true;
