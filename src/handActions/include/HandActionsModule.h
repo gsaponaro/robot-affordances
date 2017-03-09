@@ -41,6 +41,7 @@ protected:
     yarp::dev::IControlMode2 *ctrlMA;
     yarp::dev::IControlMode2 *ctrlMT;
 
+    bool closing;
     yarp::os::RpcServer rpcPort;
 
     yarp::os::Mutex mutex;

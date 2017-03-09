@@ -13,7 +13,6 @@
 #include <yarp/os/ResourceFinder.h>
 
 #include "HandActionsModule.h"
-#include "handActions_IDL.h"
 
 using namespace yarp::os;
 

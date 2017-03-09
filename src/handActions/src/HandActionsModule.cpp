@@ -251,6 +251,8 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     handVels[7] = 50.0;
     handVels[8] = 80.0;
 
+    closing = false;
+
     rpcPort.open("/"+moduleName+"/rpc:i");
     attach(rpcPort);
 
@@ -287,7 +289,7 @@ double HandActionsModule::getPeriod()
 /***************************************************/
 bool HandActionsModule::updateModule()
 {
-    return true;
+    return !closing;
 }
 
 /***************************************************/
@@ -558,11 +560,11 @@ bool HandActionsModule::draw(const double x, const double y, const double z)
     return true;
 }
 
+/***************************************************/
 bool HandActionsModule::quit()
 {
     yInfo("quitting");
-    interruptModule();
-    close();
+    closing = true;
 
     return true;
 }
