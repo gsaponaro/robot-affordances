@@ -13,8 +13,11 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <yarp/os/BufferedPort.h>
+#include <yarp/os/Log.h>
 #include <yarp/os/RateThread.h>
 #include <yarp/os/ResourceFinder.h>
+#include <yarp/sig/Image.h>
 
 /***************************************************/
 class RobotHandProcessorThread : public yarp::os::RateThread
@@ -25,6 +28,11 @@ private:
     yarp::os::ResourceFinder rf;
     bool closing;
 
+    std::string inImgPortName;
+    std::string outImgPortName;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inImgPort;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outImgPort;
+
 public:
 
     RobotHandProcessorThread(const std::string &_moduleName,
@@ -34,6 +42,7 @@ public:
     void interrupt();
     void close();
 
+    bool openPorts();
     void mainProcessing();
 
     // IDL functions
