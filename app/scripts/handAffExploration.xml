@@ -1,0 +1,59 @@
+<application>
+
+  <name>Hand Affordances Exploration</name>
+
+  <dependencies>
+      <port>/icub/camcalib/left/out</port>
+      <port>/icub/cartesianController/left_arm/state:o</port>
+      <port>/icub/cartesianController/right_arm/state:o</port>
+      <port>/wholeBodyDynamics/left_arm/cartesianEndEffectorWrench:o</port>
+      <port>/wholeBodyDynamics/right_arm/cartesianEndEffectorWrench:o</port>
+      <port>/iKinGazeCtrl/rpc</port>
+  </dependencies>
+
+  <module>
+      <name>lbpExtract</name>
+      <node>icub-laptop</node>
+  </module>
+
+  <module>
+      <name>shapeDescriptor</name>
+      <node>icub-laptop</node>
+  </module>
+
+  <module>
+      <name>sequentialLabeller</name>
+      <node>icub-laptop</node>
+  </module>
+
+  <module>
+      <name>yarpview</name>
+      <node>icub-laptop</node>
+      <parameters>--name /view/segm --x 330 --y 0 --p 33</parameters>
+  </module>
+
+  <connection>
+      <from>/icub/camcalib/left/out</from>
+      <to>/lbpExtract/image:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/lbpExtract/segmentedlbp:o</from>
+      <to>/view/segm</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/lbpExtract/segmentedlbp:o</from>
+      <to>/shapeDescriptor/binImg:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/sequentialLabeller/labeledImg:o</from>
+      <to>/shapeDescriptor/labeledImg:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+</application>
