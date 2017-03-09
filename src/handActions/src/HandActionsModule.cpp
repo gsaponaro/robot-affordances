@@ -122,6 +122,50 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     else
         arm = "right_arm";
 
+    straightHandPoss.resize(9, 0.0);
+    straightHandPoss[0] =  0.0; // j7
+    straightHandPoss[1] = 30.0;
+    straightHandPoss[2] = 10.0;
+    straightHandPoss[3] =  0.0;
+    straightHandPoss[4] = 10.0; // j11
+    straightHandPoss[5] = 10.0;
+    straightHandPoss[6] = 10.0; // j13
+    straightHandPoss[7] = 10.0;
+    straightHandPoss[8] = 10.0; // j15
+
+    fortyfiveHandPoss.resize(9, 0.0);
+    fortyfiveHandPoss[0] =  0.0; // j7
+    fortyfiveHandPoss[1] = 30.0;
+    fortyfiveHandPoss[2] = 10.0;
+    fortyfiveHandPoss[3] =  0.0;
+    fortyfiveHandPoss[4] = 45.0; // j11
+    fortyfiveHandPoss[5] = 10.0;
+    fortyfiveHandPoss[6] = 45.0; // j13
+    fortyfiveHandPoss[7] = 10.0;
+    fortyfiveHandPoss[8] = 55.0; // j15
+
+    bentHandPoss.resize(9, 0.0);
+    bentHandPoss[0] =  0.0; // j7
+    bentHandPoss[1] = 30.0;
+    bentHandPoss[2] = 10.0;
+    bentHandPoss[3] =  0.0;
+    bentHandPoss[4] = 74.0; // j11
+    bentHandPoss[5] = 10.0;
+    bentHandPoss[6] = 72.0; // j13
+    bentHandPoss[7] = 10.0;
+    bentHandPoss[8] =120.0; // j15
+
+    handVels.resize(9, 0.0);
+    handVels[0] = 20.0;
+    handVels[1] = 40.0;
+    handVels[2] = 50.0;
+    handVels[3] = 50.0;
+    handVels[4] = 50.0;
+    handVels[5] = 50.0;
+    handVels[6] = 90.0;
+    handVels[7] = 50.0;
+    handVels[8] = 80.0;
+
     /******** Gaze Control *******/
     Property optGaze;
     optGaze.put("device","gazecontrollerclient");
@@ -189,6 +233,14 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     posA->getAxes(&nAxesA);
     controlModesArm = new int[nAxesA];
 
+    const int firstHandJoint = nAxesA-straightHandPoss.length();
+
+    // j7-j16
+    for (size_t j=0; j<straightHandPoss.length(); j++)
+    {
+        posA->setRefSpeed(firstHandJoint+j,handVels[j]);
+    }
+
     /******** Position Torso Control Interface *******/
     Property optionTorso("(device remote_controlboard)");
     optionTorso.put("remote",("/"+robot+"/torso").c_str());
@@ -206,50 +258,6 @@ bool HandActionsModule::configure(ResourceFinder &rf)
        cout << moduleName << ": problems acquiring interfaces to remote_controlboard of Torso"<< endl;
         return false;
     }
-
-    straightHandPoss.resize(9, 0.0);
-    straightHandPoss[0] =  0.0; // j7
-    straightHandPoss[1] = 30.0;
-    straightHandPoss[2] = 10.0;
-    straightHandPoss[3] = 10.0;
-    straightHandPoss[4] = 10.0; // j11
-    straightHandPoss[5] = 10.0;
-    straightHandPoss[6] = 10.0; // j13
-    straightHandPoss[7] = 10.0;
-    straightHandPoss[8] = 10.0; // j15
-
-    fortyfiveHandPoss.resize(9, 0.0);
-    fortyfiveHandPoss[0] =  0.0; // j7
-    fortyfiveHandPoss[1] = 30.0;
-    fortyfiveHandPoss[2] = 10.0;
-    fortyfiveHandPoss[3] = 10.0;
-    fortyfiveHandPoss[4] = 45.0; // j11
-    fortyfiveHandPoss[5] = 10.0;
-    fortyfiveHandPoss[6] = 45.0; // j13
-    fortyfiveHandPoss[7] = 10.0;
-    fortyfiveHandPoss[8] = 55.0; // j15
-
-    bentHandPoss.resize(9, 0.0);
-    bentHandPoss[0] =  0.0; // j7
-    bentHandPoss[1] = 30.0;
-    bentHandPoss[2] = 10.0;
-    bentHandPoss[3] = 10.0;
-    bentHandPoss[4] = 74.0; // j11
-    bentHandPoss[5] = 10.0;
-    bentHandPoss[6] = 72.0; // j13
-    bentHandPoss[7] = 10.0;
-    bentHandPoss[8] =120.0; // j15
-
-    handVels.resize(9, 0.0);
-    handVels[0] = 20.0;
-    handVels[1] = 40.0;
-    handVels[2] = 50.0;
-    handVels[3] = 50.0;
-    handVels[4] = 50.0;
-    handVels[5] = 50.0;
-    handVels[6] = 50.0;
-    handVels[7] = 50.0;
-    handVels[8] = 80.0;
 
     closing = false;
 
@@ -315,17 +323,16 @@ void HandActionsModule::moveHand(const int postureType)
         return;
     }
 
-    //drvArm.view(imode);
-    //drvArm.view(posA);
+    const int firstHandJoint = nAxesA-straightHandPoss.length();
 
+    // j7-j16
     for (size_t j=0; j<straightHandPoss.length(); j++)
-        ctrlMA->setControlMode(straightHandPoss.length()+j, VOCAB_CM_POSITION);
+        ctrlMA->setControlMode(firstHandJoint+j, VOCAB_CM_POSITION);
 
     for (size_t j=0; j<straightHandPoss.length(); j++)
     {
-        int k = straightHandPoss.length()+j;
-        posA->setRefSpeed(k,handVels[j]);
-        posA->positionMove(k,(*poss)[j]);
+        //posA->setRefSpeed(firstHandJoint+j,handVels[j]);
+        posA->positionMove(firstHandJoint+j,(*poss)[j]);
     }
 }
 
