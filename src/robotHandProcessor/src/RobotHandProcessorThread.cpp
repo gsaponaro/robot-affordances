@@ -86,9 +86,17 @@ void RobotHandProcessorThread::mainProcessing()
 
     if (inImg != NULL)
     {
-        // create OpenCV output image, for now identical to raw input image
+        // create OpenCV output image, for now identical to input image
+        // (foreground 0 black, background 255 white)
         Mat outMat;
         outMat = cvarrToMat(static_cast<IplImage*>(inImg->getIplImage()));
+
+        // invert foreground and background
+        outMat = Scalar::all(255) - outMat;
+
+        // apply morphological transformation to fill holes
+        Mat element = getStructuringElement(MORPH_ELLIPSE, Size(3,3));
+        morphologyEx(outMat, outMat, MORPH_CLOSE, element);
 
         // send image on yarp port
         ImageOf<PixelBgr> &outYarp = outImgPort.prepare();
