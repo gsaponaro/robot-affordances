@@ -31,6 +31,12 @@
   </module>
 
   <module>
+      <name>descriptorReduction</name>
+      <parameters>--name drObj</parameters>
+      <node>localhost</node>
+  </module>
+
+  <module>
       <name>yarpview</name>
       <node>localhost</node>
       <parameters>--name /view/obj/segm --x 330 --y 0 --p 33</parameters>
@@ -71,6 +77,12 @@
   <module>
       <name>sequentialLabeller</name>
       <parameters>--name seqHand</parameters>
+      <node>localhost</node>
+  </module>
+
+  <module>
+      <name>descriptorReduction</name>
+      <parameters>--name drHand</parameters>
       <node>localhost</node>
   </module>
 
@@ -129,6 +141,16 @@
   </connection>
 
   <connection>
+      <from>/descObj/wholeDescriptors:o</from>
+      <to>/drObj/wholeDescriptors:i</to>
+  </connection>
+
+  <connection>
+      <from>/descObj/partDescriptors:o</from>
+      <to>/drObj/partDescriptors:i</to>
+  </connection>
+
+  <connection>
       <from>/iCubUnitySim/cam/left</from>
       <to>/robotHandProcessor/image:i</to>
       <protocol>udp</protocol>
@@ -173,6 +195,16 @@
       <from>/seqHand/labeledImg:o</from>
       <to>/descHand/labeledImg:i</to>
       <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/descHand/wholeDescriptors:o</from>
+      <to>/drHand/wholeDescriptors:i</to>
+  </connection>
+
+  <connection>
+      <from>/descHand/partDescriptors:o</from>
+      <to>/drHand/partDescriptors:i</to>
   </connection>
 
 </application>
