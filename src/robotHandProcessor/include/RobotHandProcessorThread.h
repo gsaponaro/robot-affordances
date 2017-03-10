@@ -35,7 +35,7 @@ private:
 
     int numArmJoints;
     yarp::sig::Vector armJoints;
-    bool armHasChanged;
+    bool armHasChanged; // at least one joint changed w.r.t. initial defaults
     double timeSinceArmUpdate;
 
     std::string inImgPortName;

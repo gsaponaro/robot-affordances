@@ -95,7 +95,6 @@ void RobotHandProcessorThread::mainProcessing()
         outArmJointsPort.getOutputCount()>0 &&
         timeSinceArmUpdate>5.0)
     {
-        // will update if at least one joint != zero (initial value)
         Bottle &outJoints = outArmJointsPort.prepare();
         outJoints.clear();
         for (int j=0; j<numArmJoints; ++j)
