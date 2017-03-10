@@ -16,7 +16,7 @@ const std::string DefModuleName   = "shapeDescriptor";
 
 const int         DefMaxObjects = 10;
 const int         DefMinArea    = 100;
-const int         DefMaxArea    = 3000;
+const int         DefMaxArea    = 8000;
 
 const std::string ValueOn  = "on";
 const std::string ValueOff = "off";

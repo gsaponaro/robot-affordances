@@ -166,13 +166,14 @@ void ShapeDescriptorThread::run2d()
     if ( (inBinImgPort.getInputCount() && !inBinImgPort.getEnvelope(tsBin)) ||
          (inLabImgPort.getInputCount() && !inLabImgPort.getEnvelope(tsBin)) )
     {
-        yWarning("timestamp(s) missing");
+        //yWarning("timestamp(s) missing");
     }
+
     if (inBinImg!=NULL &&
         inLabImg!=NULL)
     {
         // check dimensions of input images to be equal
-        const int refWidth  = inBinImg->width(); 
+        const int refWidth  = inBinImg->width();
         const int refHeight = inBinImg->height();
         if (refWidth!=inLabImg->width() || refHeight!=inLabImg->height())
         {
@@ -396,6 +397,8 @@ void ShapeDescriptorThread::run2d()
                 Bottle &bObj = bDesc.addList();
                 addDescriptors(*it, bObj);
             }
+            else
+                yWarning("area %.2f not in range (%d,%d)", it->getArea(),minArea,maxArea);
         }
         outWholeDescPort.setEnvelope(tsBin);
         outWholeDescPort.write();

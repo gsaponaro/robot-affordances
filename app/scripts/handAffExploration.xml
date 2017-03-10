@@ -36,6 +36,12 @@
       <parameters>--name /view/obj/segm --x 330 --y 0 --p 33</parameters>
   </module>
 
+  <module>
+      <name>yarpview</name>
+      <node>localhost</node>
+      <parameters>--name /view/obj/desc --x 660 --y 0 --p 33</parameters>
+  </module>
+
   <!--
   <module>
       <name>iCubUnitySim</name>
@@ -74,6 +80,12 @@
       <parameters>--name /view/hand/segm --x 330 --y 360 --p 33</parameters>
   </module>
 
+  <module>
+      <name>yarpview</name>
+      <node>localhost</node>
+      <parameters>--name /view/hand/desc --x 660 --y 360 --p 33</parameters>
+  </module>
+
   <connection>
       <from>/icub/camcalib/left/out</from>
       <to>/lbpObj/image:i</to>
@@ -83,6 +95,18 @@
   <connection>
       <from>/lbpObj/segmentedlbp:o</from>
       <to>/view/obj/segm</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/descObj/annotatedImg:o</from>
+      <to>/view/obj/desc</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/icub/camcalib/left/out</from>
+      <to>/descObj/rawImg:i</to>
       <protocol>udp</protocol>
   </connection>
 
@@ -118,6 +142,18 @@
   <connection>
       <from>/robotHandProcessor/image:o</from>
       <to>/view/hand/segm</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/descHand/annotatedImg:o</from>
+      <to>/view/hand/desc</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/robotHandProcessor/image:o</from>
+      <to>/descHand/rawImg:i</to>
       <protocol>udp</protocol>
   </connection>
 
