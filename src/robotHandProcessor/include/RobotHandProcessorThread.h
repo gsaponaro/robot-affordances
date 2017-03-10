@@ -9,15 +9,20 @@
 #ifndef ROBOT_HAND_PROCESSOR_THREAD_H
 #define ROBOT_HAND_PROCESSOR_THREAD_H
 
+#include <iomanip>
+#include <sstream>
 #include <string>
 
 #include <opencv2/opencv.hpp>
 
+#include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/Log.h>
 #include <yarp/os/RateThread.h>
 #include <yarp/os/ResourceFinder.h>
+#include <yarp/os/Time.h>
 #include <yarp/sig/Image.h>
+#include <yarp/sig/Vector.h>
 
 /***************************************************/
 class RobotHandProcessorThread : public yarp::os::RateThread
@@ -28,10 +33,17 @@ private:
     yarp::os::ResourceFinder rf;
     bool closing;
 
+    int numArmJoints;
+    yarp::sig::Vector armJoints;
+    bool armHasChanged;
+    double timeSinceArmUpdate;
+
     std::string inImgPortName;
     std::string outImgPortName;
+    std::string outArmJointsPortName;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inImgPort;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outImgPort;
+    yarp::os::BufferedPort<yarp::os::Bottle> outArmJointsPort;
 
 public:
 
@@ -46,6 +58,8 @@ public:
     void mainProcessing();
 
     // IDL functions
+    double getPos(int32_t joint);
+    bool setPos(int32_t joint, double value);
 };
 
 #endif // ROBOT_HAND_PROCESSOR_THREAD_H

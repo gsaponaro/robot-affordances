@@ -11,8 +11,9 @@
 
 #include <string>
 
-#include <yarp/os/all.h>
-#include <yarp/sig/all.h>
+#include <yarp/os/ResourceFinder.h>
+#include <yarp/os/RFModule.h>
+#include <yarp/os/RpcServer.h>
 
 #include "RobotHandProcessorThread.h"
 #include "robotHandProcessor_IDL.h"
@@ -41,6 +42,9 @@ public:
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
     bool quit();
+    double getPos(int32_t joint);
+    bool setPos(int32_t joint, double value);
+    bool resetKinematics();
 };
 
 #endif // ROBOT_HAND_PROCESSOR_MODULE_H
