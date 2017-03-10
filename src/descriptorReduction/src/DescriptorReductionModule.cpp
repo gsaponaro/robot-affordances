@@ -55,9 +55,8 @@ bool DescriptorReductionModule::updateModule()
 {
     if (inWholeDescPort.getInputCount()>0 && inPartDescPort.getInputCount()>0)
     {
-        yDebug("both inputs connected");
         Bottle *inWholeDesc = inWholeDescPort.read(true);
-        Bottle *inPartDesc = inWholeDescPort.read(true);
+        Bottle *inPartDesc = inPartDescPort.read(true);
         if (inWholeDesc!=NULL && inPartDesc!=NULL)
         {
             const int numBlobs = inWholeDesc->size();
@@ -68,7 +67,59 @@ bool DescriptorReductionModule::updateModule()
                 return true;
             }
 
-            
+            // further sanity checks
+            bool ok = true;
+            ok = ok &&
+                 inPartDesc->size()==1 &&
+                 inPartDesc->get(0).asList()->size()==2;
+            if (!ok)
+            {
+                yError("partDescriptors problem");
+                return true;
+            }
+
+            // create Property objects for parsing
+            yarp::os::Property pWhole;
+            //yDebug("inWholeDesc->get(0).asList()->toString().c_str(): %s", inWholeDesc->get(0).asList()->toString().c_str());
+            pWhole.fromString(inWholeDesc->get(0).asList()->toString().c_str());
+            yarp::os::Property pTop;
+            //yDebug("inPartDesc top: %s", inPartDesc->get(0).asList()->get(0).asList()->toString().c_str());
+            pTop.fromString(inPartDesc->get(0).asList()->get(0).asList()->toString().c_str());
+            yarp::os::Property pBottom;
+            //yDebug("inPartDesc bottom: %s", inPartDesc->get(0).asList()->get(1).asList()->toString().c_str());
+            pBottom.fromString(inPartDesc->get(0).asList()->get(1).asList()->toString().c_str());
+
+            Bottle &r = outReducedDescPort.prepare();
+            r.clear();
+            // whole
+            r.addDouble(pWhole.find("convexity").asList()->get(0).asDouble());
+            r.addDouble(pWhole.find("eccentricity").asList()->get(0).asDouble());
+            r.addDouble(pWhole.find("compactness").asList()->get(0).asDouble());
+            r.addDouble(pWhole.find("circularity").asList()->get(0).asDouble());
+            r.addDouble(pWhole.find("squareness").asList()->get(0).asDouble());
+            r.addDouble(pWhole.find("convexityDefects").asList()->get(0).asDouble());
+            r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(0).asDouble());
+            r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(1).asDouble());
+            r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(2).asDouble());
+            r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(3).asDouble());
+            r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(4).asDouble());
+            r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(5).asDouble());
+            r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(6).asDouble());
+            /*
+            // top
+            r.addDouble(pTop.find("convexity").asList()->get(0).asDouble());
+            r.addDouble(pTop.find("eccentricity").asList()->get(0).asDouble());
+            r.addDouble(pTop.find("compactness").asList()->get(0).asDouble());
+            r.addDouble(pTop.find("circularity").asList()->get(0).asDouble());
+            r.addDouble(pTop.find("squareness").asList()->get(0).asDouble());
+            // bottom
+            r.addDouble(pBottom.find("convexity").asList()->get(0).asDouble());
+            r.addDouble(pBottom.find("eccentricity").asList()->get(0).asDouble());
+            r.addDouble(pBottom.find("compactness").asList()->get(0).asDouble());
+            r.addDouble(pBottom.find("circularity").asList()->get(0).asDouble());
+            r.addDouble(pBottom.find("squareness").asList()->get(0).asDouble());
+            */
+            outReducedDescPort.write();
         }
     }
 

@@ -12,6 +12,7 @@
 #include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/Log.h>
+#include <yarp/os/Property.h>
 #include <yarp/os/RFModule.h>
 
 class DescriptorReductionModule : public yarp::os::RFModule
