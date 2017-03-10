@@ -13,46 +13,85 @@
 
   <module>
       <name>lbpExtract</name>
-      <node>icub-laptop</node>
+      <parameters>--name lbpObj</parameters>
+      <node>localhost</node>
   </module>
 
   <module>
       <name>shapeDescriptor</name>
-      <node>icub-laptop</node>
+      <parameters>--name descObj</parameters>
+      <node>localhost</node>
   </module>
 
   <module>
       <name>sequentialLabeller</name>
-      <node>icub-laptop</node>
+      <parameters>--name seqObj</parameters>
+      <node>localhost</node>
   </module>
 
   <module>
       <name>yarpview</name>
-      <node>icub-laptop</node>
-      <parameters>--name /view/segm --x 330 --y 0 --p 33</parameters>
+      <node>localhost</node>
+      <parameters>--name /view/obj/segm --x 330 --y 0 --p 33</parameters>
+  </module>
+
+  <!--
+  <module>
+      <name>iCubUnitySim</name>
+      <node>win</node>
+  </module>
+  -->
+
+  <module>
+      <name>robotHandProcessor</name>
+      <node>localhost</node>
+  </module>
+
+  <module>
+      <name>lbpExtract</name>
+      <parameters>--name lbpHand</parameters>
+      <node>localhost</node>
+  </module>
+
+  <module>
+      <name>shapeDescriptor</name>
+      <parameters>--name descHand</parameters>
+      <node>localhost</node>
+  </module>
+
+  <module>
+      <name>sequentialLabeller</name>
+      <parameters>--name seqHand</parameters>
+      <node>localhost</node>
+  </module>
+
+  <module>
+      <name>yarpview</name>
+      <node>localhost</node>
+      <parameters>--name /view/hand/segm --x 330 --y 360 --p 33</parameters>
   </module>
 
   <connection>
       <from>/icub/camcalib/left/out</from>
-      <to>/lbpExtract/image:i</to>
+      <to>/lbpObj/image:i</to>
       <protocol>udp</protocol>
   </connection>
 
   <connection>
-      <from>/lbpExtract/segmentedlbp:o</from>
-      <to>/view/segm</to>
+      <from>/lbpObj/segmentedlbp:o</from>
+      <to>/view/obj/segm</to>
       <protocol>udp</protocol>
   </connection>
 
   <connection>
-      <from>/lbpExtract/segmentedlbp:o</from>
-      <to>/shapeDescriptor/binImg:i</to>
+      <from>/lbpObj/segmentedlbp:o</from>
+      <to>/descObj/binImg:i</to>
       <protocol>udp</protocol>
   </connection>
 
   <connection>
-      <from>/sequentialLabeller/labeledImg:o</from>
-      <to>/shapeDescriptor/labeledImg:i</to>
+      <from>/seqObj/labeledImg:o</from>
+      <to>/descObj/labeledImg:i</to>
       <protocol>udp</protocol>
   </connection>
 
