@@ -9,6 +9,7 @@
       <port>/wholeBodyDynamics/left_arm/cartesianEndEffectorWrench:o</port>
       <port>/wholeBodyDynamics/right_arm/cartesianEndEffectorWrench:o</port>
       <port>/iKinGazeCtrl/rpc</port>
+      <port>/iCubUnitySim/cam/left</port>
   </dependencies>
 
   <module>
@@ -47,11 +48,13 @@
       <node>localhost</node>
   </module>
 
+  <!--
   <module>
       <name>lbpExtract</name>
       <parameters>--name lbpHand</parameters>
       <node>localhost</node>
   </module>
+  -->
 
   <module>
       <name>shapeDescriptor</name>
@@ -90,8 +93,49 @@
   </connection>
 
   <connection>
+      <from>/lbpObj/segmentedlbp:o</from>
+      <to>/seqObj/binImg:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
       <from>/seqObj/labeledImg:o</from>
       <to>/descObj/labeledImg:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/iCubUnitySim/cam/left</from>
+      <to>/robotHandProcessor/image:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/robotHandProcessor/armJoints:o</from>
+      <to>/iCubUnitySim/rightArm</to>
+  </connection>
+
+  <connection>
+      <from>/robotHandProcessor/image:o</from>
+      <to>/view/hand/segm</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/robotHandProcessor/image:o</from>
+      <to>/descHand/binImg:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/robotHandProcessor/image:o</from>
+      <to>/seqHand/binImg:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/seqHand/labeledImg:o</from>
+      <to>/descHand/labeledImg:i</to>
       <protocol>udp</protocol>
   </connection>
 
