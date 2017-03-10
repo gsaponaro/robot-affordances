@@ -585,6 +585,8 @@ bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
         convDefBot.addString("convexityDefects");
         Bottle &convDefBotCnt = convDefBot.addList();
         std::vector<cv::Vec4i> defs = o.getConvexityDefects();
+        convDefBotCnt.addDouble(defs.size());
+        /*
         for(std::vector<cv::Vec4i>::const_iterator iter = defs.begin();
             iter != defs.end();
             ++iter)
@@ -595,6 +597,7 @@ bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
             d.addDouble((*iter)[2]);
             d.addDouble((*iter)[3]);
         }
+        */
     }
 
     // eccentricity info
