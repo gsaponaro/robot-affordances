@@ -561,6 +561,7 @@ bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
         smBotCnt.addDouble(mom.m03);
     }
 
+    // area info
     if (useArea)
     {
         Bottle &areaBot = b.addList();
