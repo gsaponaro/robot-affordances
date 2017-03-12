@@ -39,6 +39,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include
 add_executable(${PROJECT_NAME} src/HandAffManagerMain.cpp
                                src/HandAffManagerModule.cpp
                                include/HandAffManagerModule.h
+                               include/CSVFile.h
                                ${IDL_GEN_FILES}
                                ${idl_files})
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES})

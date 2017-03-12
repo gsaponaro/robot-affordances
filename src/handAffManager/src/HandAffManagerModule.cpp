@@ -8,6 +8,7 @@
  *
  */
 
+#include "CSVFile.h"
 #include "HandAffManagerModule.h"
 
 using namespace std;
