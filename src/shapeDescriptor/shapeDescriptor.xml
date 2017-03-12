@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <?xml-stylesheet type="text/xsl" href="yarpmanifest.xsl"?>
- 
+
 <module>
   <name>shapeDescriptor</name>
 
@@ -11,7 +11,7 @@
   <copypolicy>Released under the terms of the GNU GPL v3.0</copypolicy>
 
   <version>0.1</version>
-  
+
   <description-long>
     Extract shape features from connected components.
 
@@ -47,9 +47,9 @@
     <param default="off" desc="enable (up-right) bounding rectangle">boundingRectangle</param>
     <param default="off" desc="enable (rotated) enclosing rectangle">enclosingRectangle</param>
   </arguments>
- 
+
   <authors>
-    <author email="gsaponaro@isr.ist.utl.pt">Giovanni Saponaro</author>
+    <author email="gsaponaro@isr.tecnico.ulisboa.pt">Giovanni Saponaro</author>
   </authors>
 
   <data>

@@ -25,8 +25,8 @@ int main(int argc, char *argv[])
     #ifdef CV_MAJOR_VERSION
     yInfo("This module has been compiled with OpenCV %d.%d.%d",CV_MAJOR_VERSION,CV_MINOR_VERSION,CV_SUBMINOR_VERSION);
     #else
-    yInfo("This module has been compiled with an unknown version of OpenCV (possibly < 1.0)");
-    #endif    
+    yInfo("This module has been compiled with an unknown version of OpenCV");
+    #endif
 
     if(rf.check("help"))
     {
