@@ -25,8 +25,11 @@ class HandAffManagerModule : public yarp::os::RFModule,
 {
 private:
 
-    bool closing;
+    //bool closing;
     yarp::os::RpcServer rpcPort;
+
+    std::string inReducedDescPortName;
+    yarp::os::BufferedPort<yarp::os::Bottle> inReducedDescPort;
 
 public:
 

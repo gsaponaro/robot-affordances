@@ -20,7 +20,10 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
 {
     string moduleName = rf.check("name",Value("handAffManager")).asString();
 
-    closing = false;
+    inReducedDescPortName = "/" + moduleName + "/desc:i";
+    inReducedDescPort.open(inReducedDescPortName.c_str());
+
+    //closing = false;
 
     rpcPort.open("/"+moduleName+"/rpc:i");
     attach(rpcPort);
@@ -31,6 +34,7 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
 /***************************************************/
 bool HandAffManagerModule::interruptModule()
 {
+    inReducedDescPort.interrupt();
     rpcPort.interrupt();
 
     return true;
@@ -39,6 +43,7 @@ bool HandAffManagerModule::interruptModule()
 /***************************************************/
 bool HandAffManagerModule::close()
 {
+    inReducedDescPort.close();
     rpcPort.close();
 
     return true;
@@ -53,7 +58,13 @@ double HandAffManagerModule::getPeriod()
 /***************************************************/
 bool HandAffManagerModule::updateModule()
 {
-    return !closing;
+    if (inReducedDescPort.getInputCount()>0)
+    {
+
+    }
+
+    //return !closing;
+    return true;
 }
 
 // IDL functions
