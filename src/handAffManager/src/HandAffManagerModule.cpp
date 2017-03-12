@@ -64,7 +64,7 @@ bool HandAffManagerModule::updateModule()
 
         if (inReducedDesc != NULL)
         {
-            
+
         }
     }
 
@@ -84,7 +84,7 @@ bool HandAffManagerModule::attach(RpcServer &source)
 bool HandAffManagerModule::quit()
 {
     yInfo("quitting");
-    closing = true;
+    //closing = true;
 
     return true;
 }
