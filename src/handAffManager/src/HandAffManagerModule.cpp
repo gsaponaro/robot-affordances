@@ -60,7 +60,12 @@ bool HandAffManagerModule::updateModule()
 {
     if (inReducedDescPort.getInputCount()>0)
     {
+        Bottle *inReducedDesc = inReducedDescPort.read(true);
 
+        if (inReducedDesc != NULL)
+        {
+            
+        }
     }
 
     //return !closing;
