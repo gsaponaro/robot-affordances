@@ -21,8 +21,11 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
 {
     string moduleName = rf.check("name",Value("handAffManager")).asString();
 
-    inReducedDescPortName = "/" + moduleName + "/desc:i";
-    inReducedDescPort.open(inReducedDescPortName.c_str());
+    inHandDescPortName = "/" + moduleName + "/handDesc:i";
+    inHandDescPort.open(inHandDescPortName.c_str());
+
+    inObjDescPortName = "/" + moduleName + "/objDesc:i";
+    inObjDescPort.open(inObjDescPortName.c_str());
 
     //closing = false;
 
@@ -35,7 +38,8 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
 /***************************************************/
 bool HandAffManagerModule::interruptModule()
 {
-    inReducedDescPort.interrupt();
+    inHandDescPort.interrupt();
+    inObjDescPort.interrupt();
     rpcPort.interrupt();
 
     return true;
@@ -44,7 +48,8 @@ bool HandAffManagerModule::interruptModule()
 /***************************************************/
 bool HandAffManagerModule::close()
 {
-    inReducedDescPort.close();
+    inHandDescPort.close();
+    inObjDescPort.close();
     rpcPort.close();
 
     return true;
@@ -59,11 +64,12 @@ double HandAffManagerModule::getPeriod()
 /***************************************************/
 bool HandAffManagerModule::updateModule()
 {
-    if (inReducedDescPort.getInputCount()>0)
+    if (inHandDescPort.getInputCount()>0 && inObjDescPort.getInputCount()>0)
     {
-        Bottle *inReducedDesc = inReducedDescPort.read(true);
+        Bottle *inHandDesc = inHandDescPort.read(true);
+        Bottle *inObjDesc = inObjDescPort.read(true);
 
-        if (inReducedDesc != NULL)
+        if (inHandDesc!=NULL && inObjDesc!=NULL)
         {
 
         }

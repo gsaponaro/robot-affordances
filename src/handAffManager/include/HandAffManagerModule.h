@@ -28,8 +28,10 @@ private:
     //bool closing;
     yarp::os::RpcServer rpcPort;
 
-    std::string inReducedDescPortName;
-    yarp::os::BufferedPort<yarp::os::Bottle> inReducedDescPort;
+    std::string inHandDescPortName;
+    std::string inObjDescPortName;
+    yarp::os::BufferedPort<yarp::os::Bottle> inHandDescPort;
+    yarp::os::BufferedPort<yarp::os::Bottle> inObjDescPort;
 
 public:
 
