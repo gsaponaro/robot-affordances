@@ -14,6 +14,7 @@
 #include <string>
 
 #include <yarp/os/all.h>
+//#include <yarp/os/RpcClient.h>
 #include <yarp/dev/all.h>
 #include <yarp/sig/all.h>
 
@@ -30,8 +31,12 @@ private:
 
     std::string inHandDescPortName;
     std::string inObjDescPortName;
+    std::string rpcHandActionsPortName;
     yarp::os::BufferedPort<yarp::os::Bottle> inHandDescPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inObjDescPort;
+    yarp::os::RpcClient rpcHandActionsPort;
+
+    yarp::os::Bottle handTopDesc;
 
 public:
 
@@ -43,6 +48,7 @@ public:
 
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
+    bool handPosture(const std::string &posture);
     bool quit();
 };
 

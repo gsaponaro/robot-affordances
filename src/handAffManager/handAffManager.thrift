@@ -10,8 +10,15 @@
 service handAffManager_IDL
 {
     /**
+     * Set fingers to one of the desired postures, acquire shape descriptors
+     * of the top half of the hand.
+     * @return true/false on success/failure
+     */
+    bool handPosture(1:string posture);
+
+    /**
      * Quit the module.
      * @return true/false on success/failure
      */
-    bool quit();  
+    bool quit();
 }

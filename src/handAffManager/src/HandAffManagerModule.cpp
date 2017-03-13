@@ -27,6 +27,9 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     inObjDescPortName = "/" + moduleName + "/objDesc:i";
     inObjDescPort.open(inObjDescPortName.c_str());
 
+    rpcHandActionsPortName = "/" + moduleName + "/handActions:rpc";
+    rpcHandActionsPort.open(rpcHandActionsPortName.c_str());
+
     //closing = false;
 
     rpcPort.open("/"+moduleName+"/rpc:i");
@@ -40,6 +43,7 @@ bool HandAffManagerModule::interruptModule()
 {
     inHandDescPort.interrupt();
     inObjDescPort.interrupt();
+    rpcHandActionsPort.interrupt();
     rpcPort.interrupt();
 
     return true;
@@ -50,6 +54,7 @@ bool HandAffManagerModule::close()
 {
     inHandDescPort.close();
     inObjDescPort.close();
+    rpcHandActionsPort.close();
     rpcPort.close();
 
     return true;
@@ -64,6 +69,7 @@ double HandAffManagerModule::getPeriod()
 /***************************************************/
 bool HandAffManagerModule::updateModule()
 {
+    /*
     if (inHandDescPort.getInputCount()>0 && inObjDescPort.getInputCount()>0)
     {
         Bottle *inHandDesc = inHandDescPort.read(true);
@@ -74,6 +80,7 @@ bool HandAffManagerModule::updateModule()
 
         }
     }
+    */
 
     //return !closing;
     return true;
@@ -85,6 +92,66 @@ bool HandAffManagerModule::updateModule()
 bool HandAffManagerModule::attach(RpcServer &source)
 {
     return this->yarp().attachAsServer(source);
+}
+
+/***************************************************/
+bool HandAffManagerModule::handPosture(const string &posture)
+{
+    // sanity checks
+    if (rpcHandActionsPort.getOutputCount()<1)
+    {
+        yError("no connection to handActions");
+        return false;
+    }
+
+    if (inHandDescPort.getInputCount()<1)
+    {
+        yError("no connection to hand descriptors");
+        return false;
+    }
+
+    // set robot hand
+    if (posture=="straight" || posture=="fortyfive" || posture=="bent")
+    {
+        Bottle handActionsCmd, handActionsReply;
+        handActionsCmd.addString("setFingers");
+        handActionsCmd.addString(posture);
+        rpcHandActionsPort.write(handActionsCmd, handActionsReply);
+        if (handActionsReply.size()>0 &&
+            handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
+        {
+            yInfo("successfully set hand posture to %s", posture.c_str());
+        }
+        else
+        {
+            yError("problem when setting hand posture to %s", posture.c_str());
+            return false;
+        }
+    }
+    else
+    {
+        yError("valid finger postures are: straight, fortyfive, bent");
+        return false;
+    }
+
+    // acquire hand top descriptors
+    handTopDesc.clear();
+    Bottle *inHandDesc = inHandDescPort.read(true);
+    if (inHandDesc != NULL)
+    {
+        const int expectedDescSize = 39;
+        if (inHandDesc->size() != expectedDescSize)
+            yWarning("got %d hand descriptors instead of %d", inHandDesc->size(), expectedDescSize);
+
+        const int firstTopIdx = 13;
+        const int lastTopIdx = 25;
+        for (int d=firstTopIdx; d<=25; ++d)
+            handTopDesc.addDouble(inHandDesc->get(d).asDouble());
+    }
+
+    yInfo("successfully acquired hand top descriptors");
+
+    return true;
 }
 
 /***************************************************/
