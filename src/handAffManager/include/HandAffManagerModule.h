@@ -32,9 +32,11 @@ private:
     std::string inHandDescPortName;
     std::string inObjDescPortName;
     std::string rpcHandActionsPortName;
+    std::string rpcRobotHandProcessorPortName;
     yarp::os::BufferedPort<yarp::os::Bottle> inHandDescPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inObjDescPort;
     yarp::os::RpcClient rpcHandActionsPort;
+    yarp::os::RpcClient rpcRobotHandProcessorPort;
 
     yarp::os::Bottle handTopDesc;
 

@@ -41,9 +41,11 @@ private:
     std::string inImgPortName;
     std::string outImgPortName;
     std::string outArmJointsPortName;
+    std::string outHeadJointsPortName;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inImgPort;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outImgPort;
     yarp::os::BufferedPort<yarp::os::Bottle> outArmJointsPort;
+    yarp::os::BufferedPort<yarp::os::Bottle> outHeadJointsPort;
 
 public:
 
@@ -58,6 +60,7 @@ public:
     void mainProcessing();
 
     // IDL functions
+    bool look(const std::string &target);
     double getPos(int32_t joint);
     bool setPos(int32_t joint, double value);
 };

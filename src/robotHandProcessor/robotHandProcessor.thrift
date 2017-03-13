@@ -14,6 +14,13 @@ service robotHandProcessor_IDL
     bool quit();
 
     /**
+     * Command the simulated head to gaze at a target.
+     * @param target string containing the name of the target (e.g. right_hand)
+     * @return true/false on success/failure
+     */
+    bool look(1:string target);
+
+    /**
      * Reset arm kinematics to real joint values.
      * @return true/false on success/failure
      */

@@ -90,6 +90,11 @@ bool RobotHandProcessorModule::quit()
     return true;
 }
 
+/***************************************************/
+bool RobotHandProcessorModule::look(const string &target)
+{
+    return thread->look(target);
+}
 
 /***************************************************/
 double RobotHandProcessorModule::getPos(int32_t joint)

@@ -30,6 +30,9 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     rpcHandActionsPortName = "/" + moduleName + "/handActions:rpc";
     rpcHandActionsPort.open(rpcHandActionsPortName.c_str());
 
+    rpcRobotHandProcessorPortName = "/" + moduleName + "/robotHandProcessor:rpc";
+    rpcRobotHandProcessorPort.open(rpcRobotHandProcessorPortName.c_str());
+
     //closing = false;
 
     rpcPort.open("/"+moduleName+"/rpc:i");
@@ -44,6 +47,7 @@ bool HandAffManagerModule::interruptModule()
     inHandDescPort.interrupt();
     inObjDescPort.interrupt();
     rpcHandActionsPort.interrupt();
+    rpcRobotHandProcessorPort.interrupt();
     rpcPort.interrupt();
 
     return true;
@@ -55,6 +59,7 @@ bool HandAffManagerModule::close()
     inHandDescPort.close();
     inObjDescPort.close();
     rpcHandActionsPort.close();
+    rpcRobotHandProcessorPort.close();
     rpcPort.close();
 
     return true;
@@ -100,7 +105,7 @@ bool HandAffManagerModule::handPosture(const string &posture)
     // sanity checks
     if (rpcHandActionsPort.getOutputCount()<1)
     {
-        yError("no connection to handActions");
+        yError("no connection to handActions RPC server");
         return false;
     }
 
@@ -110,27 +115,67 @@ bool HandAffManagerModule::handPosture(const string &posture)
         return false;
     }
 
-    // set robot hand
+    if (rpcRobotHandProcessorPort.getOutputCount()<1)
+    {
+        yError("no connection to robotHandProcessor RPC server");
+        return false;
+    }
+
+    // set robot hand *on the real robot*
     if (posture=="straight" || posture=="fortyfive" || posture=="bent")
     {
-        Bottle handActionsCmd, handActionsReply;
+        Bottle handActionsCmd;
+        Bottle handActionsReply;
         handActionsCmd.addString("setFingers");
         handActionsCmd.addString(posture);
         rpcHandActionsPort.write(handActionsCmd, handActionsReply);
         if (handActionsReply.size()>0 &&
             handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
         {
-            yInfo("successfully set hand posture to %s", posture.c_str());
+            yInfo("successfully set real hand posture to %s", posture.c_str());
         }
         else
         {
-            yError("problem when setting hand posture to %s", posture.c_str());
+            yError("problem when setting real hand posture to %s", posture.c_str());
             return false;
         }
     }
     else
     {
         yError("valid finger postures are: straight, fortyfive, bent");
+        return false;
+    }
+
+    // move head and arm *in the simulator* so that hand is fully visible
+    Bottle simCmd;
+    Bottle simReply;
+    simCmd.addString("resetKinematics"); // arm
+    rpcRobotHandProcessorPort.write(simCmd, simReply);
+    if (simReply.size()>0 &&
+        simReply.get(0).asVocab()==Vocab::encode("ok"))
+    {
+        yInfo("successfully simulated reset of arm positions");
+    }
+    else
+    {
+        yError("problem when simulating reset of arm positions");
+        return false;
+    }
+    simCmd.clear();
+    simReply.clear();
+    simCmd.addString("look");
+    string desiredHand = "right_hand";
+    simCmd.addString(desiredHand);
+    rpcRobotHandProcessorPort.write(simCmd, simReply);
+    if (simReply.size()>0 &&
+        simReply.get(0).asVocab()==Vocab::encode("ok"))
+    {
+        yInfo("successfully simulated looking at %s", desiredHand.c_str());
+        yDebug("please visually check the simulated hand image!");
+    }
+    else
+    {
+        yError("problem when simulating looking at %s", desiredHand.c_str());
         return false;
     }
 

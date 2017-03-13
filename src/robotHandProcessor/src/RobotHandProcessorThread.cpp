@@ -58,6 +58,7 @@ void RobotHandProcessorThread::interrupt()
     inImgPort.interrupt();
     outImgPort.interrupt();
     outArmJointsPort.interrupt();
+    outHeadJointsPort.interrupt();
 }
 
 /**********************************************************/
@@ -65,6 +66,8 @@ void RobotHandProcessorThread::close()
 {
     inImgPort.close();
     outImgPort.close();
+    outArmJointsPort.close();
+    outHeadJointsPort.close();
 }
 
 /**********************************************************/
@@ -80,6 +83,9 @@ bool RobotHandProcessorThread::openPorts()
 
     outArmJointsPortName = "/" + moduleName + "/armJoints:o";
     ret = ret && outArmJointsPort.open(outArmJointsPortName.c_str());
+
+    outHeadJointsPortName = "/" + moduleName + "/headJoints:o";
+    ret = ret && outHeadJointsPort.open(outHeadJointsPortName.c_str());
 
     return ret;
 }
@@ -134,6 +140,26 @@ void RobotHandProcessorThread::mainProcessing()
 }
 
 // IDL functions
+/***************************************************/
+bool RobotHandProcessorThread::look(const string &target)
+{
+    if (target != "right_hand")
+    {
+        yError("for now, the only valid target is right_hand");
+        return false;
+    }
+
+    if (outHeadJointsPort.getOutputCount()<1)
+    {
+        yWarning("not connected to iCubUnitySim head:i");
+        return false;
+    }
+
+    // TODO
+
+    return true;
+}
+
 /***************************************************/
 double RobotHandProcessorThread::getPos(int32_t joint)
 {

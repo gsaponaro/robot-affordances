@@ -162,6 +162,11 @@
   </connection>
 
   <connection>
+      <from>/robotHandProcessor/headJoints:o</from>
+      <to>/iCubUnitySim/head:i</to>
+  </connection>
+
+  <connection>
       <from>/robotHandProcessor/armJoints:o</from>
       <to>/iCubUnitySim/rightArm:i</to>
   </connection>

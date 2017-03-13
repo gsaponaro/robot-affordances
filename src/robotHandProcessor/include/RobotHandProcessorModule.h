@@ -42,6 +42,7 @@ public:
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
     bool quit();
+    bool look(const std::string &target);
     double getPos(int32_t joint);
     bool setPos(int32_t joint, double value);
     bool resetKinematics();
