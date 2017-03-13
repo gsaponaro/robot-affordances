@@ -34,6 +34,7 @@ private:
     bool closing;
 
     int numArmJoints;
+    int numHeadJoints;
     yarp::sig::Vector armJoints;
     bool armHasChanged; // at least one joint changed w.r.t. initial defaults
     double timeSinceArmUpdate;
@@ -61,6 +62,7 @@ public:
 
     // IDL functions
     bool look(const std::string &target);
+    bool resetKinematics();
     double getPos(int32_t joint);
     bool setPos(int32_t joint, double value);
 };

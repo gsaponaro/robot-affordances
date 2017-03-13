@@ -111,6 +111,9 @@ bool RobotHandProcessorModule::setPos(int32_t joint, double value)
 /***************************************************/
 bool RobotHandProcessorModule::resetKinematics()
 {
+    return thread->resetKinematics();
+
+
     yInfo("arm kinematics has been reset to real joint values");
 
     return true;

@@ -36,6 +36,10 @@ bool RobotHandProcessorThread::threadInit()
 
     numArmJoints = 16;
     armJoints.resize(numArmJoints, 0.0);
+
+    numHeadJoints = 6;
+    headJoints.resize(numHeadJoints, 0.0);
+
     armHasChanged = false;
     timeSinceArmUpdate = Time::now();
 
@@ -155,7 +159,36 @@ bool RobotHandProcessorThread::look(const string &target)
         return false;
     }
 
-    // TODO
+    // head joints corresponding to target position
+    headJoints[0] = 30.0;
+    headJoints[1] =  0.0;
+    headJoints[2] = 30.0;
+    headJoints[3] =  0.0;
+    headJoints[4] =  0.0;
+    headJoints[5] =  0.0;
+
+    // move head
+    Bottle &outHeadJoints = outHeadJointsPort.prepare();
+    for (j=0; j<numHeadJoints; ++j)
+    {
+        outHeadJoints.addDouble(headJoints[j]);
+    }
+    outHeadPointsPort.write();
+    yInfo("successfully looked at target position");
+
+    return true;
+}
+
+/***************************************************/
+bool RobotHandProcessorThread::resetKinematics()
+{
+    yarp::os::Network::connect("/icub/right_arm/state:o", "/iCubUnitySim/rightArm:i");
+    yInfo("connected /icub/right_arm/state:o /iCubUnitySim/rightArm:i/iCubUnitySim/rightArm:i");
+
+    yarp::os::Time::delay(1.0)
+
+    yarp::os::Network::disconnect("/icub/right_arm/state:o", "/iCubUnitySim/rightArm:i");
+    yInfo("disconnected /icub/right_arm/state:o /iCubUnitySim/rightArm:i/iCubUnitySim/rightArm:i");
 
     return true;
 }

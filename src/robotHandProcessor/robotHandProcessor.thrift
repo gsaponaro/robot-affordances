@@ -14,7 +14,7 @@ service robotHandProcessor_IDL
     bool quit();
 
     /**
-     * Command the simulated head to gaze at a target.
+     * Command the simulated head so that it gazes at a target.
      * @param target string containing the name of the target (e.g. right_hand)
      * @return true/false on success/failure
      */
