@@ -90,8 +90,9 @@ bool DescriptorReductionModule::updateModule()
             pBottom.fromString(inPartDesc->get(0).asList()->get(1).asList()->toString().c_str());
 
             Bottle &r = outReducedDescPort.prepare();
+            // we will output 3 * 13 = 39 numbers, as follows
             r.clear();
-            // whole
+            // whole: 0 - 12
             r.addDouble(pWhole.find("convexity").asList()->get(0).asDouble());
             r.addDouble(pWhole.find("eccentricity").asList()->get(0).asDouble());
             r.addDouble(pWhole.find("compactness").asList()->get(0).asDouble());
@@ -105,20 +106,34 @@ bool DescriptorReductionModule::updateModule()
             r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(4).asDouble());
             r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(5).asDouble());
             r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(6).asDouble());
-            /*
-            // top
+            // top: 13 - 25
             r.addDouble(pTop.find("convexity").asList()->get(0).asDouble());
             r.addDouble(pTop.find("eccentricity").asList()->get(0).asDouble());
             r.addDouble(pTop.find("compactness").asList()->get(0).asDouble());
             r.addDouble(pTop.find("circularity").asList()->get(0).asDouble());
             r.addDouble(pTop.find("squareness").asList()->get(0).asDouble());
-            // bottom
+            r.addDouble(pTop.find("convexityDefects").asList()->get(0).asDouble());
+            r.addDouble(pTop.find("centralNormalizedMoments").asList()->get(0).asDouble());
+            r.addDouble(pTop.find("centralNormalizedMoments").asList()->get(1).asDouble());
+            r.addDouble(pTop.find("centralNormalizedMoments").asList()->get(2).asDouble());
+            r.addDouble(pTop.find("centralNormalizedMoments").asList()->get(3).asDouble());
+            r.addDouble(pTop.find("centralNormalizedMoments").asList()->get(4).asDouble());
+            r.addDouble(pTop.find("centralNormalizedMoments").asList()->get(5).asDouble());
+            r.addDouble(pTop.find("centralNormalizedMoments").asList()->get(6).asDouble());
+            // bottom: 26 - 38
             r.addDouble(pBottom.find("convexity").asList()->get(0).asDouble());
             r.addDouble(pBottom.find("eccentricity").asList()->get(0).asDouble());
             r.addDouble(pBottom.find("compactness").asList()->get(0).asDouble());
             r.addDouble(pBottom.find("circularity").asList()->get(0).asDouble());
             r.addDouble(pBottom.find("squareness").asList()->get(0).asDouble());
-            */
+            r.addDouble(pBottom.find("convexityDefects").asList()->get(0).asDouble());
+            r.addDouble(pBottom.find("centralNormalizedMoments").asList()->get(0).asDouble());
+            r.addDouble(pBottom.find("centralNormalizedMoments").asList()->get(1).asDouble());
+            r.addDouble(pBottom.find("centralNormalizedMoments").asList()->get(2).asDouble());
+            r.addDouble(pBottom.find("centralNormalizedMoments").asList()->get(3).asDouble());
+            r.addDouble(pBottom.find("centralNormalizedMoments").asList()->get(4).asDouble());
+            r.addDouble(pBottom.find("centralNormalizedMoments").asList()->get(5).asDouble());
+            r.addDouble(pBottom.find("centralNormalizedMoments").asList()->get(6).asDouble());
             outReducedDescPort.write();
         }
     }
