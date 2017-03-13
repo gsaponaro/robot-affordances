@@ -98,6 +98,11 @@
       <parameters>--name /view/hand/desc --x 660 --y 360 --p 33</parameters>
   </module>
 
+  <module>
+      <name>handAffManager</name>
+      <node>localhost</node>
+  </module>
+
   <connection>
       <from>/icub/camcalib/left/out</from>
       <to>/lbpObj/image:i</to>
@@ -205,6 +210,16 @@
   <connection>
       <from>/descHand/partDescriptors:o</from>
       <to>/drHand/partDescriptors:i</to>
+  </connection>
+
+  <connection>
+      <from>/drHand/desc:o</from>
+      <to>/handAffManager/objHand:i</to>
+  </connection>
+
+  <connection>
+      <from>/drObj/desc:o</from>
+      <to>/handAffManager/objObj:i</to>
   </connection>
 
 </application>
