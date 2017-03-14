@@ -115,12 +115,13 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
 bool HandActionsModule::configure(ResourceFinder &rf)
 {
     string moduleName = rf.check("name",Value("handActions")).asString();
-    string robot = rf.check("robot",Value("icubSim")).asString();
-    string arm = rf.check("arm",Value("right_arm")).asString();
-    if (arm.compare("left")==0 ||arm.compare("leftarm")==0 || arm.compare("armleft")==0 || arm.compare("Left")==0)
+    string robot = rf.check("robot",Value("icub")).asString();
+    string arm = rf.check("arm",Value("left_arm")).asString();
+    if (arm!="left_arm" && arm!="right_arm")
+    {
+        yWarning("invalid arm %s specified, using the default (left_arm)", arm.c_str());
         arm = "left_arm";
-    else
-        arm = "right_arm";
+    }
 
     straightHandPoss.resize(9, 0.0);
     straightHandPoss[0] =  0.0; // j7

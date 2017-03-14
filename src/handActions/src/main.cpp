@@ -28,8 +28,8 @@ int main(int argc, char *argv[])
     {
         yInfo("Available options:");
         yInfo("--name <name of module> (default handActions)");
-        yInfo("--robot <name of robot> (default icubSim)");
-        yInfo("--arm <arm to use> (default right_arm)");
+        yInfo("--robot <name of robot> (default icub)");
+        yInfo("--arm <arm to use> (default left_arm)");
 
         return 0; // EXIT_SUCCESS
     }
