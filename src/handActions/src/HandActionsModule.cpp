@@ -29,9 +29,9 @@ void HandActionsModule::fixate(const Vector &x)
 Vector HandActionsModule::computeHandOrientation()
 {
     Matrix R(3,3);
-    R(0,0) = -1.0; R(1,0) = 0.0;  R(2,0) = 0.0; 
-    R(0,1) = 0.0;  R(1,1) = 0.0;  R(2,1) = -1.0; 
-    R(0,2) = 0.0;  R(1,2) = -1.0; R(2,2) = 0.0; 
+    R(0,0) = -1.0; R(1,0) = 0.0;  R(2,0) = 0.0;
+    R(0,1) = 0.0;  R(1,1) = 0.0;  R(2,1) = -1.0;
+    R(0,2) = 0.0;  R(1,2) = -1.0; R(2,2) = 0.0;
     return dcm2axis(R);
 }
 
@@ -253,7 +253,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
         return false;
     }
 
-    if (!drvTorso.view(posT) || !drvTorso.view(ctrlMT)) 
+    if (!drvTorso.view(posT) || !drvTorso.view(ctrlMT))
     {
        cout << moduleName << ": problems acquiring interfaces to remote_controlboard of Torso"<< endl;
         return false;
@@ -344,6 +344,13 @@ bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &
     if (targetPos[0] > xMinThresh)
     {
         yWarning("unsafe x");
+        return false;
+    }
+
+    const double zMaxThresh = -0.09;
+    if (targetPos[2] < zMaxThresh)
+    {
+        yWarning("unsafe z");
         return false;
     }
 
