@@ -169,11 +169,11 @@ bool RobotHandProcessorThread::look(const string &target)
 
     // move head
     Bottle &outHeadJoints = outHeadJointsPort.prepare();
-    for (j=0; j<numHeadJoints; ++j)
+    for (int j=0; j<numHeadJoints; ++j)
     {
         outHeadJoints.addDouble(headJoints[j]);
     }
-    outHeadPointsPort.write();
+    outHeadJointsPort.write();
     yInfo("successfully looked at target position");
 
     return true;
@@ -185,7 +185,7 @@ bool RobotHandProcessorThread::resetKinematics()
     yarp::os::Network::connect("/icub/right_arm/state:o", "/iCubUnitySim/rightArm:i");
     yInfo("connected /icub/right_arm/state:o /iCubUnitySim/rightArm:i/iCubUnitySim/rightArm:i");
 
-    yarp::os::Time::delay(1.0)
+    yarp::os::Time::delay(1.0);
 
     yarp::os::Network::disconnect("/icub/right_arm/state:o", "/iCubUnitySim/rightArm:i");
     yInfo("disconnected /icub/right_arm/state:o /iCubUnitySim/rightArm:i/iCubUnitySim/rightArm:i");

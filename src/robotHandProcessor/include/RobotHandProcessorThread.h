@@ -36,6 +36,7 @@ private:
     int numArmJoints;
     int numHeadJoints;
     yarp::sig::Vector armJoints;
+    yarp::sig::Vector headJoints;
     bool armHasChanged; // at least one joint changed w.r.t. initial defaults
     double timeSinceArmUpdate;
 
