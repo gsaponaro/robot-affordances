@@ -403,6 +403,7 @@ bool HandActionsModule::look_down()
 /***************************************************/
 bool HandActionsModule::home()
 {
+    // set control modes
     ctrlMA->getControlModes(controlModesArm);
 
     for(int i=0; i<nAxesA; i++)
@@ -418,18 +419,36 @@ bool HandActionsModule::home()
         ctrlMT->setControlMode(i,VOCAB_CM_POSITION);
     }
 
+    // move torso pitch
+    const double TORSO_DEF_HOME[] = {0.0, 0.0, 0.0};
+    const int torsoPitchIdx = 2;
+    posT->positionMove(torsoPitchIdx, TORSO_DEF_HOME[torsoPitchIdx]);
+
+    bool done=false;
+    double elapsedTime=0.0;
+    double startTime=Time::now();
+
+    while(!done && elapsedTime<2.0)
+    {
+        posT->checkMotionDone(&done);
+        Time::delay(0.04);
+        elapsedTime= Time::now()-startTime;
+    }
+
+    // move arm
+    const double ARM_DEF_HOME[] = {-50.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0,     20.0,  30.0,10.0,10.0,  10.0,10.0, 10.0,10.0,  10.0};
+
     //posA->setRefSpeeds(handVels.data()); // 9 or 16 values?
 
-    const double ARM_DEF_HOME[] = {-50.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0,     20.0,  30.0,10.0,10.0,  10.0,10.0, 10.0,10.0,  10.0};
     //posA->positionMove(ARM_DEF_HOME);
     for (int i=0; i<7; i++) // arm joints, no hand joints
     {
         posA->positionMove(i, ARM_DEF_HOME[i]);
     }
 
-    bool done=false;
-    double elapsedTime=0.0;
-    double startTime=Time::now();
+    done=false;
+    elapsedTime=0.0;
+    startTime=Time::now();
 
     while(!done && elapsedTime<2.0)
     {
@@ -438,7 +457,7 @@ bool HandActionsModule::home()
         elapsedTime= Time::now()-startTime;
     }
 
-    const double TORSO_DEF_HOME[] = {0.0, 0.0, 0.0};
+    // move torso yaw and roll
     posT->positionMove(TORSO_DEF_HOME);
 
     done=false;
