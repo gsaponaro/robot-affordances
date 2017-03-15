@@ -10,11 +10,17 @@
 service handAffManager_IDL
 {
     /**
-     * Set fingers to one of the desired postures, acquire shape descriptors
-     * of the top half of the hand.
+     * Set fingers to one of the permitted postures: straight, fortyfive,
+     * bent.
      * @return true/false on success/failure
      */
-    bool handPosture(1:string posture);
+    bool setHandPosture(1:string posture);
+
+    /**
+     * Acquire shape descriptors of the hand.
+     * @return true/false on success/failure
+     */
+    bool getHandDescriptors();
 
     /**
      * Positive response by user to request for information.

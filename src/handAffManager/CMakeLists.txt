@@ -14,6 +14,7 @@ project(handAffManager)
 # mandatory use of these packages
 find_package(YARP REQUIRED)
 find_package(ICUBcontrib REQUIRED)
+find_package(Boost REQUIRED filesystem system)
 
 # extend the current search path used by cmake to load helpers
 list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH})
@@ -35,14 +36,19 @@ icubcontrib_set_default_prefix()
 
 include_directories(${PROJECT_SOURCE_DIR}/include
                     ${YARP_INCLUDE_DIRS}
-                    ${IDL_GENERATED_CODE_DIR}/include)
+                    ${IDL_GENERATED_CODE_DIR}/include
+                    ${Boost_FILESYSTEM_INCLUDE_DIRS}
+                    ${Boost_SYSTEM_INCLUDE_DIRS})
 add_executable(${PROJECT_NAME} src/HandAffManagerMain.cpp
                                src/HandAffManagerModule.cpp
                                include/HandAffManagerModule.h
                                include/CSVFile.h
                                ${IDL_GEN_FILES}
                                ${idl_files})
-target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+                      ${YARP_LIBRARIES}
+                      ${Boost_FILESYSTEM_LIBRARY}
+                      ${Boost_SYSTEM_LIBRARY})
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
 # generate ad-hoc project to perform "make uninstall"

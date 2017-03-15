@@ -11,6 +11,8 @@
 #include "CSVFile.h"
 #include "HandAffManagerModule.h"
 
+namespace fs = boost::filesystem;
+
 using namespace std;
 using namespace yarp::os;
 using namespace yarp::dev;
@@ -35,6 +37,9 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
 
     gotSomething = false;
     userConfirmation = false;
+
+    basePath = rf.getHomeContextPath().c_str();
+    yDebug("basePath: %s", basePath.c_str());
 
     //closing = false;
 
@@ -90,8 +95,68 @@ bool HandAffManagerModule::updateModule()
     }
     */
 
+    // if we have made a call to getHandDescriptors()...
+    if (handDesc.size()>0)
+    {
+        // ask user to confirm whether simulated hand & descriptors are good
+        yWarning("if the simulated hand is properly visible and the descriptors make sense, type \"yes\" (in the RPC terminal), otherwise type \"no\"");
+        while(!gotSomething)
+            yarp::os::Time::delay(0.1);
+        if (!userConfirmation)
+        {
+            yWarning("no -> will reset hand descriptors, please restart the acquisition");
+            handDesc.clear();
+        }
+        yInfo("yes -> will save hand descriptors to file");
+        gotSomething = false; // reset variable
+
+        // make sure that currPosture is up to date
+        if (currPosture == "")
+        {
+            yWarning("I don't know the current hand posture, please set it with setHandPosture");
+            return true;
+        }
+        else
+        {
+            yDebug("current hand posture is %s", currPosture.c_str());
+            saveDescToFile(currPosture);
+        }
+    }
+
     //return !closing;
     return true;
+}
+
+/***************************************************/
+void HandAffManagerModule::saveDescToFile(const std::string &label)
+{
+    // sanity checks
+    const int numDesc = 13;
+    if (handDesc.size() != numDesc)
+    {
+        yError("got %d descriptors, was expecting %d", handDesc.size(), numDesc);
+        return;
+    }
+
+    // path and file where we will save
+    string path = basePath+"/"+label;
+    yDebug("path: %s", path.c_str());
+    string filename = "test.csv";
+    csvfile csv(filename);
+
+    // write header row
+    csv << "handOrObjectName" << "convexity" << "eccentricity"
+        << "compactness" << "circularity" << "squareness" << "convexityDefects"
+        // central normalized moments
+        << "nu00" << "nu11" << "nu02" << "nu30" << "nu21" << "nu12" << "nu03"
+        << endrow;
+
+    // write data row
+    csv << label;
+    for (int d=0; d<numDesc; ++d)
+        csv << handDesc.get(d).asDouble();
+
+    csv << endrow;
 }
 
 // IDL functions
@@ -103,18 +168,12 @@ bool HandAffManagerModule::attach(RpcServer &source)
 }
 
 /***************************************************/
-bool HandAffManagerModule::handPosture(const string &posture)
+bool HandAffManagerModule::setHandPosture(const string &posture)
 {
     // sanity checks
     if (rpcHandActionsPort.getOutputCount()<1)
     {
         yError("no connection to handActions RPC server");
-        return false;
-    }
-
-    if (inHandDescPort.getInputCount()<1)
-    {
-        yError("no connection to hand descriptors");
         return false;
     }
 
@@ -137,6 +196,7 @@ bool HandAffManagerModule::handPosture(const string &posture)
             handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
         {
             yInfo("successfully set real hand posture to %s", posture.c_str());
+            currPosture = posture; // save it for later
         }
         else
         {
@@ -185,20 +245,21 @@ bool HandAffManagerModule::handPosture(const string &posture)
         return false;
     }
 
-    // ask user to confirm whether simulated hand is properly visible
-    yInfo("in the RPC terminal, type \"yes\" if simulated hand is properly visible, \"no\" otherwise");
-    while(!gotSomething)
-        yarp::os::Time::delay(0.1);
-    if (!userConfirmation)
+    return true;
+}
+
+/***************************************************/
+bool HandAffManagerModule::getHandDescriptors()
+{
+    // sanity checks
+    if (inHandDescPort.getInputCount()<1)
     {
-        yWarning("received information that simulated hand is not properly visible!");
+        yError("no connection to hand descriptors");
         return false;
     }
-    yInfo("received confirmation that simulated hand is properly visible, will now acquire descriptors");
-    gotSomething = false; // reset variable
 
     // acquire hand top descriptors
-    handTopDesc.clear();
+    handDesc.clear();
     Bottle *inHandDesc = inHandDescPort.read(true);
     if (inHandDesc != NULL)
     {
@@ -206,13 +267,18 @@ bool HandAffManagerModule::handPosture(const string &posture)
         if (inHandDesc->size() != expectedDescSize)
             yWarning("got %d hand descriptors instead of %d", inHandDesc->size(), expectedDescSize);
 
-        const int firstTopIdx = 13;
-        const int lastTopIdx = 25;
-        for (int d=firstTopIdx; d<=25; ++d)
-            handTopDesc.addDouble(inHandDesc->get(d).asDouble());
+        // whole
+        const int firstIdx = 0;
+        const int lastIdx = 12;
+        // top
+        //const int firstIdx = 13;
+        //const int lastIdx = 25;
+        for (int d=firstIdx; d<=lastIdx; ++d)
+            handDesc.addDouble(inHandDesc->get(d).asDouble());
     }
 
-    yInfo("successfully acquired hand top descriptors");
+    yInfo("successfully acquired hand descriptors");
+    yInfo("%s", handDesc.toString().c_str());
 
     return true;
 }

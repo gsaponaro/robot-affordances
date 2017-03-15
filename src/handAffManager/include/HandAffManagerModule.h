@@ -13,6 +13,8 @@
 
 #include <string>
 
+#include <boost/filesystem.hpp>
+
 #include <yarp/os/all.h>
 //#include <yarp/os/RpcClient.h>
 #include <yarp/dev/all.h>
@@ -38,10 +40,14 @@ private:
     yarp::os::RpcClient rpcHandActionsPort;
     yarp::os::RpcClient rpcRobotHandProcessorPort;
 
-    yarp::os::Bottle handTopDesc;
+    yarp::os::Bottle handDesc;
 
     bool gotSomething;
     bool userConfirmation;
+
+    std::string basePath;
+
+    std::string currPosture;
 
 public:
 
@@ -51,9 +57,12 @@ public:
     double getPeriod();
     bool updateModule();
 
+    void saveDescToFile(const std::string &label);
+
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
-    bool handPosture(const std::string &posture);
+    bool setHandPosture(const std::string &posture);
+    bool getHandDescriptors();
     bool yes();
     bool no();
     bool quit();

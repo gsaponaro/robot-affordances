@@ -21,7 +21,7 @@ service handActions_IDL
     bool home();
 
     /**
-     * Set fingers to one of the desired postures.
+     * Set fingers to one of the permitted postures: straight, fortyfive, bent.
      * @param posture type of fingers bending
      * @return true/false on success/failure
      */
@@ -67,5 +67,5 @@ service handActions_IDL
      * Quit the module.
      * @return true/false on success/failure
      */
-    bool quit();  
+    bool quit();
 }
