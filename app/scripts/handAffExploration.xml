@@ -232,4 +232,10 @@
       <to>/handActions/rpc:i</to>
   </connection>
 
+  <connection>
+      <from>/handAffManager/robotHandProcessor:rpc</from>
+      <to>/robotHandProcessor/rpc:i</to>
+  </connection>
+
+
 </application>
