@@ -258,7 +258,7 @@ bool HandAffManagerModule::getHandDescriptors()
         return false;
     }
 
-    // acquire hand top descriptors
+    // acquire hand descriptors
     handDesc.clear();
     Bottle *inHandDesc = inHandDescPort.read(true);
     if (inHandDesc != NULL)
