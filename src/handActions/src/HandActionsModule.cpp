@@ -70,6 +70,8 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
     {
         yDebug("draw");
         approach[0] -= 0.10;
+        // increase y when using right_arm, decrease y when using left_arm
+        approach[1] += 0.03*(arm=="right_arm" ? 1 : -1);
     }
 
     iarm->goToPoseSync(approach,o);
@@ -103,6 +105,8 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
     else if(side.compare("top")==0) // draw
     {
         targetModified[0] += 0.1;
+        // increase y when using right_arm, decrease y when using left_arm
+        targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
         iarm->setTrajTime(1.3);
     }
 
@@ -116,7 +120,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 {
     string moduleName = rf.check("name",Value("handActions")).asString();
     string robot = rf.check("robot",Value("icub")).asString();
-    string arm = rf.check("arm",Value("left_arm")).asString();
+    arm = rf.check("arm",Value("left_arm")).asString();
     if (arm!="left_arm" && arm!="right_arm")
     {
         yWarning("invalid arm %s specified, using the default (left_arm)", arm.c_str());

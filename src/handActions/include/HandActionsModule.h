@@ -32,6 +32,8 @@ protected:
     yarp::dev::PolyDriver drvArmPos;
     yarp::dev::PolyDriver drvTorso;
 
+    std::string arm;
+
     yarp::dev::IGazeControl *igaze;
     yarp::dev::IEncoders *encsA;
     yarp::dev::ICartesianControl *iarm;
