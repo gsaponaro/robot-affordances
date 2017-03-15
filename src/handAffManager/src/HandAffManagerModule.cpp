@@ -33,6 +33,9 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     rpcRobotHandProcessorPortName = "/" + moduleName + "/robotHandProcessor:rpc";
     rpcRobotHandProcessorPort.open(rpcRobotHandProcessorPortName.c_str());
 
+    gotSomething = false;
+    userConfirmation = false;
+
     //closing = false;
 
     rpcPort.open("/"+moduleName+"/rpc:i");
@@ -124,6 +127,7 @@ bool HandAffManagerModule::handPosture(const string &posture)
     // set robot hand *on the real robot*
     if (posture=="straight" || posture=="fortyfive" || posture=="bent")
     {
+        yDebug("requesting %s hand posture on the real robot", posture.c_str());
         Bottle handActionsCmd;
         Bottle handActionsReply;
         handActionsCmd.addString("setFingers");
@@ -150,7 +154,10 @@ bool HandAffManagerModule::handPosture(const string &posture)
     Bottle simCmd;
     Bottle simReply;
     simCmd.addString("resetKinematics"); // arm
+    yDebug("setting simulated arm kinematics to be like the real robot...");
     rpcRobotHandProcessorPort.write(simCmd, simReply);
+    yDebug("...done");
+
     if (simReply.size()>0 &&
         simReply.get(0).asVocab()==Vocab::encode("ok"))
     {
@@ -164,20 +171,31 @@ bool HandAffManagerModule::handPosture(const string &posture)
     simCmd.clear();
     simReply.clear();
     simCmd.addString("look");
-    string desiredHand = "right_hand";
+    string desiredHand = "left_hand";
     simCmd.addString(desiredHand);
     rpcRobotHandProcessorPort.write(simCmd, simReply);
     if (simReply.size()>0 &&
         simReply.get(0).asVocab()==Vocab::encode("ok"))
     {
         yInfo("successfully simulated looking at %s", desiredHand.c_str());
-        yDebug("please visually check the simulated hand image!");
     }
     else
     {
         yError("problem when simulating looking at %s", desiredHand.c_str());
         return false;
     }
+
+    // ask user to confirm whether simulated hand is properly visible
+    yInfo("in the RPC terminal, type \"yes\" if simulated hand is properly visible, \"no\" otherwise");
+    while(!gotSomething)
+        yarp::os::Time::delay(0.1);
+    if (!userConfirmation)
+    {
+        yWarning("received information that simulated hand is not properly visible!");
+        return false;
+    }
+    yInfo("received confirmation that simulated hand is properly visible, will now acquire descriptors");
+    gotSomething = false; // reset variable
 
     // acquire hand top descriptors
     handTopDesc.clear();
@@ -196,6 +214,22 @@ bool HandAffManagerModule::handPosture(const string &posture)
 
     yInfo("successfully acquired hand top descriptors");
 
+    return true;
+}
+
+/***************************************************/
+bool HandAffManagerModule::yes()
+{
+    gotSomething = true;
+    userConfirmation = true;
+    return true;
+}
+
+/***************************************************/
+bool HandAffManagerModule::no()
+{
+    gotSomething = true;
+    userConfirmation = false;
     return true;
 }
 

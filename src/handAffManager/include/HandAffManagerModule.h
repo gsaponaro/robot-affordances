@@ -40,6 +40,9 @@ private:
 
     yarp::os::Bottle handTopDesc;
 
+    bool gotSomething;
+    bool userConfirmation;
+
 public:
 
     bool configure(yarp::os::ResourceFinder &rf);
@@ -51,6 +54,8 @@ public:
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
     bool handPosture(const std::string &posture);
+    bool yes();
+    bool no();
     bool quit();
 };
 

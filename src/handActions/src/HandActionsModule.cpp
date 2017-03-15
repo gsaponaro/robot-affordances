@@ -339,6 +339,14 @@ void HandActionsModule::moveHand(const int postureType)
         //posA->setRefSpeed(firstHandJoint+j,handVels[j]);
         posA->positionMove(firstHandJoint+j,(*poss)[j]);
     }
+
+    // wait for the last positionMove to be complete
+    bool done=false;
+    while (!done)
+    {
+        yarp::os::Time::delay(0.01);
+        posA->checkMotionDone(&done);
+    }
 }
 
 /***************************************************/

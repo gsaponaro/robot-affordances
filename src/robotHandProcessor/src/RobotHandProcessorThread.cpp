@@ -147,9 +147,9 @@ void RobotHandProcessorThread::mainProcessing()
 /***************************************************/
 bool RobotHandProcessorThread::look(const string &target)
 {
-    if (target != "right_hand")
+    if (target != "left_hand")
     {
-        yError("for now, the only valid target is right_hand");
+        yError("for now, the only valid target is left_hand");
         return false;
     }
 
@@ -160,12 +160,12 @@ bool RobotHandProcessorThread::look(const string &target)
     }
 
     // head joints corresponding to target position
-    headJoints[0] = 30.0;
-    headJoints[1] =  0.0;
-    headJoints[2] = 30.0;
-    headJoints[3] =  0.0;
-    headJoints[4] =  0.0;
-    headJoints[5] =  0.0;
+    headJoints[0] =  30.0;
+    headJoints[1] =   0.0;
+    headJoints[2] = -30.0;
+    headJoints[3] =   0.0;
+    headJoints[4] =   0.0;
+    headJoints[5] =   0.0;
 
     // move head
     Bottle &outHeadJoints = outHeadJointsPort.prepare();

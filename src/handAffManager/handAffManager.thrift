@@ -17,6 +17,18 @@ service handAffManager_IDL
     bool handPosture(1:string posture);
 
     /**
+     * Positive response by user to request for information.
+     * @return true/false on success/failure
+     */
+    bool yes();
+
+    /**
+     * Negative response by user to request for information.
+     * @return true/false on success/failure
+     */
+    bool no();
+
+    /**
      * Quit the module.
      * @return true/false on success/failure
      */
