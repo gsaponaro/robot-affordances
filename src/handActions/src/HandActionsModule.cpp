@@ -150,9 +150,9 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 
     straightHandPoss.resize(9, 0.0);
     straightHandPoss[0] =  0.0; // j7
-    straightHandPoss[1] = 30.0;
-    straightHandPoss[2] = 10.0;
-    straightHandPoss[3] =  0.0;
+    straightHandPoss[1] = 10.0;
+    straightHandPoss[2] = 55.0;
+    straightHandPoss[3] = 34.0;
     straightHandPoss[4] = 10.0; // j11
     straightHandPoss[5] = 10.0;
     straightHandPoss[6] = 10.0; // j13
@@ -161,9 +161,9 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 
     fortyfiveHandPoss.resize(9, 0.0);
     fortyfiveHandPoss[0] =  0.0; // j7
-    fortyfiveHandPoss[1] = 30.0;
-    fortyfiveHandPoss[2] = 10.0;
-    fortyfiveHandPoss[3] =  0.0;
+    fortyfiveHandPoss[1] = 10.0;
+    fortyfiveHandPoss[2] = 55.0;
+    fortyfiveHandPoss[3] = 34.0;
     fortyfiveHandPoss[4] = 45.0; // j11
     fortyfiveHandPoss[5] = 10.0;
     fortyfiveHandPoss[6] = 45.0; // j13
@@ -172,9 +172,9 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 
     bentHandPoss.resize(9, 0.0);
     bentHandPoss[0] =  0.0; // j7
-    bentHandPoss[1] = 30.0;
-    bentHandPoss[2] = 10.0;
-    bentHandPoss[3] =  0.0;
+    bentHandPoss[1] = 10.0;
+    bentHandPoss[2] = 55.0;
+    bentHandPoss[3] = 34.0;
     bentHandPoss[4] = 74.0; // j11
     bentHandPoss[5] = 10.0;
     bentHandPoss[6] = 72.0; // j13
