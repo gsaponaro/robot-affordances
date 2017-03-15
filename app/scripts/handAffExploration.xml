@@ -5,9 +5,9 @@
   <dependencies>
       <port>/icub/camcalib/left/out</port>
       <port>/icub/cartesianController/left_arm/state:o</port>
-      <port>/icub/cartesianController/right_arm/state:o</port>
+      <!-- <port>/icub/cartesianController/right_arm/state:o</port> -->
       <port>/wholeBodyDynamics/left_arm/cartesianEndEffectorWrench:o</port>
-      <port>/wholeBodyDynamics/right_arm/cartesianEndEffectorWrench:o</port>
+      <!-- <port>/wholeBodyDynamics/right_arm/cartesianEndEffectorWrench:o</port> -->
       <port>/iKinGazeCtrl/rpc</port>
       <port>/iCubUnitySim/cam/left</port>
   </dependencies>
@@ -168,7 +168,7 @@
 
   <connection>
       <from>/robotHandProcessor/armJoints:o</from>
-      <to>/iCubUnitySim/rightArm:i</to>
+      <to>/iCubUnitySim/leftArm:i</to>
   </connection>
 
   <connection>
