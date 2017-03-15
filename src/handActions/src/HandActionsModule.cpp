@@ -143,6 +143,9 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     else
         yDebug("disabled hand movements");
 
+    rpcManagerPortName = "/" + moduleName + "/handAffManager:rpc";
+    rpcManagerPort.open(rpcManagerPortName.c_str());
+
     closing = false;
 
     rpcPort.open("/"+moduleName+"/rpc:i");
@@ -291,6 +294,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 /***************************************************/
 bool HandActionsModule::interruptModule()
 {
+    rpcManagerPort.interrupt();
     rpcPort.interrupt();
 
     return true;
@@ -307,6 +311,7 @@ bool HandActionsModule::close()
         drvTorso.close();
     }
 
+    rpcManagerPort.close();
     rpcPort.close();
 
     return true;
@@ -322,6 +327,68 @@ double HandActionsModule::getPeriod()
 bool HandActionsModule::updateModule()
 {
     return !closing;
+}
+
+/***************************************************/
+bool HandActionsModule::ensureNumVisibleObjects(int desiredNum)
+{
+    // sanity check
+    if (rpcManagerPort.getOutputCount()<1)
+    {
+        yError("no connection to handAffManager RPC server");
+        return false;
+    }
+
+    // send rpc query, verify if returned number equals the desired one
+    Bottle handMgrCmd;
+    Bottle handMgrReply;
+    handMgrCmd.addString("getNumVisibleObjects");
+    rpcManagerPort.write(handMgrCmd, handMgrReply);
+    if (handMgrReply.size()>0 &&
+        handMgrReply.get(0).asInt()==desiredNum)
+    {
+        return true;
+    }
+    else
+    {
+        yWarning("there are %d visible objects", handMgrReply.get(0).asInt());
+        return false;
+    }
+}
+
+/***************************************************/
+bool HandActionsModule::getObject3D(double x, double y, double z)
+{
+    // sanity check
+    if (rpcManagerPort.getOutputCount()<1)
+    {
+        yError("no connection to handAffManager RPC server");
+        return false;
+    }
+
+    Bottle handMgrCmd;
+    Bottle handMgrReply;
+    handMgrCmd.addString("getObject3D");
+    rpcManagerPort.write(handMgrCmd, handMgrReply);
+
+    bool validReply = handMgrReply.size()>0 &&
+                      handMgrReply.get(0).isList() &&
+                      handMgrReply.get(0).asList()->size()==3;
+
+    if (validReply)
+    {
+        x = handMgrReply.get(0).asList()->get(0).asDouble();
+        y = handMgrReply.get(0).asList()->get(1).asDouble();
+        z = handMgrReply.get(0).asList()->get(2).asDouble();
+        return true;
+    }
+    else
+    {
+        yWarning("invalid reply to getObject3D: %s", handMgrReply.toString().c_str());
+        return false;
+    }
+
+    return validReply;
 }
 
 /***************************************************/
@@ -538,7 +605,78 @@ bool HandActionsModule::setFingers(const std::string &posture)
 }
 
 /***************************************************/
-bool HandActionsModule::tapFromLeft(const double x, const double y, const double z)
+bool HandActionsModule::tapFromLeft()
+{
+    if (!ensureNumVisibleObjects(1))
+    {
+        return false;
+    }
+
+    double x, y, z;
+    if (!getObject3D(x,y,z))
+    {
+        yError("problem with getObject3D");
+        return false;
+    }
+
+    return tapFromLeftCoords(x,y,z);
+}
+
+/***************************************************/
+bool HandActionsModule::tapFromRight()
+{
+    if (!ensureNumVisibleObjects(1))
+    {
+        return false;
+    }
+
+    double x, y, z;
+    if (!getObject3D(x,y,z))
+    {
+        yError("problem with getObject3D");
+        return false;
+    }
+
+    return tapFromRightCoords(x,y,z);
+}
+
+/***************************************************/
+bool HandActionsModule::push()
+{
+    if (!ensureNumVisibleObjects(1))
+    {
+        return false;
+    }
+
+    double x, y, z;
+    if (!getObject3D(x,y,z))
+    {
+        yError("problem with getObject3D");
+        return false;
+    }
+
+    return pushCoords(x,y,z);
+}
+
+/***************************************************/
+bool HandActionsModule::draw()
+{
+    if (!ensureNumVisibleObjects(1))
+    {
+        return false;
+    }
+
+    double x, y, z;
+    if (!getObject3D(x,y,z))
+    {
+        yError("problem with getObject3D");
+        return false;
+    }
+
+    return drawCoords(x,y,z);}
+
+/***************************************************/
+bool HandActionsModule::tapFromLeftCoords(const double x, const double y, const double z)
 {
     Vector targetPos(3);
     targetPos[0] = x;
@@ -561,7 +699,7 @@ bool HandActionsModule::tapFromLeft(const double x, const double y, const double
 }
 
 /***************************************************/
-bool HandActionsModule::tapFromRight(const double x, const double y, const double z)
+bool HandActionsModule::tapFromRightCoords(const double x, const double y, const double z)
 {
     Vector targetPos(3);
     targetPos[0] = x;
@@ -584,7 +722,7 @@ bool HandActionsModule::tapFromRight(const double x, const double y, const doubl
 }
 
 /***************************************************/
-bool HandActionsModule::push(const double x, const double y, const double z)
+bool HandActionsModule::pushCoords(const double x, const double y, const double z)
 {
     Vector targetPos(3);
     targetPos[0] = x;
@@ -607,7 +745,7 @@ bool HandActionsModule::push(const double x, const double y, const double z)
 }
 
 /***************************************************/
-bool HandActionsModule::draw(const double x, const double y, const double z)
+bool HandActionsModule::drawCoords(const double x, const double y, const double z)
 {
     Vector targetPos(3);
     targetPos[0] = x;

@@ -28,40 +28,64 @@ service handActions_IDL
     bool setFingers(1:string posture);
 
     /**
-     * Tap an object from the left.
-     * @param x object 3D x position in meters
-     * @param y object 3D y position in meters
-     * @param z object 3D z position in meters
+     * Tap an object from the left. Only one object must be visible.
      * @return true/false on success/failure
      */
-    bool tapFromLeft(1:double x, 2:double y, 3:double z);
+    bool tapFromLeft();
 
     /**
-     * Tap an object from the right.
-     * @param x object 3D x position in meters
-     * @param y object 3D y position in meters
-     * @param z object 3D z position in meters
+     * Tap an object from the right. Only one object must be visible.
      * @return true/false on success/failure
      */
-    bool tapFromRight(1:double x, 2:double y, 3:double z);
+    bool tapFromRight();
 
     /**
-     * Push an object away from the robot.
-     * @param x object 3D x position in meters
-     * @param y object 3D y position in meters
-     * @param z object 3D z position in meters
+     * Push an object away from the robot. Only one object must be visible.
      * @return true/false on success/failure
      */
-    bool push(1:double x, 2:double y, 3:double z);
+    bool push();
 
     /**
-     * Draw an object closer to the robot.
+     * Draw an object closer to the robot. Only one object must be visible.
+     * @return true/false on success/failure
+     */
+    bool draw();
+
+    /**
+     * Tap an object from the left, specifying the object coordinates.
      * @param x object 3D x position in meters
      * @param y object 3D y position in meters
      * @param z object 3D z position in meters
      * @return true/false on success/failure
      */
-    bool draw(1:double x, 2:double y, 3:double z);
+    bool tapFromLeftCoords(1:double x, 2:double y, 3:double z);
+
+    /**
+     * Tap an object from the right, specifying the object coordinates.
+     * @param x object 3D x position in meters
+     * @param y object 3D y position in meters
+     * @param z object 3D z position in meters
+     * @return true/false on success/failure
+     */
+    bool tapFromRightCoords(1:double x, 2:double y, 3:double z);
+
+    /**
+     * Push an object away from the robot, specifying the object coordinates.
+     * @param x object 3D x position in meters
+     * @param y object 3D y position in meters
+     * @param z object 3D z position in meters
+     * @return true/false on success/failure
+     */
+    bool pushCoords(1:double x, 2:double y, 3:double z);
+
+    /**
+     * Draw an object closer to the robot, specifying the object coordinates.
+     * @param x object 3D x position in meters
+     * @param y object 3D y position in meters
+     * @param z object 3D z position in meters
+     * @return true/false on success/failure
+     */
+    bool drawCoords(1:double x, 2:double y, 3:double z);
 
     /**
      * Quit the module.

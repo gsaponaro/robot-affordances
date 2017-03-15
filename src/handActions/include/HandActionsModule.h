@@ -47,6 +47,9 @@ protected:
     bool closing;
     yarp::os::RpcServer rpcPort;
 
+    std::string rpcManagerPortName;
+    yarp::os::RpcClient rpcManagerPort;
+
     yarp::os::Mutex mutex;
     int *controlModesArm;
     int nAxesA;
@@ -73,6 +76,9 @@ public:
     double getPeriod();
     bool updateModule();
 
+    bool ensureNumVisibleObjects(int desiredNum);
+    bool getObject3D(double x, double y, double z);
+
     void moveHand(const int postureType);
     bool safetyCheck(const yarp::sig::Vector &targetPos, const std::string &side);
 
@@ -81,10 +87,14 @@ public:
     bool look_down();
     bool home();
     bool setFingers(const std::string &posture);
-    bool tapFromLeft(const double x, const double y, const double z);
-    bool tapFromRight(const double x, const double y, const double z);
-    bool push(const double x, const double y, const double z);
-    bool draw(const double x, const double y, const double z);
+    bool tapFromLeft();
+    bool tapFromRight();
+    bool push();
+    bool draw();
+    bool tapFromLeftCoords(const double x, const double y, const double z);
+    bool tapFromRightCoords(const double x, const double y, const double z);
+    bool pushCoords(const double x, const double y, const double z);
+    bool drawCoords(const double x, const double y, const double z);
     bool quit();
 };
 
