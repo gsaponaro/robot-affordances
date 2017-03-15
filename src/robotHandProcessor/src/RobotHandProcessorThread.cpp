@@ -129,7 +129,7 @@ void RobotHandProcessorThread::mainProcessing()
         outMat = Scalar::all(255) - outMat;
 
         // apply morphological transformation to fill holes
-        Mat element = getStructuringElement(MORPH_ELLIPSE, Size(3,3));
+        Mat element = getStructuringElement(MORPH_ELLIPSE, Size(10,10));
         morphologyEx(outMat, outMat, MORPH_CLOSE, element);
 
         // send image on yarp port
