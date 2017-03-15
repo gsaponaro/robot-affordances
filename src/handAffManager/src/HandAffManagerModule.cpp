@@ -36,6 +36,9 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     rpcRobotHandProcessorPortName = "/" + moduleName + "/robotHandProcessor:rpc";
     rpcRobotHandProcessorPort.open(rpcRobotHandProcessorPortName.c_str());
 
+    rpcGazePortName = "/" + moduleName + "/gaze:rpc";
+    rpcGazePort.open(rpcGazePortName.c_str());
+
     gotSomething = false;
     userConfirmation = false;
 
@@ -83,19 +86,6 @@ double HandAffManagerModule::getPeriod()
 /***************************************************/
 bool HandAffManagerModule::updateModule()
 {
-    /*
-    if (inHandDescPort.getInputCount()>0 && inObjDescPort.getInputCount()>0)
-    {
-        Bottle *inHandDesc = inHandDescPort.read(true);
-        Bottle *inObjDesc = inObjDescPort.read(true);
-
-        if (inHandDesc!=NULL && inObjDesc!=NULL)
-        {
-
-        }
-    }
-    */
-
     // if we have made a call to getHandDescriptors()...
     if (handDesc.size()>0)
     {
@@ -264,16 +254,16 @@ bool HandAffManagerModule::getHandDescriptors()
     Bottle *inHandDesc = inHandDescPort.read(true);
     if (inHandDesc != NULL)
     {
-        const int expectedDescSize = 39;
+        const int expectedDescSize = 41;
         if (inHandDesc->size() != expectedDescSize)
             yWarning("got %d hand descriptors instead of %d", inHandDesc->size(), expectedDescSize);
 
         // whole
-        const int firstIdx = 0;
-        const int lastIdx = 12;
+        const int firstIdx = 2;
+        const int lastIdx = 14;
         // top
-        //const int firstIdx = 13;
-        //const int lastIdx = 25;
+        //const int firstIdx = 15;
+        //const int lastIdx = 27;
         for (int d=firstIdx; d<=lastIdx; ++d)
             handDesc.addDouble(inHandDesc->get(d).asDouble());
     }
@@ -298,6 +288,84 @@ bool HandAffManagerModule::no()
     gotSomething = true;
     userConfirmation = false;
     return true;
+}
+
+/***************************************************/
+int32_t HandAffManagerModule::getNumVisibleObjects()
+{
+    if (inObjDescPort.getInputCount()>0)
+    {
+        Bottle *inObjDesc = inObjDescPort.read(true);
+
+        if (inObjDesc!=NULL)
+        {
+            // descriptorReduction already ensures that there is only 1 blob
+            return 1;
+        }
+    }
+
+    yError("something wrong with getNumVisibleObjects");
+    const int errorCode = -1;
+    return errorCode;
+}
+
+/***************************************************/
+Bottle HandAffManagerModule::getObject3D()
+{
+    Bottle res;
+    res.clear();
+
+    if (inObjDescPort.getInputCount()>0 && rpcGazePort.getOutputCount()>0)
+    {
+        Bottle *inObjDesc = inObjDescPort.read(true);
+
+        if (inObjDesc!=NULL)
+        {
+            // descriptorReduction already ensures that there is only 1 blob
+            const double u = inObjDesc->get(0).asDouble();
+            const double v = inObjDesc->get(1).asDouble();
+
+            const string eye = "left"; // we always use left camera so far
+
+            // heigh of the table in z direction [m]
+            const double tableOffset = -0.10; // TODO parameterize
+
+            const double planeA =  0.0;
+            const double planeB =  0.0;
+            const double planeC = -1.0;
+            const double planeD = tableOffset;
+
+            // convert coords from 2D to 3D via RPC queries to gaze control
+            Bottle cmd;
+            Bottle reply;
+            // use homography, equivalent to IGaze client get3DPointOnPlane()
+            cmd.addVocab(Vocab::encode("get"));
+            cmd.addVocab(Vocab::encode("3D"));
+            cmd.addVocab(Vocab::encode("proj"));
+            cmd.addVocab(Vocab::encode(eye));
+            cmd.addDouble(u);
+            cmd.addDouble(v);
+            cmd.addDouble(planeA);
+            cmd.addDouble(planeB);
+            cmd.addDouble(planeC);
+            cmd.addDouble(planeD);
+
+            rpcGazePort.write(cmd, reply);
+            yDebug("reply from gaze: %s", reply.toString().c_str());
+            if (reply.get(0).asVocab()==Vocab::encode("ack") &&
+                reply.size()==4) // ack x y z
+            {
+                res.addDouble(reply.get(1).asDouble());
+                res.addDouble(reply.get(2).asDouble());
+                res.addDouble(reply.get(3).asDouble());
+                res.addDouble(reply.get(4).asDouble());
+            }
+            else
+                yWarning("problem with iKinGazeCtrl RPC");
+        }
+    }
+
+    return res;
 }
 
 /***************************************************/

@@ -8,6 +8,12 @@
 #
 # handAffManager.thrift
 
+struct Bottle { }
+(
+yarp.name = "yarp::os::Bottle"
+yarp.includefile="yarp/os/Bottle.h"
+)
+
 service handAffManager_IDL
 {
     /**
@@ -34,6 +40,18 @@ service handAffManager_IDL
      * @return true/false on success/failure
      */
     bool no();
+
+    /**
+     * Get number of objects that are currently found by segmentation.
+     * @return int number of visible objects
+     */
+    i32 getNumVisibleObjects();
+
+    /**
+     * Get the 3D position of an object.
+     * @return Bottle containing 3D offset
+     */
+    Bottle getObject3D();
 
     /**
      * Quit the module.

@@ -36,10 +36,12 @@ private:
     std::string inObjDescPortName;
     std::string rpcHandActionsPortName;
     std::string rpcRobotHandProcessorPortName;
+    std::string rpcGazePortName;
     yarp::os::BufferedPort<yarp::os::Bottle> inHandDescPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inObjDescPort;
     yarp::os::RpcClient rpcHandActionsPort;
     yarp::os::RpcClient rpcRobotHandProcessorPort;
+    yarp::os::RpcClient rpcGazePort;
 
     yarp::os::Bottle handDesc;
 
@@ -66,6 +68,8 @@ public:
     bool getHandDescriptors();
     bool yes();
     bool no();
+    int32_t getNumVisibleObjects();
+    yarp::os::Bottle getObject3D();
     bool quit();
 };
 

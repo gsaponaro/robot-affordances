@@ -546,6 +546,7 @@ bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
         centerBotCnt.addDouble(mom.m10/mom.m00);
         centerBotCnt.addDouble(mom.m01/mom.m00);
 
+        // TODO: permit disabling spatialMoments while keeping center
         Bottle &smBot = b.addList();
         smBot.addString("spatialMoments");
         Bottle &smBotCnt = smBot.addList();

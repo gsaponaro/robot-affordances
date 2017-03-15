@@ -30,7 +30,7 @@ const std::string DefUseCircularity             = ValueOn;
 const std::string DefUseSquareness              = ValueOn;
 const std::string DefUsePerimeter               = ValueOff;
 const std::string DefUseElongation              = ValueOff;
-const std::string DefSpatialMomentsCenterOfMass = ValueOff;
+const std::string DefSpatialMomentsCenterOfMass = ValueOn;
 const std::string DefCentralMoments             = ValueOff;
 const std::string DefCentralNormalizedMoments   = ValueOn;
 

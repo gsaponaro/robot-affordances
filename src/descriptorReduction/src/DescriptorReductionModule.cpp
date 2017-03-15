@@ -90,9 +90,12 @@ bool DescriptorReductionModule::updateModule()
             pBottom.fromString(inPartDesc->get(0).asList()->get(1).asList()->toString().c_str());
 
             Bottle &r = outReducedDescPort.prepare();
-            // we will output 3 * 13 = 39 numbers, as follows
+            // we will output 2 + 3*13 numbers, as follows
             r.clear();
-            // whole: 0 - 12
+            // centroid of whole blob: 0 - 1
+            r.addDouble(pWhole.find("center").asList()->get(0).asDouble());
+            r.addDouble(pWhole.find("center").asList()->get(1).asDouble());
+            // whole descriptors: 2 - 14
             r.addDouble(pWhole.find("convexity").asList()->get(0).asDouble());
             r.addDouble(pWhole.find("eccentricity").asList()->get(0).asDouble());
             r.addDouble(pWhole.find("compactness").asList()->get(0).asDouble());
@@ -106,7 +109,7 @@ bool DescriptorReductionModule::updateModule()
             r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(4).asDouble());
             r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(5).asDouble());
             r.addDouble(pWhole.find("centralNormalizedMoments").asList()->get(6).asDouble());
-            // top: 13 - 25
+            // top part descriptors: 15 - 27
             r.addDouble(pTop.find("convexity").asList()->get(0).asDouble());
             r.addDouble(pTop.find("eccentricity").asList()->get(0).asDouble());
             r.addDouble(pTop.find("compactness").asList()->get(0).asDouble());
@@ -120,7 +123,7 @@ bool DescriptorReductionModule::updateModule()
             r.addDouble(pTop.find("centralNormalizedMoments").asList()->get(4).asDouble());
             r.addDouble(pTop.find("centralNormalizedMoments").asList()->get(5).asDouble());
             r.addDouble(pTop.find("centralNormalizedMoments").asList()->get(6).asDouble());
-            // bottom: 26 - 38
+            // bottom part descriptors: 28 - 40
             r.addDouble(pBottom.find("convexity").asList()->get(0).asDouble());
             r.addDouble(pBottom.find("eccentricity").asList()->get(0).asDouble());
             r.addDouble(pBottom.find("compactness").asList()->get(0).asDouble());

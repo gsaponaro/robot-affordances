@@ -237,5 +237,9 @@
       <to>/robotHandProcessor/rpc:i</to>
   </connection>
 
+  <connection>
+      <from>/handAffManager/gaze:rpc</from>
+      <to>/iKinGazeCtrl/rpc</to>
+  </connection>
 
 </application>
