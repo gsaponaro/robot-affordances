@@ -3,6 +3,7 @@
  *                Istituto Superior Técnico, Universidade de Lisboa, Lisbon, Portugal
  * Author: Giovanni Saponaro <gsaponaro@isr.tecnico.ulisboa.pt>,
  *         Atabak Dehban <adehban@isr.tecnico.ulisboa.pt>,
+ *         Pedro Vicente <pvicente@isr.tecnico.ulisboa.pt>,
  *         Lorenzo Jamone, Afonso Gonçalves
  * CopyPolicy: Released under the terms of the GNU GPL v3.0
  *
