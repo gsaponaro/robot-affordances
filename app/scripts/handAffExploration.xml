@@ -219,12 +219,17 @@
 
   <connection>
       <from>/drHand/desc:o</from>
-      <to>/handAffManager/objHand:i</to>
+      <to>/handAffManager/handDesc:i</to>
   </connection>
 
   <connection>
       <from>/drObj/desc:o</from>
-      <to>/handAffManager/objObj:i</to>
+      <to>/handAffManager/objDesc:i</to>
+  </connection>
+
+  <connection>
+      <from>/handAffManager/handActions:rpc</from>
+      <to>/handActions/rpc:i</to>
   </connection>
 
 </application>
