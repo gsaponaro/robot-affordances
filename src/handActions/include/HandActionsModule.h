@@ -33,6 +33,7 @@ protected:
     yarp::dev::PolyDriver drvTorso;
 
     std::string arm;
+    bool useHand;
 
     yarp::dev::IGazeControl *igaze;
     yarp::dev::IEncoders *encsA;

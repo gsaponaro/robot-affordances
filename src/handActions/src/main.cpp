@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
         yInfo("--name <name of module> (default handActions)");
         yInfo("--robot <name of robot> (default icub)");
         yInfo("--arm <arm to use> (default left_arm)");
+        yInfo("--useHand <on|off> (default on)");
 
         return 0; // EXIT_SUCCESS
     }

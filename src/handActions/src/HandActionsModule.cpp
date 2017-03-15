@@ -20,6 +20,9 @@ using namespace yarp::math;
 /***************************************************/
 void HandActionsModule::fixate(const Vector &x)
 {
+    if (!useHand)
+        return;
+
     igaze->lookAtFixationPoint(x);
     igaze->waitMotionDone();
     //igaze->setTrackingMode(true);
@@ -38,6 +41,9 @@ Vector HandActionsModule::computeHandOrientation()
 /***************************************************/
 bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o, string side)
 {
+    if (!useHand)
+        return false;
+
     if (!safetyCheck(x,side))
     {
         yWarning("action is dangerous, I will not do it!");
@@ -83,6 +89,9 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
 /***************************************************/
 void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string side)
 {
+    if (!useHand)
+        return;
+
     double tempotempo;
     iarm->getTrajTime(&tempotempo);
     iarm->setTrajTime(0.7);
@@ -126,6 +135,18 @@ bool HandActionsModule::configure(ResourceFinder &rf)
         yWarning("invalid arm %s specified, using the default (left_arm)", arm.c_str());
         arm = "left_arm";
     }
+    useHand = rf.check("useHand",Value("on")).asString()=="on"?true:false;
+    if (useHand)
+    {
+        yDebug("enabled hand movements");
+    }
+    else
+        yDebug("disabled hand movements");
+
+    closing = false;
+
+    rpcPort.open("/"+moduleName+"/rpc:i");
+    attach(rpcPort);
 
     straightHandPoss.resize(9, 0.0);
     straightHandPoss[0] =  0.0; // j7
@@ -260,14 +281,9 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 
     if (!drvTorso.view(posT) || !drvTorso.view(ctrlMT))
     {
-       cout << moduleName << ": problems acquiring interfaces to remote_controlboard of Torso"<< endl;
+        yError("problems acquiring interfaces to remote_controlboard of torso");
         return false;
     }
-
-    closing = false;
-
-    rpcPort.open("/"+moduleName+"/rpc:i");
-    attach(rpcPort);
 
     return true;
 }
@@ -283,10 +299,13 @@ bool HandActionsModule::interruptModule()
 /***************************************************/
 bool HandActionsModule::close()
 {
-    drvGaze.close();
-    drvArm.close();
-    drvArmPos.close();
-    drvTorso.close();
+    if (useHand)
+    {
+        drvGaze.close();
+        drvArm.close();
+        drvArmPos.close();
+        drvTorso.close();
+    }
 
     rpcPort.close();
 
@@ -308,6 +327,9 @@ bool HandActionsModule::updateModule()
 /***************************************************/
 void HandActionsModule::moveHand(const int postureType)
 {
+    if (!useHand)
+        return;
+
     Vector *poss = NULL;
 
     switch (postureType)
@@ -419,7 +441,8 @@ bool HandActionsModule::home()
     // set control modes
     ctrlMA->getControlModes(controlModesArm);
 
-    for(int i=0; i<nAxesA; i++)
+    const int lastArmJoint = 7;
+    for(int i=0; i<lastArmJoint; i++)
     {
         if (controlModesArm[i]!=VOCAB_CM_POSITION)
         {
@@ -449,12 +472,12 @@ bool HandActionsModule::home()
     }
 
     // move arm
-    const double ARM_DEF_HOME[] = {-50.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0,     20.0,  30.0,10.0,10.0,  10.0,10.0, 10.0,10.0,  10.0};
+    const double ARM_DEF_HOME[] = {-50.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0};
 
     //posA->setRefSpeeds(handVels.data()); // 9 or 16 values?
 
     //posA->positionMove(ARM_DEF_HOME);
-    for (int i=0; i<7; i++) // arm joints, no hand joints
+    for (int i=0; i<lastArmJoint; i++) // arm joints, no hand joints
     {
         posA->positionMove(i, ARM_DEF_HOME[i]);
     }
