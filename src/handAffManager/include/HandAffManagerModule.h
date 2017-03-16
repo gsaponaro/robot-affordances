@@ -45,8 +45,8 @@ private:
 
     yarp::os::Bottle handDesc;
 
-    bool gotSomething;
-    bool userConfirmation;
+    bool needUserConfirmation;
+    bool userResponse;
 
     std::string basePath;
 

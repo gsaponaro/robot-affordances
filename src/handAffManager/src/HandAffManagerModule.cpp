@@ -39,8 +39,8 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     rpcGazePortName = "/" + moduleName + "/gaze:rpc";
     rpcGazePort.open(rpcGazePortName.c_str());
 
-    gotSomething = false;
-    userConfirmation = false;
+    needUserConfirmation = false;
+    userResponse = false;
 
     basePath = rf.getHomeContextPath().c_str();
     yDebug("basePath: %s", basePath.c_str());
@@ -86,20 +86,20 @@ double HandAffManagerModule::getPeriod()
 /***************************************************/
 bool HandAffManagerModule::updateModule()
 {
-    // if we have made a call to getHandDescriptors()...
-    if (handDesc.size()>0)
+    // enter here after getHandDescriptors has filled handDesc
+    if (needUserConfirmation && handDesc.size()>0)
     {
         // ask user to confirm whether simulated hand & descriptors are good
-        yWarning("if the simulated hand is properly visible and the descriptors make sense, type \"yes\" (in the RPC terminal), otherwise type \"no\"");
-        while(!gotSomething)
+        yInfo("if the simulated hand is properly visible and the descriptors make sense, type \"yes\" (in the RPC terminal), otherwise type \"no\"");
+        while(!needUserConfirmation)
             yarp::os::Time::delay(0.1);
-        if (!userConfirmation)
+        if (!userResponse)
         {
             yWarning("no -> will reset hand descriptors, please restart the acquisition");
             handDesc.clear();
+            return true;
         }
         yInfo("yes -> will save hand descriptors to file");
-        gotSomething = false; // reset variable
 
         // make sure that currPosture is up to date
         if (currPosture == "")
@@ -268,8 +268,9 @@ bool HandAffManagerModule::getHandDescriptors()
             handDesc.addDouble(inHandDesc->get(d).asDouble());
     }
 
-    yInfo("successfully acquired hand descriptors");
+    yInfo("hand descriptors acquired:");
     yInfo("%s", handDesc.toString().c_str());
+    needUserConfirmation = true;
 
     return true;
 }
@@ -277,16 +278,16 @@ bool HandAffManagerModule::getHandDescriptors()
 /***************************************************/
 bool HandAffManagerModule::yes()
 {
-    gotSomething = true;
-    userConfirmation = true;
+    needUserConfirmation = false; // reset variable
+    userResponse = true;
     return true;
 }
 
 /***************************************************/
 bool HandAffManagerModule::no()
 {
-    gotSomething = true;
-    userConfirmation = false;
+    needUserConfirmation = false; // reset variable
+    userResponse = false;
     return true;
 }
 

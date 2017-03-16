@@ -17,38 +17,38 @@ yarp.includefile="yarp/os/Bottle.h"
 service handAffManager_IDL
 {
     /**
-     * Set fingers to one of the permitted postures: straight, fortyfive,
-     * bent.
+     * Set robot fingers to one of the permitted postures: straight, fortyfive,
+     * bent. This is done first on the real robot, then in the Unity simulator.
      * @return true/false on success/failure
      */
     bool setHandPosture(1:string posture);
 
     /**
-     * Acquire shape descriptors of the hand.
+     * Acquire shape descriptors of the hand from the Unity simulator.
      * @return true/false on success/failure
      */
     bool getHandDescriptors();
 
     /**
-     * Positive response by user to request for information.
+     * Provide positive user response to a program request for information.
      * @return true/false on success/failure
      */
     bool yes();
 
     /**
-     * Negative response by user to request for information.
+     * Provide negative user response to a program request for information.
      * @return true/false on success/failure
      */
     bool no();
 
     /**
-     * Get number of objects that are currently found by segmentation.
+     * Get the number of objects that are currently seen by segmentation.
      * @return int number of visible objects
      */
     i32 getNumVisibleObjects();
 
     /**
-     * Get the 3D position of an object.
+     * Get the 3D position of the (only) object currently seen by segmentation.
      * @return Bottle containing 3D offset
      */
     Bottle getObject3D();
