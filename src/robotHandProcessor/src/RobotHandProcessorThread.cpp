@@ -60,6 +60,8 @@ void RobotHandProcessorThread::interrupt()
     closing = true;
 
     inImgPort.interrupt();
+    inArmJointsPort.interrupt();
+    inHeadJointsPort.interrupt();
     outImgPort.interrupt();
     outArmJointsPort.interrupt();
     outHeadJointsPort.interrupt();
@@ -69,6 +71,8 @@ void RobotHandProcessorThread::interrupt()
 void RobotHandProcessorThread::close()
 {
     inImgPort.close();
+    inArmJointsPort.close();
+    inHeadJointsPort.close();
     outImgPort.close();
     outArmJointsPort.close();
     outHeadJointsPort.close();
@@ -81,6 +85,12 @@ bool RobotHandProcessorThread::openPorts()
 
     inImgPortName = "/" + moduleName + "/image:i";
     ret = ret && inImgPort.open(inImgPortName.c_str());
+
+    inArmJointsPortName = "/" + moduleName + "/armJoints:i";
+    ret = ret && inArmJointsPort.open(inArmJointsPortName.c_str());
+
+    inHeadJointsPortName = "/" + moduleName + "/headJoints:i";
+    ret = ret && inHeadJointsPort.open(inHeadJointsPortName.c_str());
 
     outImgPortName = "/" + moduleName + "/image:o";
     ret = ret && outImgPort.open(outImgPortName.c_str());

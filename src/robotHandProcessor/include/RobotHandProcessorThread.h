@@ -41,10 +41,14 @@ private:
     double timeSinceArmUpdate;
 
     std::string inImgPortName;
+    std::string inArmJointsPortName;
+    std::string inHeadJointsPortName;
     std::string outImgPortName;
     std::string outArmJointsPortName;
     std::string outHeadJointsPortName;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inImgPort;
+    yarp::os::BufferedPort<yarp::os::Bottle> inArmJointsPort;
+    yarp::os::BufferedPort<yarp::os::Bottle> inHeadJointsPort;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outImgPort;
     yarp::os::BufferedPort<yarp::os::Bottle> outArmJointsPort;
     yarp::os::BufferedPort<yarp::os::Bottle> outHeadJointsPort;

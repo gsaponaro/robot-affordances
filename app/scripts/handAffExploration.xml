@@ -13,6 +13,13 @@
   </dependencies>
 
   <module>
+      <name>handAffManager</name>
+      <node>localhost</node>
+  </module>
+
+  <!-- object pipeline modules -->
+
+  <module>
       <name>lbpExtract</name>
       <parameters>--name lbpObj</parameters>
       <node>localhost</node>
@@ -47,6 +54,8 @@
       <node>localhost</node>
       <parameters>--name /view/obj/desc --x 660 --y 0 --p 33</parameters>
   </module>
+
+  <!-- hand pipeline modules -->
 
   <!--
   <module>
@@ -98,10 +107,7 @@
       <parameters>--name /view/hand/desc --x 660 --y 360 --p 33</parameters>
   </module>
 
-  <module>
-      <name>handAffManager</name>
-      <node>localhost</node>
-  </module>
+  <!-- object pipeline connections -->
 
   <connection>
       <from>/icub/camcalib/left/out</from>
@@ -155,10 +161,22 @@
       <to>/drObj/partDescriptors:i</to>
   </connection>
 
+  <!-- hand pipeline connections -->
+
   <connection>
       <from>/iCubUnitySim/cam/left</from>
       <to>/robotHandProcessor/image:i</to>
       <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/iCubUnitySim/leftArm:o</from>
+      <to>/robotHandProcessor/armJoints:i</to>
+  </connection>
+
+  <connection>
+      <from>/iCubUnitySim/head:o</from>
+      <to>/robotHandProcessor/headJoints:i</to>
   </connection>
 
   <connection>
