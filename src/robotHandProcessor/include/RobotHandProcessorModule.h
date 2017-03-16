@@ -43,6 +43,16 @@ public:
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
     bool quit();
+    bool look(const std::string &target);
+    bool resetKinematics();
+    double getArmPos(const int32_t joint);
+    yarp::os::Bottle getArmPoss();
+    bool setArmPos(const int32_t joint, const double value);
+    bool setArmPoss(const yarp::os::Bottle &values);
+    double getHeadPos(const int32_t joint);
+    yarp::os::Bottle getHeadPoss();
+    bool setHeadPos(const int32_t joint, const double value);
+    bool setHeadPoss(const yarp::os::Bottle &values);
 };
 
 #endif // ROBOT_HAND_PROCESSOR_MODULE_H

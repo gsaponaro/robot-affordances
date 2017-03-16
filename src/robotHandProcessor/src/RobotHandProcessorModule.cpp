@@ -89,3 +89,63 @@ bool RobotHandProcessorModule::quit()
 
     return true;
 }
+
+/***************************************************/
+bool RobotHandProcessorModule::look(const string &target)
+{
+    return thread->look(target);
+}
+
+/***************************************************/
+bool RobotHandProcessorModule::resetKinematics()
+{
+    return thread->resetKinematics();
+}
+
+/***************************************************/
+double RobotHandProcessorModule::getArmPos(int32_t joint)
+{
+    return thread->getArmPos(joint);
+}
+
+/***************************************************/
+Bottle RobotHandProcessorModule::getArmPoss()
+{
+    return thread->getArmPoss();
+}
+
+/***************************************************/
+bool RobotHandProcessorModule::setArmPos(const int32_t joint, const double value)
+{
+    return thread->setArmPos(joint,value);
+}
+
+/***************************************************/
+bool RobotHandProcessorModule::setArmPoss(const Bottle &values)
+{
+    return thread->setArmPoss(values);
+}
+
+/***************************************************/
+double RobotHandProcessorModule::getHeadPos(const int32_t joint)
+{
+    return thread->getHeadPos(joint);
+}
+
+/***************************************************/
+Bottle RobotHandProcessorModule::getHeadPoss()
+{
+    return thread->getHeadPoss();
+}
+
+/***************************************************/
+bool RobotHandProcessorModule::setHeadPos(const int32_t joint, const double value)
+{
+    return thread->setHeadPos(joint,value);
+}
+
+/***************************************************/
+bool RobotHandProcessorModule::setHeadPoss(const Bottle &values)
+{
+    return thread->setHeadPoss(values);
+}

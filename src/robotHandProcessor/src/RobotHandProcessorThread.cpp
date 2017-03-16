@@ -35,13 +35,7 @@ bool RobotHandProcessorThread::threadInit()
     closing = false;
 
     numArmJoints = 16;
-    armJoints.resize(numArmJoints, 0.0);
-
     numHeadJoints = 6;
-    headJoints.resize(numHeadJoints, 0.0);
-
-    armHasChanged = false;
-    timeSinceArmUpdate = Time::now();
 
     return true;
 }
@@ -110,26 +104,21 @@ void RobotHandProcessorThread::mainProcessing()
     if (closing)
         return;
 
-    // send updated arm joint values periodically
-    if (armHasChanged &&
-        outArmJointsPort.getOutputCount()>0 &&
-        timeSinceArmUpdate>5.0)
+    if (inImgPort.getInputCount()<1)
     {
-        Bottle &outJoints = outArmJointsPort.prepare();
-        outJoints.clear();
-        for (int j=0; j<numArmJoints; ++j)
-        {
-            outJoints.addDouble(armJoints[j]);
-        }
-        outArmJointsPort.write();
-        timeSinceArmUpdate = Time::now();
+        yarp::os::Time::delay(0.1);
+        return;
     }
+
+    //LockGuard lg(mutex);
 
     ImageOf<PixelBgr> *inImg;
     inImg = inImgPort.read(true);
 
     if (inImg != NULL)
     {
+        //yDebug("processing image");
+
         // create OpenCV output image, for now identical to input image
         // (foreground 0 black, background 255 white)
         Mat outMat;
@@ -157,102 +146,294 @@ void RobotHandProcessorThread::mainProcessing()
 /***************************************************/
 bool RobotHandProcessorThread::look(const string &target)
 {
+    if (outHeadJointsPort.getOutputCount()<1)
+    {
+        yError("missing connection: %s /iCubUnitySim/head:i", outHeadJointsPortName.c_str());
+        return false;
+    }
+
     if (target != "left_hand")
     {
         yError("for now, the only valid target is left_hand");
         return false;
     }
 
-    if (outHeadJointsPort.getOutputCount()<1)
-    {
-        yWarning("not connected to iCubUnitySim head:i");
-        return false;
-    }
-
     // head joints corresponding to target position
-    headJoints[0] = -30.0;
-    headJoints[1] =   0.0;
-    headJoints[2] =  30.0;
-    headJoints[3] =   0.0;
-    headJoints[4] =   0.0;
-    headJoints[5] =   0.0;
+    Vector headPoss;
+    headPoss.resize(6, 0.0);
+    headPoss[0] = -30.0;
+    headPoss[1] =   0.0;
+    headPoss[2] =  30.0;
+    headPoss[3] =   0.0;
+    headPoss[4] =   0.0;
+    headPoss[5] =   0.0;
 
-    // move head
-    Bottle &outHeadJoints = outHeadJointsPort.prepare();
+    // send head joints to Unity simulator
+    Bottle bHeadPoss;
+    bHeadPoss.clear();
     for (int j=0; j<numHeadJoints; ++j)
-    {
-        outHeadJoints.addDouble(headJoints[j]);
-    }
-    outHeadJointsPort.write();
-    yInfo("successfully looked at target position");
+        bHeadPoss.addDouble(headPoss[j]);
 
-    return true;
+    return setHeadPoss(bHeadPoss);
 }
 
 /***************************************************/
 bool RobotHandProcessorThread::resetKinematics()
 {
-    yarp::os::Network::connect("/icub/right_arm/state:o", "/iCubUnitySim/rightArm:i");
-    yInfo("connected /icub/right_arm/state:o /iCubUnitySim/rightArm:i/iCubUnitySim/rightArm:i");
+    yarp::os::Network::connect("/icub/left_arm/state:o", "/iCubUnitySim/leftArm:i");
+    yInfo("connected /icub/left_arm/state:o /iCubUnitySim/leftArm:i");
 
     yarp::os::Time::delay(1.0);
 
-    yarp::os::Network::disconnect("/icub/right_arm/state:o", "/iCubUnitySim/rightArm:i");
-    yInfo("disconnected /icub/right_arm/state:o /iCubUnitySim/rightArm:i/iCubUnitySim/rightArm:i");
+    yarp::os::Network::disconnect("/icub/left_arm/state:o", "/iCubUnitySim/leftArm:i");
+    yInfo("disconnected /icub/left_arm/state:o /iCubUnitySim/leftArm:i");
+
+    yarp::os::Time::delay(1.0);
+
+    yarp::os::Network::connect("/icub/head/state:o", "/iCubUnitySim/head:i");
+    yInfo("connected /icub/head/state:o /iCubUnitySim/head:i");
+
+    yarp::os::Time::delay(1.0);
+
+    yarp::os::Network::disconnect("/icub/head/state:o", "/iCubUnitySim/head:i");
+    yInfo("disconnected /icub/head/state:o /iCubUnitySim/head:i");
 
     return true;
 }
 
 /***************************************************/
-double RobotHandProcessorThread::getArmPos(int32_t joint)
+double RobotHandProcessorThread::getArmPos(const int32_t joint)
 {
-    if (joint<0 || joint>numArmJoints)
+    double errorValue = -1.0;
+
+    if (inArmJointsPort.getInputCount()<1)
     {
-        yError("getPos: joint argument must be between 0 and %d", numArmJoints);
-        return 0.0; // error value
+        yError("missing connection: /iCubUnitySim/leftArm:o %s", inArmJointsPortName.c_str());
+        return errorValue;
     }
 
-    return armJoints(joint);
+    if (joint<0 || joint>numArmJoints)
+    {
+        yError("getArmPos: joint argument must be between 0 and %d", numArmJoints-1);
+        return errorValue;
+    }
+
+    Bottle *inArmJoints;
+    inArmJoints = inArmJointsPort.read(true);
+
+    if (inArmJoints != NULL)
+    {
+        if (inArmJoints->size() == numArmJoints)
+        {
+            return inArmJoints->get(joint).asDouble();
+        }
+    }
+
+    return errorValue;
 }
 
 /***************************************************/
-bool RobotHandProcessorThread::setArmPos(int32_t joint, double value)
+Bottle RobotHandProcessorThread::getArmPoss()
 {
-    if (joint<0 || joint>numArmJoints)
+    if (inArmJointsPort.getInputCount()<1)
     {
-        yError("setPos: joint argument must be between 0 and %d", numArmJoints);
+        yError("missing connection: /iCubUnitySim/leftArm:o %s", inArmJointsPortName.c_str());
+        return Bottle();
+    }
+
+    //LockGuard lg(mutex);
+
+    Bottle *inArmJoints;
+    inArmJoints = inArmJointsPort.read(true);
+
+    if (inArmJoints != NULL)
+        return *inArmJoints;
+    else
+    {
+        yError("getArmPoss problem");
+        return Bottle();
+    }
+}
+
+/***************************************************/
+bool RobotHandProcessorThread::setArmPos(const int32_t joint, const double value)
+{
+    // sanity checks
+    if (outArmJointsPort.getOutputCount()<1)
+    {
+        yError("missing connection: %s /iCubUnitySim/leftArm:i", outArmJointsPortName.c_str());
         return false;
     }
 
-    armJoints[joint] = value;
-    armHasChanged = true;
-
-    // create string with joint values truncated to a desired decimal precision
-    // http://stackoverflow.com/a/5113241/1638888
-    stringstream armJointsTrunc;
-    armJointsTrunc.precision(2);
-    armJointsTrunc << fixed;
-    bool lastIteration = false;
-    for (int j=0; j<numArmJoints; ++j)
+    if (joint<0 || joint>numArmJoints)
     {
-        armJointsTrunc << armJoints[j];
-        if (!lastIteration)
-            armJointsTrunc << " ";
+        yError("setPos: joint argument must be between 0 and %d", numArmJoints-1);
+        return false;
     }
 
-    yInfo("arm joints: %s", armJointsTrunc.str().c_str());
+    // get current joints
+    Bottle currentArmPoss = getArmPoss();
+
+    // construct output Bottle
+    Bottle &outArmJoints = outArmJointsPort.prepare();
+    outArmJoints.clear();
+    if (currentArmPoss.size() == numArmJoints)
+    {
+        // copy current joint values, except for the entry to overwrite
+        for (int j=0; j<numArmJoints; ++j)
+        {
+            if (j != joint)
+                outArmJoints.addDouble(currentArmPoss.get(j).asDouble());
+            else
+                outArmJoints.addDouble(value);
+        }
+    }
+
+    // send output Bottle
+    outArmJointsPort.write();
 
     return true;
 }
 
 /***************************************************/
-Vector RobotHandProcessorThread::getArmPoss()
+bool RobotHandProcessorThread::setArmPoss(const Bottle &values)
 {
-    return Vector();
+    if (outArmJointsPort.getOutputCount()<1)
+    {
+        yError("missing connection: %s /iCubUnitySim/leftArm:i", outArmJointsPortName.c_str());
+        return false;
+    }
+
+    if (values.size() != numArmJoints)
+    {
+        yError("setArmPoss argument must be a Bottle with %d elements enclosed within ( )", numArmJoints);
+        return false;
+    }
+
+    Bottle &valuesCopy = outArmJointsPort.prepare();
+    valuesCopy.clear();
+
+    for (int j=0; j<numArmJoints; ++j)
+        valuesCopy.addDouble(values.get(j).asDouble());
+
+    outArmJointsPort.write();
+
+    return true;
 }
 
 /***************************************************/
-bool RobotHandProcessorThread::setArmPoss(const Vector &values)
+double RobotHandProcessorThread::getHeadPos(const int32_t joint)
 {
+    double errorValue = -1.0;
+
+    if (inHeadJointsPort.getInputCount()<1)
+    {
+        yError("missing connection: /iCubUnitySim/head:o %s", inHeadJointsPortName.c_str());
+        return errorValue;
+    }
+
+    if (joint<0 || joint>numHeadJoints)
+    {
+        yError("getHeadPos: joint argument must be between 0 and %d", numHeadJoints-1);
+        return errorValue;
+    }
+
+    Bottle *inHeadJoints;
+    inHeadJoints = inHeadJointsPort.read(true);
+
+    if (inHeadJoints != NULL)
+    {
+        if (inHeadJoints->size() == numHeadJoints)
+        {
+            return inHeadJoints->get(joint).asDouble();
+        }
+    }
+
+    return errorValue;
+}
+
+/***************************************************/
+Bottle RobotHandProcessorThread::getHeadPoss()
+{
+    if (inHeadJointsPort.getInputCount()<1)
+    {
+        yError("missing connection: /iCubUnitySim/head:o %s", inHeadJointsPortName.c_str());
+        return Bottle();
+    }
+
+    //LockGuard lg(mutex);
+
+    Bottle *inHeadJoints;
+    inHeadJoints = inHeadJointsPort.read(true);
+
+    if (inHeadJoints != NULL)
+        return *inHeadJoints;
+}
+
+/***************************************************/
+bool RobotHandProcessorThread::setHeadPos(const int32_t joint, const double value)
+{
+    // sanity checks
+    if (outHeadJointsPort.getOutputCount()<1)
+    {
+        yError("missing connection: %s /iCubUnitySim/head:i", outHeadJointsPortName.c_str());
+        return false;
+    }
+
+    if (joint<0 || joint>numHeadJoints)
+    {
+        yError("setHeadPos: joint argument must be between 0 and %d", numHeadJoints-1);
+        return false;
+    }
+
+    // get current joints
+    Bottle currentHeadPoss = getHeadPoss();
+
+    // construct output Bottle
+    Bottle &outHeadJoints = outHeadJointsPort.prepare();
+    outHeadJoints.clear();
+    if (currentHeadPoss.size() == numHeadJoints)
+    {
+        // copy current joint values, except for the entry to overwrite
+        for (int j=0; j<numHeadJoints; ++j)
+        {
+            if (j != joint)
+                outHeadJoints.addDouble(currentHeadPoss.get(j).asDouble());
+            else
+                outHeadJoints.addDouble(value);
+        }
+    }
+
+    // send output Bottle
+    outHeadJointsPort.write();
+
+    return true;
+}
+
+/***************************************************/
+bool RobotHandProcessorThread::setHeadPoss(const Bottle &values)
+{
+    if (outHeadJointsPort.getOutputCount()<1)
+    {
+        yError("missing connection: %s /iCubUnitySim/head:i", outHeadJointsPortName.c_str());
+        return false;
+    }
+
+    if (values.size() != numHeadJoints)
+    {
+        yError("setHeadPoss argument must be a Bottle with %d elements enclosed within ( )", numHeadJoints);
+        return false;
+    }
+
+    //LockGuard lg(mutex);
+
+    Bottle &valuesCopy = outHeadJointsPort.prepare();
+    valuesCopy.clear();
+
+    for (int j=0; j<numHeadJoints; ++j)
+        valuesCopy.addDouble(values.get(j).asDouble());
+
+    outHeadJointsPort.write();
+
     return true;
 }

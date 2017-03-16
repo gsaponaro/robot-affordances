@@ -5,25 +5,23 @@
 #
 # robotHandProcessor.thrift
 
-struct Vector {
-    1: list<double> content;
-}
+struct Bottle { }
 (
-    yarp.name = "yarp::sig::Vector"
-    yarp.includefile = "yarp/sig/Vector.h"
+    yarp.name = "yarp::os::Bottle"
+    yarp.includefile = "yarp/os/Bottle.h"
 )
 
 service robotHandProcessor_IDL
 {
     /**
      * Command the simulated head so that it gazes at a target.
-     * @param target string containing the name of the target (e.g. right_hand)
+     * @param target string containing the name of the target (e.g. left_hand)
      * @return true/false on success/failure
      */
     bool look(1:string target);
 
     /**
-     * Reset arm kinematics to real joint values.
+     * Reset simulated joints (arm and head) to the real robot ones.
      * @return true/false on success/failure
      */
     bool resetKinematics();
@@ -36,6 +34,12 @@ service robotHandProcessor_IDL
     double getArmPos(1:i32 joint);
 
     /**
+     * Get the current values of all the arm joints.
+     * @return Bottle list of joint values
+     */
+    Bottle getArmPoss();
+
+    /**
      * Set an arm joint to a value.
      * @param joint the index of the joint (0..15)
      * @param value desired value in degrees
@@ -44,17 +48,39 @@ service robotHandProcessor_IDL
     bool setArmPos(1:i32 joint, 2:double value);
 
     /**
-     * Get the current values of all the arm joints.
-     * @return Vector of joint values
-     */
-    Vector getArmPoss();
-
-    /**
      * Set all the arm joints to a desired vector of values.
-     * @param values Vector of desired values in degrees
+     * @param values Bottle of desired values in degrees, enclosed within ( )
      * @return true/false on success/failure
      */
-    bool setArmPoss(1:Vector values);
+    bool setArmPoss(1:Bottle values);
+
+    /**
+     * Get the current value of a head joint.
+     * @param joint the index of the joint (0..5)
+     * @return true/false on success/failure
+     */
+    double getHeadPos(1:i32 joint);
+
+    /**
+     * Get the current values of all the head joints.
+     * @return Bottle list of joint values
+     */
+    Bottle getHeadPoss();
+
+    /**
+     * Set a head joint to a value.
+     * @param joint the index of the joint (0..5)
+     * @param value desired value in degrees
+     * @return true/false on success/failure
+     */
+    bool setHeadPos(1:i32 joint, 2:double value);
+
+    /**
+     * Set all the head joints to a desired vector of values.
+     * @param values Bottle of desired values in degrees, enclosed within ( )
+     * @return true/false on success/failure
+     */
+    bool setHeadPoss(1:Bottle values);
 
     /**
      * Quit the module.

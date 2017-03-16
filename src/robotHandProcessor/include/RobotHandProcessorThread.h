@@ -17,31 +17,27 @@
 
 #include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
+//#include <yarp/os/LockGuard.h>
 #include <yarp/os/Log.h>
+//#include <yarp/os/Mutex.h>
 #include <yarp/os/RateThread.h>
 #include <yarp/os/ResourceFinder.h>
 #include <yarp/os/Time.h>
 #include <yarp/sig/Image.h>
 #include <yarp/sig/Vector.h>
 
-#include "robotHandProcessor_IDL.h"
-
 /***************************************************/
-class RobotHandProcessorThread : public yarp::os::RateThread,
-                                 public robotHandProcessor_IDL
+class RobotHandProcessorThread : public yarp::os::RateThread
 {
 private:
 
     std::string moduleName;
     yarp::os::ResourceFinder rf;
     bool closing;
+    //yarp::os::Mutex mutex;
 
     int numArmJoints;
     int numHeadJoints;
-    yarp::sig::Vector armJoints;
-    yarp::sig::Vector headJoints;
-    bool armHasChanged; // at least one joint changed w.r.t. initial defaults
-    double timeSinceArmUpdate;
 
     std::string inImgPortName;
     std::string inArmJointsPortName;
@@ -71,10 +67,13 @@ public:
     // IDL functions
     bool look(const std::string &target);
     bool resetKinematics();
-    double getArmPos(int32_t joint);
-    bool setArmPos(int32_t joint, double value);
-    yarp::sig::Vector getArmPoss();
-    bool setArmPoss(const yarp::sig::Vector &values);
-};
+    double getArmPos(const int32_t joint);
+    yarp::os::Bottle getArmPoss();
+    bool setArmPos(const int32_t joint, const double value);
+    bool setArmPoss(const yarp::os::Bottle &values);
+    double getHeadPos(const int32_t joint);
+    yarp::os::Bottle getHeadPoss();
+    bool setHeadPos(const int32_t joint, double value);
+    bool setHeadPoss(const yarp::os::Bottle &values);};
 
 #endif // ROBOT_HAND_PROCESSOR_THREAD_H
