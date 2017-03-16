@@ -5,14 +5,16 @@
 #
 # robotHandProcessor.thrift
 
+struct Vector {
+    1: list<double> content;
+}
+(
+    yarp.name = "yarp::sig::Vector"
+    yarp.includefile = "yarp/sig/Vector.h"
+)
+
 service robotHandProcessor_IDL
 {
-    /**
-     * Quit the module.
-     * @return true/false on success/failure
-     */
-    bool quit();
-
     /**
      * Command the simulated head so that it gazes at a target.
      * @param target string containing the name of the target (e.g. right_hand)
@@ -31,7 +33,7 @@ service robotHandProcessor_IDL
      * @param joint the index of the joint (0..15)
      * @return true/false on success/failure
      */
-    double getPos(1:i32 joint);
+    double getArmPos(1:i32 joint);
 
     /**
      * Set an arm joint to a value.
@@ -39,5 +41,24 @@ service robotHandProcessor_IDL
      * @param value desired value in degrees
      * @return true/false on success/failure
      */
-    bool setPos(1:i32 joint, 2:double value);
+    bool setArmPos(1:i32 joint, 2:double value);
+
+    /**
+     * Get the current values of all the arm joints.
+     * @return Vector of joint values
+     */
+    Vector getArmPoss();
+
+    /**
+     * Set all the arm joints to a desired vector of values.
+     * @param values Vector of desired values in degrees
+     * @return true/false on success/failure
+     */
+    bool setArmPoss(1:Vector values);
+
+    /**
+     * Quit the module.
+     * @return true/false on success/failure
+     */
+    bool quit();
 }

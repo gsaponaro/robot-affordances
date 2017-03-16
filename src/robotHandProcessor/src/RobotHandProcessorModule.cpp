@@ -89,32 +89,3 @@ bool RobotHandProcessorModule::quit()
 
     return true;
 }
-
-/***************************************************/
-bool RobotHandProcessorModule::look(const string &target)
-{
-    return thread->look(target);
-}
-
-/***************************************************/
-double RobotHandProcessorModule::getPos(int32_t joint)
-{
-    return thread->getPos(joint);
-}
-
-/***************************************************/
-bool RobotHandProcessorModule::setPos(int32_t joint, double value)
-{
-    return thread->setPos(joint, value);
-}
-
-/***************************************************/
-bool RobotHandProcessorModule::resetKinematics()
-{
-    return thread->resetKinematics();
-
-
-    yInfo("arm kinematics has been reset to real joint values");
-
-    return true;
-}

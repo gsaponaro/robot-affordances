@@ -204,7 +204,7 @@ bool RobotHandProcessorThread::resetKinematics()
 }
 
 /***************************************************/
-double RobotHandProcessorThread::getPos(int32_t joint)
+double RobotHandProcessorThread::getArmPos(int32_t joint)
 {
     if (joint<0 || joint>numArmJoints)
     {
@@ -216,7 +216,7 @@ double RobotHandProcessorThread::getPos(int32_t joint)
 }
 
 /***************************************************/
-bool RobotHandProcessorThread::setPos(int32_t joint, double value)
+bool RobotHandProcessorThread::setArmPos(int32_t joint, double value)
 {
     if (joint<0 || joint>numArmJoints)
     {
@@ -242,5 +242,17 @@ bool RobotHandProcessorThread::setPos(int32_t joint, double value)
 
     yInfo("arm joints: %s", armJointsTrunc.str().c_str());
 
+    return true;
+}
+
+/***************************************************/
+Vector RobotHandProcessorThread::getArmPoss()
+{
+    return Vector();
+}
+
+/***************************************************/
+bool RobotHandProcessorThread::setArmPoss(const Vector &values)
+{
     return true;
 }

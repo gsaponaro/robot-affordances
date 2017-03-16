@@ -24,8 +24,11 @@
 #include <yarp/sig/Image.h>
 #include <yarp/sig/Vector.h>
 
+#include "robotHandProcessor_IDL.h"
+
 /***************************************************/
-class RobotHandProcessorThread : public yarp::os::RateThread
+class RobotHandProcessorThread : public yarp::os::RateThread,
+                                 public robotHandProcessor_IDL
 {
 private:
 
@@ -68,8 +71,10 @@ public:
     // IDL functions
     bool look(const std::string &target);
     bool resetKinematics();
-    double getPos(int32_t joint);
-    bool setPos(int32_t joint, double value);
+    double getArmPos(int32_t joint);
+    bool setArmPos(int32_t joint, double value);
+    yarp::sig::Vector getArmPoss();
+    bool setArmPoss(const yarp::sig::Vector &values);
 };
 
 #endif // ROBOT_HAND_PROCESSOR_THREAD_H
