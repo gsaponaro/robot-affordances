@@ -91,7 +91,7 @@ bool HandAffManagerModule::updateModule()
     {
         // ask user to confirm whether simulated hand & descriptors are good
         yInfo("if the simulated hand is properly visible and the descriptors make sense, type \"yes\" (in the RPC terminal), otherwise type \"no\"");
-        while(!needUserConfirmation)
+        while(needUserConfirmation)
             yarp::os::Time::delay(0.1);
         if (!userResponse)
         {
@@ -148,6 +148,8 @@ void HandAffManagerModule::saveDescToFile(const std::string &label)
         csv << handDesc.get(d).asDouble();
 
     csv << endrow;
+
+    handDesc.clear();
 }
 
 // IDL functions
