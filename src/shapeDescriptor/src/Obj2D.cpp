@@ -28,6 +28,9 @@ bool Obj2D::computeDescriptors()
     if (area <= 0)
         return false;
 
+    if (contour.size()<5) // not enough for fitEllipse
+        return false;
+
     perimeter = arcLength(contour, true);
     convexHull(contour, hull);
     double hull_perimeter = arcLength(hull, true);
