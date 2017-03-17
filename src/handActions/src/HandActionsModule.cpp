@@ -56,31 +56,35 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
     //dof[1]=0;
     //dof[2]=0;
     iarm->setDOF(dof,dummy);
-    Vector approach=x;
+    Vector initialApproach;
+    Vector finalApproach=x;
     if(side.compare("right")==0) // tapFromRight
     {
         yDebug("tapFromRight");
-        approach[1] += 0.1;
+        finalApproach[1] += 0.1;
     }
     else if(side.compare("left")==0) // tapFromLeft
     {
         yDebug("tapFromLeft");
-        approach[1] -= 0.1;
+        finalApproach[1] -= 0.1;
     }
     else if(side.compare("bottom")==0) // push
     {
         yDebug("push");
-        approach[0] += 0.15;
+        finalApproach[0] += 0.15;
     }
     else if(side.compare("top")==0) // draw
     {
         yDebug("draw");
-        approach[0] -= 0.10;
+        finalApproach[0] -= 0.10;
         // increase y when using right_arm, decrease y when using left_arm
-        approach[1] += 0.03*(arm=="right_arm" ? 1 : -1);
+        finalApproach[1] += 0.03*(arm=="right_arm" ? 1 : -1);
     }
-
-    iarm->goToPoseSync(approach,o);
+    initialApproach = finalApproach;
+    initialApproach[2] += 0.1;              // avoid collision with objects during the approach phase
+    iarm->goToPoseSync(initialApproach,o);
+    iarm->waitMotionDone();
+    iarm->goToPoseSync(finalApproach,o);
     iarm->waitMotionDone();
 
     return true;
