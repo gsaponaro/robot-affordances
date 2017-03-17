@@ -80,6 +80,7 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
         // increase y when using right_arm, decrease y when using left_arm
         finalApproach[1] += 0.03*(arm=="right_arm" ? 1 : -1);
     }
+    finalApproach[2] += 0.03;               // Offset - avoid collision with table
     initialApproach = finalApproach;
     initialApproach[2] += 0.1;              // avoid collision with objects during the approach phase
     iarm->goToPoseSync(initialApproach,o);
@@ -122,7 +123,7 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
         targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
         iarm->setTrajTime(1.3);
     }
-
+    targetModified[2] += 0.03;            // Offset - avoid collision with table
     iarm->goToPoseSync(targetModified,o);
     iarm->waitMotionDone();
     iarm->setTrajTime(tempotempo);
@@ -167,26 +168,26 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     straightHandPoss[8] = 10.0; // j15
 
     fortyfiveHandPoss.resize(9, 0.0);
-    fortyfiveHandPoss[0] =  0.0; // j7
-    fortyfiveHandPoss[1] = 10.0;
-    fortyfiveHandPoss[2] = 55.0;
-    fortyfiveHandPoss[3] = 34.0;
-    fortyfiveHandPoss[4] = 45.0; // j11
-    fortyfiveHandPoss[5] = 10.0;
-    fortyfiveHandPoss[6] = 45.0; // j13
-    fortyfiveHandPoss[7] = 10.0;
-    fortyfiveHandPoss[8] = 55.0; // j15
+    fortyfiveHandPoss[0] =   0.0; // j7
+    fortyfiveHandPoss[1] =  10.0;
+    fortyfiveHandPoss[2] =  55.0;
+    fortyfiveHandPoss[3] =  34.0;
+    fortyfiveHandPoss[4] =  85.0; // j11
+    fortyfiveHandPoss[5] =  68.0;
+    fortyfiveHandPoss[6] =  85.0; // j13
+    fortyfiveHandPoss[7] =  42.0;
+    fortyfiveHandPoss[8] = 147.0; // j15
 
     bentHandPoss.resize(9, 0.0);
-    bentHandPoss[0] =  0.0; // j7
-    bentHandPoss[1] = 10.0;
-    bentHandPoss[2] = 55.0;
-    bentHandPoss[3] = 34.0;
-    bentHandPoss[4] = 74.0; // j11
-    bentHandPoss[5] = 10.0;
-    bentHandPoss[6] = 72.0; // j13
-    bentHandPoss[7] = 10.0;
-    bentHandPoss[8] =120.0; // j15
+    bentHandPoss[0] =   0.0; // j7
+    bentHandPoss[1] =  10.0;
+    bentHandPoss[2] =  55.0;
+    bentHandPoss[3] =  34.0;
+    bentHandPoss[4] =  74.0; // j11
+    bentHandPoss[5] =  10.0;
+    bentHandPoss[6] =  72.0; // j13
+    bentHandPoss[7] =  10.0;
+    bentHandPoss[8] = 120.0; // j15
 
     handVels.resize(9, 0.0);
     handVels[0] = 20.0;
@@ -453,21 +454,38 @@ bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &
         return false;
     }
 
-    const double zMaxThresh = -0.09;
+    const double zMaxThresh = -0.13;
     if (targetPos[2] < zMaxThresh)
     {
         yWarning("unsafe z");
         return false;
     }
 
-    // tapFromLeft, tapFromRight with right arm
-    const double yThresh = 0.10;
-    if (side=="left" || side=="right")
+    // tapFromLeft, tapFromRight with left arm
+    if (arm == "left_arm")
     {
-        if (targetPos[1] < yThresh)
+        const double yThresh = 0.10;
+        if (side=="left" || side=="right")
         {
-            yWarning("unsafe y");
-            return false;
+            if (targetPos[1] > yThresh)
+            {
+                yWarning("unsafe y");
+                return false;
+            }
+        }
+    }
+
+    // tapFromLeft, tapFromRight with right arm
+    if (arm == "right_arm")
+    {
+        const double yThresh = -0.10;
+        if (side=="left" || side=="right")
+        {
+            if (targetPos[1] < yThresh)
+            {
+                yWarning("unsafe y");
+                return false;
+            }
         }
     }
 
