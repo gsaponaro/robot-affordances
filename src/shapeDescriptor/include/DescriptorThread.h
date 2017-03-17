@@ -58,6 +58,7 @@ class ShapeDescriptorThread : public yarp::os::RateThread
         int minArea;
         int maxArea;
 
+        bool useCenterOfMass;
         bool useArea;
         bool useConvexity;
         bool useConvexityDefects;

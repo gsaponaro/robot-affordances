@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
         yInfo("--minArea <minimum valid blob area> (default: %d)", DefMinArea);
         yInfo("--maxArea <maximum valid blob area> (default: %d)", DefMaxArea);
         yInfo(" ");
+        yInfo("--center <on|off> (default: %s)", DefUseCenterOfMass.c_str());
         yInfo("--area <on|off> (default: %s)", DefUseArea.c_str());
         yInfo("--convexity <on|off> (default: %s)", DefUseConvexity.c_str());
         yInfo("--convexityDefects <on|off> (default: %s)", DefUseConvexityDefects.c_str());
@@ -46,7 +47,7 @@ int main(int argc, char *argv[])
         yInfo("--squareness <on|off> (default: %s)", DefUseSquareness.c_str());
         yInfo("--perimeter <on|off> (default: %s)", DefUsePerimeter.c_str());
         yInfo("--elongation <on|off> (default: %s)", DefUseElongation.c_str());
-        yInfo("--spatialMoments <on|off> (default: %s)", DefSpatialMomentsCenterOfMass.c_str());
+        yInfo("--spatialMoments <on|off> (default: %s)", DefSpatialMoments.c_str());
         yInfo("--centralMoments <on|off> (default: %s)", DefCentralMoments.c_str());
         yInfo("--centralNormalizedMoments <on|off> (default: %s)", DefCentralNormalizedMoments.c_str());
         yInfo("--boundingRectangle <on|off> (default: %s)", DefBoundingRectangle.c_str());

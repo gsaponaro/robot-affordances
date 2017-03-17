@@ -21,6 +21,7 @@ const int         DefMaxArea    = 8000;
 const std::string ValueOn  = "on";
 const std::string ValueOff = "off";
 
+const std::string DefUseCenterOfMass            = ValueOn;
 const std::string DefUseArea                    = ValueOff;
 const std::string DefUseConvexity               = ValueOn;
 const std::string DefUseConvexityDefects        = ValueOn;
@@ -30,7 +31,7 @@ const std::string DefUseCircularity             = ValueOn;
 const std::string DefUseSquareness              = ValueOn;
 const std::string DefUsePerimeter               = ValueOff;
 const std::string DefUseElongation              = ValueOff;
-const std::string DefSpatialMomentsCenterOfMass = ValueOn;
+const std::string DefSpatialMoments             = ValueOff;
 const std::string DefCentralMoments             = ValueOff;
 const std::string DefCentralNormalizedMoments   = ValueOn;
 

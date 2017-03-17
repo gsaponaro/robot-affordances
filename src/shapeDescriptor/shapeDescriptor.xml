@@ -31,6 +31,7 @@
     <param default="100" desc="minimum valid blob area">minArea</param>
     <param default="3000" desc="maximum valid blob area">maxArea</param>
 
+    <param default="on" desc="enable center of mass">centerOfMass</param>
     <param default="on" desc="enable area">area</param>
     <param default="on" desc="enable convexity">convexity</param>
     <param default="on" desc="enable convexity defects">convexityDefects</param>
@@ -40,9 +41,9 @@
     <param default="on" desc="enable squareness">squareness</param>
     <param default="on" desc="enable perimeter">perimeter</param>
     <param default="on" desc="enable elongation">elongation</param>
-    <param default="on" desc="enable spatial moments (and center of mass)">spatialMoments</param>
+    <param default="off" desc="enable spatial moments">spatialMoments</param>
     <param default="off" desc="enable central moments">centralMoments</param>
-    <param default="off" desc="enable central normalized moments">centralNormalizedMoments</param>
+    <param default="on" desc="enable central normalized moments">centralNormalizedMoments</param>
 
     <param default="off" desc="enable (up-right) bounding rectangle">boundingRectangle</param>
     <param default="off" desc="enable (rotated) enclosing rectangle">enclosingRectangle</param>

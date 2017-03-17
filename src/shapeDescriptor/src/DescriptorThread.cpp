@@ -112,6 +112,7 @@ bool ShapeDescriptorThread::threadInit()
     yInfo("initialized thread with maxObjects=%d minArea=%d maxArea=%d",
           maxObjects, minArea, maxArea);
 
+    useCenterOfMass = rf.check("center",Value(DefUseCenterOfMass)).asString()=="on"?true:false;
     useArea = rf.check("area",Value(DefUseArea)).asString()=="on"?true:false;
     useConvexity = rf.check("convexity",Value(DefUseConvexity)).asString()=="on"?true:false;
     useConvexityDefects = rf.check("convexityDefects",Value(DefUseConvexityDefects)).asString()=="on"?true:false;
@@ -121,7 +122,7 @@ bool ShapeDescriptorThread::threadInit()
     useSquareness = rf.check("squareness",Value(DefUseSquareness)).asString()=="on"?true:false;
     usePerimeter = rf.check("perimeter",Value(DefUsePerimeter)).asString()=="on"?true:false;
     useElongation = rf.check("elongation",Value(DefUseElongation)).asString()=="on"?true:false;
-    useSpatialMoments = rf.check("spatialMoments",Value(DefSpatialMomentsCenterOfMass)).asString()=="on"?true:false;
+    useSpatialMoments = rf.check("spatialMoments",Value(DefSpatialMoments)).asString()=="on"?true:false;
     useCentralMoments = rf.check("centralMoments",Value(DefCentralMoments)).asString()=="on"?true:false;
     useCentralNormalizedMoments = rf.check("centralNormalizedMoments",Value(DefCentralNormalizedMoments)).asString()=="on"?true:false;
     useBoundingRectangle = rf.check("boundingRectangle",Value(DefBoundingRectangle)).asString()=="on"?true:false;
@@ -532,21 +533,24 @@ void ShapeDescriptorThread::run2d()
   */
 bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
 {
-    // acquire raw moments if needed later
+    // acquire raw spatial moments if needed later
     Moments mom;
-    if (useSpatialMoments || useCentralMoments || useCentralNormalizedMoments)
+    if (useCenterOfMass || useSpatialMoments || useCentralMoments || useCentralNormalizedMoments)
         mom = o.getMoments();
 
-    // spatial moments and center of mass info
-    if (useSpatialMoments)
+    // center of mass info (for now computed from spatial moments)
+    if (useCenterOfMass)
     {
         Bottle &centerBot = b.addList();
         centerBot.addString("center");
         Bottle &centerBotCnt = centerBot.addList();
         centerBotCnt.addDouble(mom.m10/mom.m00);
         centerBotCnt.addDouble(mom.m01/mom.m00);
+    }
 
-        // TODO: permit disabling spatialMoments while keeping center
+    // spatial moments and center of mass info
+    if (useSpatialMoments)
+    {
         Bottle &smBot = b.addList();
         smBot.addString("spatialMoments");
         Bottle &smBotCnt = smBot.addList();
