@@ -42,6 +42,21 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     needUserConfirmation = false;
     userResponse = false;
 
+    // hands and objects descriptors file
+    //string filenameHandsObjects = "handsAndObjectsDescriptors.csv";
+    //csvHandsObjects(filenameHandsObjects);
+    /*
+    csvHandsObjects(filenameHandsObjects);
+
+    // write header row
+    csvHandsObjects << "handOrObjectName" << "convexity" << "eccentricity"
+        << "compactness" << "circularity" << "squareness" << "convexityDefects"
+        // central normalized moments
+        << "nu00" << "nu11" << "nu02" << "nu30" << "nu21" << "nu12" << "nu03"
+        << endrow;
+        */
+
+    // effects files
     basePath = rf.getHomeContextPath().c_str();
     yDebug("basePath: %s", basePath.c_str());
 
@@ -129,25 +144,20 @@ void HandAffManagerModule::saveDescToFile(const std::string &label)
         return;
     }
 
+    /*
     // path and file where we will save
     string path = basePath+"/"+label;
     yDebug("path: %s", path.c_str());
-    string filename = "test.csv";
-    csvfile csv(filename);
-
-    // write header row
-    csv << "handOrObjectName" << "convexity" << "eccentricity"
-        << "compactness" << "circularity" << "squareness" << "convexityDefects"
-        // central normalized moments
-        << "nu00" << "nu11" << "nu02" << "nu30" << "nu21" << "nu12" << "nu03"
-        << endrow;
+    */
 
     // write data row
-    csv << label;
+    /*
+    csvHandsObjects << label;
     for (int d=0; d<numDesc; ++d)
-        csv << handDesc.get(d).asDouble();
+        csvHandsObjects << handDesc.get(d).asDouble();
 
-    csv << endrow;
+    csvHandsObjects << endrow;
+    */
 
     handDesc.clear();
 }
@@ -320,7 +330,13 @@ Bottle HandAffManagerModule::getObject3D()
 
     if (inObjDescPort.getInputCount()>0 && rpcGazePort.getOutputCount()>0)
     {
-        Bottle *inObjDesc = inObjDescPort.read(true);
+        Bottle *inObjDesc = inObjDescPort.read(false);
+        double t1 = yarp::os::Time::now();
+        while ((yarp::os::Time::now()-t1 < 5.0) && (inObjDesc == NULL))
+        {
+            inObjDesc = inObjDescPort.read(false);
+            yarp::os::Time::delay(0.1);
+        }
 
         if (inObjDesc!=NULL)
         {
@@ -331,7 +347,7 @@ Bottle HandAffManagerModule::getObject3D()
             const string eye = "left"; // we always use left camera so far
 
             // heigh of the table in z direction [m]
-            const double tableOffset = -0.10; // TODO parameterize
+            const double tableOffset = -0.07; // TODO parameterize
 
             const double planeA =  0.0;
             const double planeB =  0.0;
@@ -345,23 +361,25 @@ Bottle HandAffManagerModule::getObject3D()
             cmd.addVocab(Vocab::encode("get"));
             cmd.addVocab(Vocab::encode("3D"));
             cmd.addVocab(Vocab::encode("proj"));
-            cmd.addVocab(Vocab::encode(eye));
-            cmd.addDouble(u);
-            cmd.addDouble(v);
-            cmd.addDouble(planeA);
-            cmd.addDouble(planeB);
-            cmd.addDouble(planeC);
-            cmd.addDouble(planeD);
+            Bottle &cmdContent = cmd.addList();
+            cmdContent.clear();
+            cmdContent.addString(eye);
+            cmdContent.addDouble(u);
+            cmdContent.addDouble(v);
+            cmdContent.addDouble(planeA);
+            cmdContent.addDouble(planeB);
+            cmdContent.addDouble(planeC);
+            cmdContent.addDouble(planeD);
 
+            //yDebug("query to gaze: %s", cmd.toString().c_str());
             rpcGazePort.write(cmd, reply);
-            yDebug("reply from gaze: %s", reply.toString().c_str());
-            if (reply.get(0).asVocab()==Vocab::encode("ack") &&
-                reply.size()==4) // ack x y z
+            //yDebug("reply from gaze: %s", reply.toString().c_str());
+            if (reply.size()==2 && // ack (x y z)
+                reply.get(0).asVocab()==Vocab::encode("ack") &&
+                reply.get(1).isList() &&
+                reply.get(1).asList()->size()==3)
             {
-                res.addDouble(reply.get(1).asDouble());
-                res.addDouble(reply.get(2).asDouble());
-                res.addDouble(reply.get(3).asDouble());
-                res.addDouble(reply.get(4).asDouble());
+                res = *reply.get(1).asList();
             }
             else
                 yWarning("problem with iKinGazeCtrl RPC");

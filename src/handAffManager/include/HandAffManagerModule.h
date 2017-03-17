@@ -21,6 +21,7 @@
 #include <yarp/dev/all.h>
 #include <yarp/sig/all.h>
 
+#include "CSVFile.h"
 #include "handAffManager_IDL.h"
 
 /***************************************************/
@@ -47,6 +48,8 @@ private:
 
     bool needUserConfirmation;
     bool userResponse;
+
+    //csvfile csvHandsObjects(std::string("handsAndObjectsDescriptors.csv"));
 
     std::string basePath;
 
