@@ -107,6 +107,13 @@
       <parameters>--name /view/hand/desc --x 660 --y 360 --p 33</parameters>
   </module>
 
+  <!-- motor modules -->
+
+  <module>
+      <name>handActions</name>
+      <node>localhost</node>
+  </module>
+
   <!-- object pipeline connections -->
 
   <connection>
@@ -258,6 +265,18 @@
   <connection>
       <from>/handAffManager/gaze:rpc</from>
       <to>/iKinGazeCtrl/rpc</to>
+  </connection>
+
+  <!-- motor connections -->
+
+  <connection>
+      <from>/handActions/handAffManager:rpc</from>
+      <to>/handAffManager/rpc:i</to>
+  </connection>
+
+  <connection>
+      <from>/handAffManager/handActions:rpc</from>
+      <to>/handActions/rpc:i</to>
   </connection>
 
 </application>
