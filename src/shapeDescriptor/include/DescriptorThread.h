@@ -13,11 +13,12 @@
 
 #include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
+#include <yarp/os/LockGuard.h>
 #include <yarp/os/Log.h>
 #include <yarp/os/LogStream.h>
+#include <yarp/os/Mutex.h>
 #include <yarp/os/RateThread.h>
 #include <yarp/os/ResourceFinder.h>
-#include <yarp/os/Semaphore.h>
 #include <yarp/os/Stamp.h>
 #include <yarp/os/Time.h>
 
@@ -31,7 +32,7 @@ class ShapeDescriptorThread : public yarp::os::RateThread
         yarp::os::ResourceFinder rf;
 
         bool closing;
-        yarp::os::Semaphore mutex;
+        yarp::os::Mutex mutex;
 
         int maxObjects;
 

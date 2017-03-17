@@ -56,10 +56,10 @@ bool ShapeDescriptorThread::openPorts()
 
 void ShapeDescriptorThread::close()
 {
-    yInfo("closing ports");
-
     // critical section
-    mutex.wait();
+    LockGuard lg(mutex);
+
+    yInfo("closing ports");
 
     inRawImgPort.close();
     inBinImgPort.close();
@@ -79,8 +79,6 @@ void ShapeDescriptorThread::close()
     // for debug
     outBothPartsImgPort.close();
     */
-
-    mutex.post();
 }
 
 void ShapeDescriptorThread::interrupt()
@@ -149,6 +147,9 @@ void ShapeDescriptorThread::run()
 
 void ShapeDescriptorThread::run2d()
 {
+    // critical section
+    LockGuard lg(mutex);
+
     bool useColor = false;
 
     if (inRawImgPort.getInputCount())
@@ -385,6 +386,9 @@ void ShapeDescriptorThread::run2d()
             parts.push_back( std::make_pair(Obj2D(top_cnt[top_largest_cnt_index]),
                                             Obj2D(bot_cnt[bot_largest_cnt_index])) );
         }
+
+        // critical section
+        //LockGuard lg(mutex);
 
         // output shape descriptors of whole blobs
         Bottle &bDesc = outWholeDescPort.prepare();
