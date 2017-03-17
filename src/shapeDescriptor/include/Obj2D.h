@@ -63,6 +63,7 @@ public:
 
     // getters
     std::vector<cv::Point> getContour() const;
+    cv::Point getCenterOfMass() const;
     double getArea() const;
     double getConvexity() const;
     cv::Vec4f getBestLineFit() const;

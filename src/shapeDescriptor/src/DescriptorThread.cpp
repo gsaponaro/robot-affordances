@@ -83,6 +83,9 @@ void ShapeDescriptorThread::close()
 
 void ShapeDescriptorThread::interrupt()
 {
+    // critical section
+    LockGuard lg(mutex);
+
     yInfo("interrupting ports");
 
     closing = true;
@@ -255,8 +258,8 @@ void ShapeDescriptorThread::run2d()
             else
             {
                 // this should never happen in the first place
-                yWarning("width>height... need to swap them!");
-                // to complete
+                //yWarning("width>height... need to swap them!");
+                // TODO swap
             }
 
             Point2f top_center, bot_center; // w.r.t. original non-rotated image
@@ -387,9 +390,6 @@ void ShapeDescriptorThread::run2d()
                                             Obj2D(bot_cnt[bot_largest_cnt_index])) );
         }
 
-        // critical section
-        //LockGuard lg(mutex);
-
         // output shape descriptors of whole blobs
         Bottle &bDesc = outWholeDescPort.prepare();
         bDesc.clear();
@@ -440,7 +440,8 @@ void ShapeDescriptorThread::run2d()
 
             const Scalar Blue(255,0,0);
             const Scalar Red(0,0,255);
-            const Scalar Yellow(255,255,0);
+            const Scalar Yellow(0,255,255);
+            const int Radius = 5;
             const int thickness = 2;
             for (std::vector<Obj2D>::iterator it = objs.begin();
                  it != objs.end();
@@ -486,6 +487,18 @@ void ShapeDescriptorThread::run2d()
                          thickness);
                 }
 
+                // draw center of mass
+                bool drawCenterOfMass = true;
+                if (drawCenterOfMass)
+                {
+                    Point com(it->getCenterOfMass().x, it->getCenterOfMass().y);
+                    circle( outAnnotatedMat,
+                            com,
+                            Radius,
+                            Red,
+                            -1 ); // filled
+                }
+
                 // draw convexity defects
                 bool drawConvexityDefects = true;
                 if (drawConvexityDefects)
@@ -499,19 +512,17 @@ void ShapeDescriptorThread::run2d()
                         int startidx = (*d)[0]; Point ptStart( it->getContour()[startidx] );
                         int endidx = (*d)[1]; Point ptEnd( it->getContour()[endidx] );
                         int faridx = (*d)[2]; Point ptFar( it->getContour()[faridx] );
-                        float depth = (*d)[3] / 256;
+                        //float depth = (*d)[3] / 256;
 
-                        const int Radius = 5;
-
-                        line( outAnnotatedMat, ptStart, ptEnd, Red, thickness );
+                        //line( outAnnotatedMat, ptStart, ptEnd, Yellow, thickness );
                         //line( outAnnotatedMat, ptStart, ptFar, Red, thickness );
                         //line( outAnnotatedMat, ptEnd, ptFar, Red, thickness );
-                        circle( outAnnotatedMat, ptFar, Radius, Red, thickness );
+                        //circle( outAnnotatedMat, ptFar, Radius, Red, thickness );
 
                         arrowedLine(outAnnotatedMat,
                                     ptFar,
                                     Point((ptStart.x+ptEnd.x)/2,(ptStart.y+ptEnd.y)/2),
-                                    Red,
+                                    Yellow,
                                     thickness,
                                     8,    // lineType
                                     0,    // shift

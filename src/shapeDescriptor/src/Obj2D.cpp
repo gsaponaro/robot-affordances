@@ -134,6 +134,15 @@ std::vector<cv::Point> Obj2D::getContour() const
 }
 
 /**
+  * Return center of mass.
+  */
+
+Point Obj2D::getCenterOfMass() const
+{
+    return Point(moments.m10/moments.m00, moments.m01/moments.m00);
+}
+
+/**
   * Return area.
   */
 double Obj2D::getArea() const
