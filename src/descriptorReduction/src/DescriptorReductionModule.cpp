@@ -57,7 +57,7 @@ bool DescriptorReductionModule::updateModule()
     {
         Bottle *inWholeDesc = inWholeDescPort.read(true);
         Bottle *inPartDesc = inPartDescPort.read(true);
-        if (inWholeDesc!=NULL && inPartDesc!=NULL)
+        if (inWholeDesc!=NULL && inPartDesc!=NULL && inWholeDesc->size()>0 && inPartDesc->size()>0)
         {
             const int numBlobs = inWholeDesc->size();
             const int desiredBlobs = 1;
@@ -74,7 +74,7 @@ bool DescriptorReductionModule::updateModule()
                  inPartDesc->get(0).asList()->size()==2;
             if (!ok)
             {
-                yError("partDescriptors problem");
+                yError("partDescriptors problem, size is of get(0) is not 2");
                 return true;
             }
 
