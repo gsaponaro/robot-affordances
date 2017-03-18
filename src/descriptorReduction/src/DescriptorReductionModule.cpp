@@ -74,7 +74,7 @@ bool DescriptorReductionModule::updateModule()
                  inPartDesc->get(0).asList()->size()==2;
             if (!ok)
             {
-                yError("partDescriptors problem, size is of get(0) is not 2");
+                yError("partDescriptors problem, size of get(0) is not 2");
                 return true;
             }
 
