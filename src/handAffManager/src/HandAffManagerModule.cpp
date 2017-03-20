@@ -24,6 +24,9 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
 {
     string moduleName = rf.check("name",Value("handAffManager")).asString();
 
+    inHandImgPortName = "/" + moduleName + "/handImage:i";
+    inHandImgPort.open(inHandImgPortName.c_str());
+
     inHandDescPortName = "/" + moduleName + "/handDesc:i";
     inHandDescPort.open(inHandDescPortName.c_str());
 
@@ -78,6 +81,7 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
 /***************************************************/
 bool HandAffManagerModule::interruptModule()
 {
+    inHandImgPort.interrupt();
     inHandDescPort.interrupt();
     inObjDescPort.interrupt();
     rpcHandActionsPort.interrupt();
@@ -90,6 +94,7 @@ bool HandAffManagerModule::interruptModule()
 /***************************************************/
 bool HandAffManagerModule::close()
 {
+    inHandImgPort.close();
     inHandDescPort.close();
     inObjDescPort.close();
     rpcHandActionsPort.close();
@@ -260,7 +265,7 @@ bool HandAffManagerModule::getHandDescriptors()
         return false;
     }
 
-    // acquire hand descriptors
+    // acquire provisional hand descriptors
     handDesc.clear();
     Bottle *inHandDesc = inHandDescPort.read(true);
     if (inHandDesc != NULL)
@@ -277,6 +282,39 @@ bool HandAffManagerModule::getHandDescriptors()
         //const int lastIdx = 27;
         for (int d=firstIdx; d<=lastIdx; ++d)
             handDesc.addDouble(inHandDesc->get(d).asDouble());
+
+        // acquire provisional hand image
+        if (inHandImgPort.getInputCount()>0)
+        {
+            // TODO: attempt for 5 seconds instead of blocking read
+            ImageOf<PixelBgr> *inHandImg = inHandImgPort.read(true);
+            if (inHandImg != NULL)
+            {
+                cv::Mat inHandMat;
+                // TODO use iplToMat helper
+                inHandMat = cv::cvarrToMat(static_cast<IplImage*>(inHandImg->getIplImage()));
+                string handFilename = "hand_";
+
+                // TODO factorize with configure()
+                // create hands and objects descriptors file with current date and time
+                // in filename, http://stackoverflow.com/a/16358264/1638888
+                time_t rawtime;
+                struct tm * timeinfo;
+                char buffer[80];
+                time (&rawtime);
+                timeinfo = localtime(&rawtime);
+                strftime(buffer,sizeof(buffer),"%Y-%m-%d_%H:%M:%S",timeinfo);
+                std::string timestr(buffer);
+
+                handFilename += timestr;
+                handFilename += ".jpg";
+                cv::imwrite(handFilename.c_str(), inHandMat);
+            }
+        }
+        else
+        {
+            yError("not receiving hand image -> cannot save it!");
+        }
     }
 
     yInfo("hand descriptors acquired:");

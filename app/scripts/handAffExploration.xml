@@ -243,6 +243,12 @@
   </connection>
 
   <connection>
+      <from>/robotHandProcessor/image:o</from>
+      <to>/handAffManager/handImage:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
       <from>/drHand/desc:o</from>
       <to>/handAffManager/handDesc:i</to>
   </connection>

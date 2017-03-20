@@ -15,6 +15,8 @@
 #include <ctime>
 #include <string>
 
+#include <opencv2/opencv.hpp>
+
 #include <boost/filesystem.hpp>
 
 #include <yarp/os/all.h>
@@ -34,11 +36,13 @@ private:
     //bool closing;
     yarp::os::RpcServer rpcPort;
 
+    std::string inHandImgPortName;
     std::string inHandDescPortName;
     std::string inObjDescPortName;
     std::string rpcHandActionsPortName;
     std::string rpcRobotHandProcessorPortName;
     std::string rpcGazePortName;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inHandImgPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inHandDescPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inObjDescPort;
     yarp::os::RpcClient rpcHandActionsPort;
