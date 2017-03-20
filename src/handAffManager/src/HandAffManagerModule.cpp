@@ -42,11 +42,19 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     needUserConfirmation = false;
     userResponse = false;
 
-    // hands and objects descriptors file
-    //string filenameHandsObjects = "handsAndObjectsDescriptors.csv";
-    //csvHandsObjects(filenameHandsObjects);
-    /*
-    csvHandsObjects(filenameHandsObjects);
+    // create hands and objects descriptors file with current date and time
+    // in filename, http://stackoverflow.com/a/16358264/1638888
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer[80];
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(buffer,sizeof(buffer),"%Y-%m-%d_%H:%M:%S",timeinfo);
+    std::string timestr(buffer);
+    string filenameHandsObjects;
+    filenameHandsObjects = "handsAndObjectsDescriptors_" + timestr + ".csv";
+    yDebug("handsObjects filename is %s", filenameHandsObjects.c_str());
+    csvHandsObjects.setFilename(filenameHandsObjects);
 
     // write header row
     csvHandsObjects << "handOrObjectName" << "convexity" << "eccentricity"
@@ -54,11 +62,10 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
         // central normalized moments
         << "nu00" << "nu11" << "nu02" << "nu30" << "nu21" << "nu12" << "nu03"
         << endrow;
-        */
 
     // effects files
     basePath = rf.getHomeContextPath().c_str();
-    yDebug("basePath: %s", basePath.c_str());
+    //yDebug("basePath: %s", basePath.c_str());
 
     //closing = false;
 

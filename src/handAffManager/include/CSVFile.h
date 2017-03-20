@@ -16,12 +16,25 @@ class csvfile
 	std::ofstream fs_;
 	const std::string separator_;
 public:
+	// Giovanni
+	csvfile()
+		: fs_()
+		, separator_(";")
+	{
+		fs_.exceptions(std::ios::failbit | std::ios::badbit);
+	}
+	void setFilename(const std::string filename)
+	{
+		fs_.exceptions(std::ios::failbit | std::ios::badbit);
+		fs_.open(filename.c_str());
+	}
+
 	csvfile(const std::string filename, const std::string separator = ";")
 		: fs_()
 		, separator_(separator)
 	{
 		fs_.exceptions(std::ios::failbit | std::ios::badbit);
-		fs_.open(filename.c_str()); // http://stackoverflow.com/a/6323624/1638888
+		fs_.open(filename.c_str()); // Giovanni http://stackoverflow.com/a/6323624/1638888
 	}
 
 	~csvfile()

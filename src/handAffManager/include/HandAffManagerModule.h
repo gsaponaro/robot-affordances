@@ -12,6 +12,7 @@
 #ifndef HAND_AFFORDANCE_MANAGER_MODULE_H
 #define HAND_AFFORDANCE_MANAGER_MODULE_H
 
+#include <ctime>
 #include <string>
 
 #include <boost/filesystem.hpp>
@@ -50,6 +51,7 @@ private:
     bool userResponse;
 
     //csvfile csvHandsObjects(std::string("handsAndObjectsDescriptors.csv"));
+    csvfile csvHandsObjects;
 
     std::string basePath;
 
