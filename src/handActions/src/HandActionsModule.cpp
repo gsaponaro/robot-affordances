@@ -85,6 +85,7 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
     initialApproach[2] += 0.1;              // avoid collision with objects during the approach phase
     iarm->goToPoseSync(initialApproach,o);
     iarm->waitMotionDone();
+    // ADD a Delay here?!
     iarm->goToPoseSync(finalApproach,o);
     iarm->waitMotionDone();
 
@@ -493,7 +494,7 @@ bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &
     const double xMaxThresh = -0.35;
     if (side=="top" || side=="bottom")
     {
-        if (targetPos[0] > xMaxThresh)
+        if (targetPos[0] < xMaxThresh)
         {
             yWarning("unsafe x");
             return false;
