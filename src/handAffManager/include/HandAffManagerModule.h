@@ -50,7 +50,6 @@ private:
     bool needUserConfirmation;
     bool userResponse;
 
-    //csvfile csvHandsObjects(std::string("handsAndObjectsDescriptors.csv"));
     csvfile csvHandsObjects;
 
     std::string basePath;

@@ -9,7 +9,7 @@
  *
  */
 
-#include "CSVFile.h"
+//#include "CSVFile.h"
 #include "HandAffManagerModule.h"
 
 namespace fs = boost::filesystem;
@@ -151,20 +151,12 @@ void HandAffManagerModule::saveDescToFile(const std::string &label)
         return;
     }
 
-    /*
-    // path and file where we will save
-    string path = basePath+"/"+label;
-    yDebug("path: %s", path.c_str());
-    */
-
     // write data row
-    /*
     csvHandsObjects << label;
     for (int d=0; d<numDesc; ++d)
         csvHandsObjects << handDesc.get(d).asDouble();
 
     csvHandsObjects << endrow;
-    */
 
     handDesc.clear();
 }
