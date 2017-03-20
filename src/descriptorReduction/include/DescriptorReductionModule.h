@@ -9,6 +9,8 @@
 #ifndef DESCRIPTOR_REDUCTION_MODULE_H
 #define DESCRIPTOR_REDUCTION_MODULE_H
 
+#include <string>
+
 #include <yarp/os/Bottle.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/Log.h>
@@ -35,6 +37,8 @@ class DescriptorReductionModule : public yarp::os::RFModule
 
         virtual bool updateModule();
         virtual double getPeriod();
+
+        bool verifyProperty(const yarp::os::Property &p, const std::string &k, const int vSize);
 };
 
 #endif

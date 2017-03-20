@@ -59,35 +59,115 @@ bool DescriptorReductionModule::updateModule()
         Bottle *inPartDesc = inPartDescPort.read(true);
         if (inWholeDesc!=NULL && inPartDesc!=NULL && inWholeDesc->size()>0 && inPartDesc->size()>0)
         {
-            const int numBlobs = inWholeDesc->size();
-            const int desiredBlobs = 1;
-            if (numBlobs > desiredBlobs)
+            // check that whole and part ports refer to same number of blobs
+            const int numWholeBlobs = inWholeDesc->size();
+            const int numPartBlobs = inPartDesc->size();
+            if (numWholeBlobs != numPartBlobs)
             {
-                yWarning("got more than %d blobs, will not do anything", inWholeDesc->size());
+                yWarning("numWholeBlobs==%d != numPartBlobs==%d", numWholeBlobs, numPartBlobs);
                 return true;
             }
 
-            // further sanity checks
-            bool ok = true;
-            ok = ok &&
-                 inPartDesc->size()==1 &&
-                 inPartDesc->get(0).asList()->size()==2;
-            if (!ok)
+            // criteria for best blob selection:
+            // (i) sufficiently large area
+            // (ii) closest to robot (highest image y)
+
+            // we provisionally consider the first blob (0) as the best one
+            int idx = 0;
+            Property pWholeFirst;
+            pWholeFirst.fromString(inWholeDesc->get(idx).asList()->toString().c_str());
+            // however, we will still confirm that its area is within the
+            // required range (criterion i)
+            const double minAreaForSelection = 50.0;
+            const int expectedAreaBottleSize = 1;
+            if (numWholeBlobs > 1)
             {
-                yError("partDescriptors problem, size of get(0) is not 2");
-                return true;
+                // initially index and maxY are those of the first blob
+                const int expectedComBottleSize = 2;
+                if (!verifyProperty(pWholeFirst,"center",expectedComBottleSize))
+                {
+                    yWarning("problem reading center coordinates of first blob");
+                    return true;
+                }
+                double maxY = pWholeFirst.find("center").asList()->get(1).asDouble();
+
+                // compare with other blobs in list, update if criteria met
+                for (int o=1; o<numWholeBlobs; ++o)
+                {
+                    Property pWholeCurr;
+                    pWholeCurr.fromString(inWholeDesc->get(o).asList()->toString().c_str());
+                    // criterion (i): sufficiently large area
+                    if (!verifyProperty(pWholeCurr,"area",expectedAreaBottleSize))
+                    {
+                        yWarning("problem reading area of blob %d", o);
+                        continue; // next o
+                    }
+                    if (pWholeCurr.find("area").asList()->get(0).asDouble()<minAreaForSelection)
+                    {
+                        yWarning("blob %d area is only %f -> will not select it",
+                                 o, pWholeCurr.find("area").asList()->get(0).asDouble());
+                        continue; // next o
+                    }
+                    // criterion (ii): closest to robot (highest image y)
+                    if (!verifyProperty(pWholeCurr,"center",expectedComBottleSize))
+                    {
+                        yWarning("problem reading center coordinates of blob %d", o);
+                        continue; // next o
+                    }
+                    const double currY = pWholeCurr.find("center").asList()->get(1).asDouble();
+                    if (currY > maxY)
+                    {
+                        idx = o;
+                        maxY = currY;
+                    }
+                }
+            }
+            else
+            {
+                // only 1 blob
+                // we just need to check criterion (ii): sufficiently large area
+                if (!verifyProperty(pWholeFirst,"area",expectedAreaBottleSize))
+                {
+                    yWarning("problem reading area of blob");
+                    return true; // skip
+                }
+                if (pWholeFirst.find("area").asList()->get(0).asDouble()<minAreaForSelection)
+                {
+                    yWarning("blob's area is only %f -> will not select it",
+                             pWholeFirst.find("area").asList()->get(0).asDouble());
+                    return true; // skip
+                }
             }
 
-            // create Property objects for parsing
-            yarp::os::Property pWhole;
-            //yDebug("inWholeDesc->get(0).asList()->toString().c_str(): %s", inWholeDesc->get(0).asList()->toString().c_str());
-            pWhole.fromString(inWholeDesc->get(0).asList()->toString().c_str());
-            yarp::os::Property pTop;
-            //yDebug("inPartDesc top: %s", inPartDesc->get(0).asList()->get(0).asList()->toString().c_str());
-            pTop.fromString(inPartDesc->get(0).asList()->get(0).asList()->toString().c_str());
-            yarp::os::Property pBottom;
-            //yDebug("inPartDesc bottom: %s", inPartDesc->get(0).asList()->get(1).asList()->toString().c_str());
-            pBottom.fromString(inPartDesc->get(0).asList()->get(1).asList()->toString().c_str());
+            // now idx is most likely a safe blob index; just a further sanity
+            // check on partDesc
+            const int expectedNumberOfParts = 2;
+            if (inPartDesc->get(idx).asList()->size() != expectedNumberOfParts)
+            {
+                yError("partDescriptors problem, size of list is not %d", expectedNumberOfParts);
+                return true; // skip
+            }
+
+            // now idx is the selected best blob index; we construct the
+            // relevant Property objects (of whole, top, bottom) for further
+            // usage, i.e., robot control towards the object associated to
+            // the selected blob
+            Property pWhole;
+            pWhole.fromString(inWholeDesc->get(idx).asList()->toString().c_str());
+
+            /*
+            yDebug("selected blob %d: center (%f %f), area %f",
+                   idx,
+                   pWhole.find("center").asList()->get(0).asDouble(),
+                   pWhole.find("center").asList()->get(1).asDouble(),
+                   pWhole.find("area").asList()->get(0).asDouble());
+            */
+
+            Property pTop;
+            pTop.fromString(inPartDesc->get(idx).asList()->get(0).asList()->toString().c_str());
+
+            Property pBottom;
+            pBottom.fromString(inPartDesc->get(idx).asList()->get(1).asList()->toString().c_str());
 
             Bottle &r = outReducedDescPort.prepare();
             // we will output 2 + 3*13 numbers, as follows
@@ -147,4 +227,21 @@ bool DescriptorReductionModule::updateModule()
 double DescriptorReductionModule::getPeriod()
 {
     return 0.0;
+}
+
+// TODO: move to external helper file
+/**
+  * Check if a shape descriptor is present and fulfills the specified
+  * constraints.
+  *
+  * In particular:
+  *
+  * Return true iff the list of shape descriptors p contains a descriptor
+  * called k whose corresponding value is a list of length vSize.
+  */
+bool DescriptorReductionModule::verifyProperty(const yarp::os::Property &p,
+                                               const std::string &k,
+                                               const int vSize)
+{
+    return p.check(k.c_str()) && p.find(k.c_str()).asList()->size()==vSize;
 }
