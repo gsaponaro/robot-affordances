@@ -19,6 +19,7 @@ service handAffManager_IDL
     /**
      * Set robot fingers to one of the permitted postures: straight, fortyfive,
      * bent. This is done first on the real robot, then in the Unity simulator.
+     * @param posture the name of the posture: straight, fortyfive, bent
      * @return true/false on success/failure
      */
     bool setHandPosture(1:string posture);
@@ -26,10 +27,16 @@ service handAffManager_IDL
     /**
      * Acquire provisional information about the robot hand (shape descriptors
      * and image) from the Unity simulator.
-     *
      * @return string containing the next interactive instruction for the user
      */
     string getHand();
+
+    /**
+     * Set the current target object name.
+     * @param objName the name of the target object
+     * @return true/false on success/failure
+     */
+    bool setObject(1:string objName);
 
     /**
      * Provide positive user response to a program request for information.

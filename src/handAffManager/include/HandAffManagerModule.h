@@ -42,11 +42,13 @@ private:
 
     std::string inHandImgPortName;
     std::string inHandDescPortName;
+    std::string inObjImgPortName;
     std::string inObjDescPortName;
     std::string rpcHandActionsPortName;
     std::string rpcRobotHandProcessorPortName;
     std::string rpcGazePortName;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inHandImgPort;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inObjImgPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inHandDescPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inObjDescPort;
     yarp::os::RpcClient rpcHandActionsPort;
@@ -58,12 +60,15 @@ private:
 
     csvfile csvHandsObjects;
     yarp::os::Bottle handDesc;
+    yarp::os::Bottle objDesc;
     cv::Mat handImage;
+    cv::Mat objImage;
     //std::string handImageTimeStr;
 
     std::string basePath;
 
     std::string currPosture;
+    std::string currObj;
 
 public:
 
@@ -76,6 +81,9 @@ public:
     bool getHandDesc();
     bool getHandImage();
 
+    bool getObjDesc();
+    bool getObjImage();
+
     bool saveDescAndImage(const std::string &label);
     bool saveDesc(const std::string &label);
     bool saveImage(const std::string &label);
@@ -87,6 +95,7 @@ public:
     bool attach(yarp::os::RpcServer &source);
     bool setHandPosture(const std::string &posture);
     std::string getHand();
+    bool setObject(const std::string &objName);
     bool yes();
     bool no();
     yarp::os::Bottle getBestObject3D();

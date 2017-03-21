@@ -28,6 +28,9 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     inHandDescPortName = "/" + moduleName + "/handDesc:i";
     inHandDescPort.open(inHandDescPortName.c_str());
 
+    inObjImgPortName = "/" + moduleName + "/objImage:i";
+    inObjImgPort.open(inObjImgPortName.c_str());
+
     inObjDescPortName = "/" + moduleName + "/objDesc:i";
     inObjDescPort.open(inObjDescPortName.c_str());
 
@@ -74,6 +77,7 @@ bool HandAffManagerModule::interruptModule()
 {
     inHandImgPort.interrupt();
     inHandDescPort.interrupt();
+    inObjImgPort.interrupt();
     inObjDescPort.interrupt();
     rpcHandActionsPort.interrupt();
     rpcRobotHandProcessorPort.interrupt();
@@ -87,6 +91,7 @@ bool HandAffManagerModule::close()
 {
     inHandImgPort.close();
     inHandDescPort.close();
+    inObjImgPort.close();
     inObjDescPort.close();
     rpcHandActionsPort.close();
     rpcRobotHandProcessorPort.close();
@@ -107,14 +112,17 @@ bool HandAffManagerModule::updateModule()
     // enter here after the provisional handDesc Bottle has been filled
     if (needUserConfirmation && handDesc.size()>0)
     {
-        // in RPC, we asked user to confirm whether simulated hand & descriptors are good (yes or no)
+        // in RPC, we asked user to confirm whether simulated hand descriptors
+        // and image are good (yes or no)
         while(needUserConfirmation)
             yarp::os::Time::delay(0.1);
+
         if (!userResponse)
         {
             yWarning("no -> will reset hand descriptors and image, please restart the acquisition");
             handDesc.clear();
             //handImage = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
+            //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
             return true;
         }
         yInfo("yes -> will save hand descriptors and image to file");
@@ -130,6 +138,37 @@ bool HandAffManagerModule::updateModule()
             // all good
             yDebug("current hand posture is %s", currPosture.c_str());
             saveDescAndImage(currPosture);
+        }
+    }
+
+    // enter here after the provisional objDesc Bottle has been filled
+    if (needUserConfirmation && objDesc.size()>0)
+    {
+        // in RPC, we asked user to confirm whether object descriptors and image are good (yes or no)
+        while(needUserConfirmation)
+            yarp::os::Time::delay(0.1);
+
+        if (!userResponse)
+        {
+            yWarning("no -> will reset object descriptors and image, please restart the acquisition");
+            handDesc.clear();
+            //handImage = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
+            //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
+            return true;
+        }
+        yInfo("yes -> will save object descriptors and image to file");
+
+        // make sure that currPosture is up to date
+        if (currObj == "")
+        {
+            yWarning("I don't know the current object label, please set it with setObject");
+            return true;
+        }
+        else
+        {
+            // all good
+            yDebug("current object is %s", currObj.c_str());
+            saveDescAndImage(currObj);
         }
     }
 
@@ -230,6 +269,98 @@ bool HandAffManagerModule::getHandImage()
 }
 
 /***************************************************/
+bool HandAffManagerModule::getObjDesc()
+{
+    // acquire provisional object descriptors; if successful put them
+    // in the objDesc Bottle
+
+    if (inObjDescPort.getInputCount()<1)
+    {
+        yError("no connection to object descriptors");
+        return false;
+    }
+
+    objDesc.clear();
+
+    // try for a few seconds
+    const double waitTime = 5.0;
+    Bottle *inObjDesc = inObjDescPort.read(false);
+    double t1 = yarp::os::Time::now();
+    while ((yarp::os::Time::now()-t1 < waitTime) && (inObjDesc == NULL))
+    {
+        inObjDesc = inObjDescPort.read(false);
+        yarp::os::Time::delay(0.1);
+    }
+
+    if (inObjDesc != NULL)
+    {
+        const int expectedDescSize = 41;
+        if (inObjDesc->size() != expectedDescSize)
+            yError("got %d object descriptors instead of %d", inObjDesc->size(), expectedDescSize);
+
+        // whole
+        const int firstIdx = 2;
+        const int lastIdx = 14;
+        // top
+        //const int firstIdx = 15;
+        //const int lastIdx = 27;
+        for (int d=firstIdx; d<=lastIdx; ++d)
+            objDesc.addDouble(inObjDesc->get(d).asDouble());
+    }
+    else
+    {
+        yError("did not receive object descriptors after trying for %f seconds", waitTime);
+        return false;
+    }
+
+    yInfo("provisional object descriptors acquired successfully:");
+    yInfo("%s", objDesc.toString().c_str());
+
+    return true;
+}
+
+/***************************************************/
+bool HandAffManagerModule::getObjImage()
+{
+    // acquire provisional object image; if successful put it
+    // in the objImage Mat
+
+    if (inObjImgPort.getInputCount()<1)
+    {
+        yError("no connection to object image");
+        return false;
+    }
+
+    // try for a few seconds
+    const double waitTime = 5.0;
+    ImageOf<PixelBgr> *inObjImg = inObjImgPort.read(false);
+    double t1 = yarp::os::Time::now();
+    while ((yarp::os::Time::now()-t1 < waitTime) && (inObjImg == NULL))
+    {
+        inObjImg = inObjImgPort.read(false);
+        yarp::os::Time::delay(0.1);
+    }
+
+    if (inObjImg != NULL)
+    {
+        //objImageTimeStr.clear();
+        objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
+
+        objImage = iplToMat(*inObjImg);
+        //objImageTimeStr = getDateAndTime();
+    }
+    else
+    {
+        yError("did not receive object image after trying for %f seconds", waitTime);
+        return false;
+    }
+
+    yInfo("provisional object image acquired successfully");
+
+    return true;
+}
+
+/***************************************************/
 bool HandAffManagerModule::saveDescAndImage(const string &label)
 {
     return saveDesc(label) && saveImage(label);
@@ -255,6 +386,8 @@ bool HandAffManagerModule::saveDesc(const string &label)
 
     csvHandsObjects << endrow;
 
+    yInfo("sucessfully saved descriptors of %s to file", label.c_str());
+
     handDesc.clear();
     return true;
 }
@@ -262,19 +395,43 @@ bool HandAffManagerModule::saveDesc(const string &label)
 /***************************************************/
 bool HandAffManagerModule::saveImage(const string &label)
 {
-    // TODO adapt function to both hands and objects
+    bool isHand = (label=="straight") ||
+                  (label=="fortyfive") ||
+                  (label=="bent");
 
-    if (handImage.empty())
+    string filename;
+
+    if (isHand)
     {
-        yError("handImage is empty, cannot save it");
-        return false;
+        // hand
+        if (handImage.empty())
+        {
+            yError("handImage is empty, cannot save it");
+            return false;
+        }
+        filename += "hand_";
+    }
+    else
+    {
+        // object
+        if (objImage.empty())
+        {
+            yError("objImage is empty, cannot save it");
+            return false;
+        }
+        filename += "object_";
     }
 
-    string handFilename = "hand_";
-    string handImageTimeStr = getDateAndTime(); // TODO do it at acquisition time
-    handFilename += handImageTimeStr;
-    handFilename += ".jpg";
-    cv::imwrite(handFilename.c_str(), handImage);
+    // both hand and object
+    filename += label;
+    filename += "_";
+    string imageTimeStr = getDateAndTime(); // TODO do it at acquisition time instead
+    filename += imageTimeStr;
+    filename += ".jpg";
+
+    cv::imwrite(filename.c_str(), (isHand ? handImage : objImage));
+
+    yInfo("sucessfully saved image of %s to file", label.c_str());
 
     return true;
 }
@@ -398,6 +555,13 @@ string HandAffManagerModule::getHand()
     needUserConfirmation = true;
 
     return "successfully acquired hand descriptors and image: if they look OK please type 'yes', otherwise type 'no'";
+}
+
+/***************************************************/
+bool HandAffManagerModule::setObject(const string &objName)
+{
+    currObj = objName;
+    return true;
 }
 
 /***************************************************/
