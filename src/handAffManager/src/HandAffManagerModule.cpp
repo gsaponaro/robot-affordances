@@ -341,27 +341,12 @@ bool HandAffManagerModule::no()
 }
 
 /***************************************************/
-int32_t HandAffManagerModule::getNumVisibleObjects()
+Bottle HandAffManagerModule::getBestObject3D()
 {
-    if (inObjDescPort.getInputCount()>0)
-    {
-        Bottle *inObjDesc = inObjDescPort.read(true);
+    // the selection is done by descriptorReduction according to:
+    // (i) sufficiently large area
+    // (ii) closest to robot (highest image y)
 
-        if (inObjDesc!=NULL)
-        {
-            // descriptorReduction already ensures that there is only 1 blob
-            return 1;
-        }
-    }
-
-    yError("something wrong with getNumVisibleObjects");
-    const int errorCode = -1;
-    return errorCode;
-}
-
-/***************************************************/
-Bottle HandAffManagerModule::getObject3D()
-{
     Bottle res;
     res.clear();
 

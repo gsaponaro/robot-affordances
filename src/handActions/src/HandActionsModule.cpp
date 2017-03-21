@@ -336,34 +336,7 @@ bool HandActionsModule::updateModule()
 }
 
 /***************************************************/
-bool HandActionsModule::ensureNumVisibleObjects(int desiredNum)
-{
-    // sanity check
-    if (rpcManagerPort.getOutputCount()<1)
-    {
-        yError("no connection to handAffManager RPC server");
-        return false;
-    }
-
-    // send rpc query, verify if returned number equals the desired one
-    Bottle handMgrCmd;
-    Bottle handMgrReply;
-    handMgrCmd.addString("getNumVisibleObjects");
-    rpcManagerPort.write(handMgrCmd, handMgrReply);
-    if (handMgrReply.size()>0 &&
-        handMgrReply.get(0).asInt()==desiredNum)
-    {
-        return true;
-    }
-    else
-    {
-        yWarning("there are %d visible objects", handMgrReply.get(0).asInt());
-        return false;
-    }
-}
-
-/***************************************************/
-bool HandActionsModule::getObject3D(double x, double y, double z)
+bool HandActionsModule::getBestObject3D(double x, double y, double z)
 {
     // sanity check
     if (rpcManagerPort.getOutputCount()<1)
@@ -374,7 +347,7 @@ bool HandActionsModule::getObject3D(double x, double y, double z)
 
     Bottle handMgrCmd;
     Bottle handMgrReply;
-    handMgrCmd.addString("getObject3D");
+    handMgrCmd.addString("getBestObject3D");
     rpcManagerPort.write(handMgrCmd, handMgrReply);
 
     bool validReply = handMgrReply.size()>0 &&
@@ -390,7 +363,7 @@ bool HandActionsModule::getObject3D(double x, double y, double z)
     }
     else
     {
-        yWarning("invalid reply to getObject3D: %s", handMgrReply.toString().c_str());
+        yError("invalid reply to getBestObject3D: %s", handMgrReply.toString().c_str());
         return false;
     }
 
@@ -630,15 +603,10 @@ bool HandActionsModule::setFingers(const std::string &posture)
 /***************************************************/
 bool HandActionsModule::tapFromLeft()
 {
-    if (!ensureNumVisibleObjects(1))
-    {
-        return false;
-    }
-
     double x, y, z;
-    if (!getObject3D(x,y,z))
+    if (!getBestObject3D(x,y,z))
     {
-        yError("problem with getObject3D");
+        //yError("problem with getBestObject3D");
         return false;
     }
 
@@ -648,15 +616,10 @@ bool HandActionsModule::tapFromLeft()
 /***************************************************/
 bool HandActionsModule::tapFromRight()
 {
-    if (!ensureNumVisibleObjects(1))
-    {
-        return false;
-    }
-
     double x, y, z;
-    if (!getObject3D(x,y,z))
+    if (!getBestObject3D(x,y,z))
     {
-        yError("problem with getObject3D");
+        //yError("problem with getBestObject3D");
         return false;
     }
 
@@ -666,15 +629,10 @@ bool HandActionsModule::tapFromRight()
 /***************************************************/
 bool HandActionsModule::push()
 {
-    if (!ensureNumVisibleObjects(1))
-    {
-        return false;
-    }
-
     double x, y, z;
-    if (!getObject3D(x,y,z))
+    if (!getBestObject3D(x,y,z))
     {
-        yError("problem with getObject3D");
+        //yError("problem with getBestObject3D");
         return false;
     }
 
@@ -684,15 +642,10 @@ bool HandActionsModule::push()
 /***************************************************/
 bool HandActionsModule::draw()
 {
-    if (!ensureNumVisibleObjects(1))
-    {
-        return false;
-    }
-
     double x, y, z;
-    if (!getObject3D(x,y,z))
+    if (!getBestObject3D(x,y,z))
     {
-        yError("problem with getObject3D");
+        //yError("problem with getBestObject3D");
         return false;
     }
 

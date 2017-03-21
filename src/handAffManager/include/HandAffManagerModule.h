@@ -76,8 +76,7 @@ public:
     bool getHandDescriptors();
     bool yes();
     bool no();
-    int32_t getNumVisibleObjects();
-    yarp::os::Bottle getObject3D();
+    yarp::os::Bottle getBestObject3D();
     bool quit();
 };
 

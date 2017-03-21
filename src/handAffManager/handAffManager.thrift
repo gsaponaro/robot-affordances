@@ -42,16 +42,12 @@ service handAffManager_IDL
     bool no();
 
     /**
-     * Get the number of objects that are currently seen by segmentation.
-     * @return int number of visible objects
-     */
-    i32 getNumVisibleObjects();
-
-    /**
-     * Get the 3D position of the (only) object currently seen by segmentation.
+     * Get the 3D position of the "best" object currently seen by segmentation,
+     * determined according these criteria: (i) sufficiently large area,
+     * (ii) closest to robot.
      * @return Bottle containing 3D offset
      */
-    Bottle getObject3D();
+    Bottle getBestObject3D();
 
     /**
      * Quit the module.
