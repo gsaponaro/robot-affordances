@@ -16,6 +16,7 @@
 #include <string>
 
 #include <opencv2/opencv.hpp>
+#include "OpenCVHelpers.h"
 
 #include <boost/filesystem.hpp>
 

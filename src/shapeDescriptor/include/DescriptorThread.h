@@ -22,8 +22,8 @@
 #include <yarp/os/Stamp.h>
 #include <yarp/os/Time.h>
 
-#include "Helpers.h"
 #include "Obj2D.h"
+#include "OpenCVHelpers.h"
 
 class ShapeDescriptorThread : public yarp::os::RateThread
 {

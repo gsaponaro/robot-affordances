@@ -37,6 +37,7 @@ source_group("IDL Files" FILES ${idl_files})
 icubcontrib_set_default_prefix()
 
 include_directories(${PROJECT_SOURCE_DIR}/include
+                    ${PROJECT_SOURCE_DIR}/../common/include
                     ${YARP_INCLUDE_DIRS}
                     ${OpenCV_INCLUDE_DIRS}
                     ${IDL_GENERATED_CODE_DIR}/include
@@ -46,6 +47,7 @@ add_executable(${PROJECT_NAME} src/HandAffManagerMain.cpp
                                src/HandAffManagerModule.cpp
                                include/HandAffManagerModule.h
                                include/CSVFile.h
+                               ${PROJECT_SOURCE_DIR}/../common/include/OpenCVHelpers.h
                                ${IDL_GEN_FILES}
                                ${idl_files})
 target_link_libraries(${PROJECT_NAME}

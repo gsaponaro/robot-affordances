@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef DESC_HELPERS_H
-#define DESC_HELPERS_H
+#ifndef ROBOT_AFFORDANCES_OPENCV_HELPERS_H
+#define ROBOT_AFFORDANCES_OPENCV_HELPERS_H
 
 #include <algorithm>
 #include <vector>
@@ -19,7 +19,7 @@
 #include <yarp/sig/Image.h>
 
 /**********************************************************/
-std::vector<int> unique(const cv::Mat &input, bool shouldSort=false);
+bool binaryMaskFromLabel(const cv::Mat &input, const int label, cv::Mat &output);
 
 /**********************************************************/
 /**
@@ -32,9 +32,9 @@ cv::Mat iplToMat(yarp::sig::ImageOf<T> &ipl)
 }
 
 /**********************************************************/
-bool binaryMaskFromLabel(const cv::Mat &input, const int label, cv::Mat &output);
-
-/**********************************************************/
 bool largestContour(std::vector< std::vector<cv::Point> > cnt, int largestIdx);
 
-#endif
+/**********************************************************/
+std::vector<int> unique(const cv::Mat &input, bool shouldSort=false);
+
+#endif // ROBOT_AFFORDANCES_OPENCV_HELPERS_H

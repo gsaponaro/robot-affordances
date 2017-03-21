@@ -216,8 +216,7 @@ bool HandAffManagerModule::getHandImage()
         //handImageTimeStr.clear();
         handImage = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
 
-        // TODO use iplToMat helper
-        handImage = cv::cvarrToMat(static_cast<IplImage*>(inHandImg->getIplImage()));
+        handImage = iplToMat(*inHandImg);
         //handImageTimeStr = getDateAndTime();
     }
     else

@@ -6,40 +6,9 @@
  *
  */
 
-#include "Helpers.h"
+#include "OpenCVHelpers.h"
 
 using namespace cv;
-
-/**
-  * Find the unique elements of a single-channel Mat.
-  * adapted from stackoverflow.com/questions/24716932
-  */
-std::vector<int> unique(const Mat &input, bool shouldSort)
-{
-    if (input.channels()>1 || input.type()!=CV_32S)
-    {
-        yError("unique() only works with CV_32S 1-channel Mat");
-        return std::vector<int>();
-    }
-
-    std::vector<int> out;
-    for (int y=0; y<input.rows; ++y)
-    {
-        const int *row_ptr = input.ptr<int>(y);
-        for (int x=0; x<input.cols; ++x)
-        {
-            float value = row_ptr[x];
-
-            if ( std::find(out.begin(),out.end(),value) == out.end() )
-                out.push_back(value);
-        }
-    }
-
-    if (shouldSort)
-        std::sort(out.begin(), out.end());
-
-    return out;
-}
 
 /**
   * Given a Matrix and an integer number (label), return a binary Matrix with
@@ -71,11 +40,10 @@ bool binaryMaskFromLabel(const Mat &input, const int label, Mat &output)
         // pointer to first column of line j
         uchar* data = const_cast<uchar*>( input.ptr<uchar>(j) );
         for (int i=0; i<nc; i++)
-            output.at<uchar>(j,i) = ( (uint8_t)*data++ == (uint8_t)label ? 1 : 0); 
+            output.at<uchar>(j,i) = ( (uint8_t)*data++ == (uint8_t)label ? 1 : 0);
     }
 
     return true;
-
 }
 
 /**
@@ -86,7 +54,7 @@ bool largestContour(std::vector< std::vector<Point> > cnt, int largestIdx)
 {
     double largestArea = 0.0;
     int currLargestIdx = -1;
-    
+
     for (int c=0; c<cnt.size(); ++c)
     {
         // default paramenter oriented=false is ok
@@ -106,4 +74,35 @@ bool largestContour(std::vector< std::vector<Point> > cnt, int largestIdx)
 
     largestIdx = currLargestIdx;
     return true;
+}
+
+/**
+  * Find the unique elements of a single-channel Mat.
+  * adapted from stackoverflow.com/questions/24716932
+  */
+std::vector<int> unique(const Mat &input, bool shouldSort)
+{
+    if (input.channels()>1 || input.type()!=CV_32S)
+    {
+        yError("unique() only works with CV_32S 1-channel Mat");
+        return std::vector<int>();
+    }
+
+    std::vector<int> out;
+    for (int y=0; y<input.rows; ++y)
+    {
+        const int *row_ptr = input.ptr<int>(y);
+        for (int x=0; x<input.cols; ++x)
+        {
+            float value = row_ptr[x];
+
+            if ( std::find(out.begin(),out.end(),value) == out.end() )
+                out.push_back(value);
+        }
+    }
+
+    if (shouldSort)
+        std::sort(out.begin(), out.end());
+
+    return out;
 }
