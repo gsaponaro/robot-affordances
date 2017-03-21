@@ -228,6 +228,7 @@ void ShapeDescriptorThread::run2d()
             }
 
             // construct whole object and extract features
+            // TODO: save computation by checking if areaInRange
             objs.push_back( Obj2D(cont[intIdx][largest]) );
 
 
