@@ -24,10 +24,12 @@ service handAffManager_IDL
     bool setHandPosture(1:string posture);
 
     /**
-     * Acquire shape descriptors of the hand from the Unity simulator.
-     * @return true/false on success/failure
+     * Acquire provisional information about the robot hand (shape descriptors
+     * and image) from the Unity simulator.
+     *
+     * @return string containing the next interactive instruction for the user
      */
-    bool getHandDescriptors();
+    string getHand();
 
     /**
      * Provide positive user response to a program request for information.
@@ -43,9 +45,9 @@ service handAffManager_IDL
 
     /**
      * Get the 3D position of the "best" object currently seen by segmentation,
-     * determined according these criteria: (i) sufficiently large area,
+     * determined according to these criteria: (i) sufficiently large area,
      * (ii) closest to robot.
-     * @return Bottle containing 3D offset
+     * @return Bottle containing 3D coordinates x y z
      */
     Bottle getBestObject3D();
 

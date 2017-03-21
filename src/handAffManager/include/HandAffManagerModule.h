@@ -49,14 +49,13 @@ private:
     yarp::os::RpcClient rpcRobotHandProcessorPort;
     yarp::os::RpcClient rpcGazePort;
 
-    yarp::os::Bottle handDesc;
-    cv::Mat handImage;
-    //std::string handImageTimeStr;
-
     bool needUserConfirmation;
     bool userResponse;
 
     csvfile csvHandsObjects;
+    yarp::os::Bottle handDesc;
+    cv::Mat handImage;
+    //std::string handImageTimeStr;
 
     std::string basePath;
 
@@ -83,7 +82,7 @@ public:
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
     bool setHandPosture(const std::string &posture);
-    bool getHand();
+    std::string getHand();
     bool yes();
     bool no();
     yarp::os::Bottle getBestObject3D();

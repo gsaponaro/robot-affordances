@@ -141,7 +141,8 @@ bool HandAffManagerModule::updateModule()
 /***************************************************/
 bool HandAffManagerModule::getHandDesc()
 {
-    // acquire provisional hand descriptors into handDesc Bottle
+    // acquire provisional hand descriptors; if successful put them
+    // in the handDesc Bottle
 
     if (inHandDescPort.getInputCount()<1)
     {
@@ -182,9 +183,8 @@ bool HandAffManagerModule::getHandDesc()
         return false;
     }
 
-    yInfo("provisional hand descriptors acquired:");
+    yInfo("provisional hand descriptors acquired successfully:");
     yInfo("%s", handDesc.toString().c_str());
-    needUserConfirmation = true;
 
     return true;
 }
@@ -192,7 +192,8 @@ bool HandAffManagerModule::getHandDesc()
 /***************************************************/
 bool HandAffManagerModule::getHandImage()
 {
-    // acquire provisional hand image into handImage
+    // acquire provisional hand image; if successful put it
+    // in the handImage Mat
 
     if (inHandImgPort.getInputCount()<1)
     {
@@ -213,14 +214,19 @@ bool HandAffManagerModule::getHandImage()
     if (inHandImg != NULL)
     {
         //handImageTimeStr.clear();
-        handImage = cv::Mat::zeros(cv::Size(inHandImg->width(),inHandImg->height()), CV_8UC3);
+        handImage = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
 
         // TODO use iplToMat helper
         handImage = cv::cvarrToMat(static_cast<IplImage*>(inHandImg->getIplImage()));
         //handImageTimeStr = getDateAndTime();
     }
     else
+    {
         yError("did not receive hand image after trying for %f seconds", waitTime);
+        return false;
+    }
+
+    yInfo("provisional hand image acquired successfully");
 
     return true;
 }
@@ -275,6 +281,7 @@ bool HandAffManagerModule::saveImage(const string &label)
     return true;
 }
 
+/***************************************************/
 string HandAffManagerModule::getDateAndTime()
 {
     // http://stackoverflow.com/a/16358264/1638888
@@ -379,10 +386,20 @@ bool HandAffManagerModule::setHandPosture(const string &posture)
 }
 
 /***************************************************/
-bool HandAffManagerModule::getHand()
+string HandAffManagerModule::getHand()
 {
-    // acquire provisional hand descriptors and image
-    return getHandDesc() && getHandImage();
+    // acquire provisional hand descriptors
+    if (!getHandDesc())
+        return "failed acquiring hand descriptors";
+
+    // acquire provisional hand image
+    if (!getHandImage())
+        return "failed acquiring hand image";
+
+    // acquisition OK, now we need to ask the user for confirmation
+    needUserConfirmation = true;
+
+    return "successfully acquired hand descriptors and image: if they look OK please type 'yes', otherwise type 'no'";
 }
 
 /***************************************************/
