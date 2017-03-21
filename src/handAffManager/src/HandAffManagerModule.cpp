@@ -9,14 +9,12 @@
  *
  */
 
-//#include "CSVFile.h"
 #include "HandAffManagerModule.h"
 
 namespace fs = boost::filesystem;
 
 using namespace std;
 using namespace yarp::os;
-using namespace yarp::dev;
 using namespace yarp::sig;
 
 /***************************************************/

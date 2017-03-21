@@ -1,7 +1,16 @@
-// http://stackoverflow.com/a/28840805/1638888
-// Vladimir Shestakov, https://github.com/rudolfovich
+/*
+ * Copyright: (C) 2015 Vladimir Shestakov
+ * http://stackoverflow.com/a/28840805/1638888
+ * https://github.com/rudolfovich
+ *
+ * modified by Giovanni Saponaro <gsaponaro@isr.tecnico.ulisboa.pt>
+ *
+ */
 
+#ifndef CSVFILE_H
+#define CSVFILE_H
 #pragma once
+
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -90,3 +99,5 @@ inline static csvfile& flush(csvfile& file)
 	file.flush();
 	return file;
 }
+
+#endif // CSVFILE_H

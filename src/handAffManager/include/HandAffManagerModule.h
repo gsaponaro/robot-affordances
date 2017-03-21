@@ -15,15 +15,18 @@
 #include <ctime>
 #include <string>
 
+#include <boost/filesystem.hpp>
+
 #include <opencv2/opencv.hpp>
 #include "OpenCVHelpers.h"
 
-#include <boost/filesystem.hpp>
-
-#include <yarp/os/all.h>
-//#include <yarp/os/RpcClient.h>
-#include <yarp/dev/all.h>
-#include <yarp/sig/all.h>
+#include <yarp/os/Bottle.h>
+#include <yarp/os/BufferedPort.h>
+#include <yarp/os/RFModule.h>
+#include <yarp/os/RpcClient.h>
+#include <yarp/os/RpcServer.h>
+#include <yarp/os/Time.h>
+#include <yarp/sig/Image.h>
 
 #include "CSVFile.h"
 #include "handAffManager_IDL.h"
