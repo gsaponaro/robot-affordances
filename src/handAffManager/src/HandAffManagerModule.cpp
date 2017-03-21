@@ -107,17 +107,17 @@ bool HandAffManagerModule::updateModule()
     // enter here after the provisional handDesc Bottle has been filled
     if (needUserConfirmation && handDesc.size()>0)
     {
-        // ask user to confirm whether simulated hand & descriptors are good
-        yInfo("if the simulated hand is properly visible and the descriptors make sense, type \"yes\" (in the RPC terminal), otherwise type \"no\"");
+        // in RPC, we asked user to confirm whether simulated hand & descriptors are good (yes or no)
         while(needUserConfirmation)
             yarp::os::Time::delay(0.1);
         if (!userResponse)
         {
-            yWarning("no -> will reset hand descriptors, please restart the acquisition");
+            yWarning("no -> will reset hand descriptors and image, please restart the acquisition");
             handDesc.clear();
+            //handImage = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
             return true;
         }
-        yInfo("yes -> will save hand descriptors to file");
+        yInfo("yes -> will save hand descriptors and image to file");
 
         // make sure that currPosture is up to date
         if (currPosture == "")
@@ -127,8 +127,9 @@ bool HandAffManagerModule::updateModule()
         }
         else
         {
+            // all good
             yDebug("current hand posture is %s", currPosture.c_str());
-            saveDesc(currPosture);
+            saveDescAndImage(currPosture);
         }
     }
 
