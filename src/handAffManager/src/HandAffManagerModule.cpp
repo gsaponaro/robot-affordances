@@ -46,14 +46,7 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     userResponse = false;
 
     // create hands and objects descriptors file with current date and time
-    // in filename, http://stackoverflow.com/a/16358264/1638888
-    time_t rawtime;
-    struct tm * timeinfo;
-    char buffer[80];
-    time (&rawtime);
-    timeinfo = localtime(&rawtime);
-    strftime(buffer,sizeof(buffer),"%Y-%m-%d_%H:%M:%S",timeinfo);
-    std::string timestr(buffer);
+    string timestr = getDateAndTime();
     string filenameHandsObjects;
     filenameHandsObjects = "handsAndObjectsDescriptors_" + timestr + ".csv";
     yDebug("handsObjects filename is %s", filenameHandsObjects.c_str());
@@ -113,7 +106,7 @@ double HandAffManagerModule::getPeriod()
 /***************************************************/
 bool HandAffManagerModule::updateModule()
 {
-    // enter here after getHandDescriptors has filled handDesc
+    // enter here after the provisional handDesc Bottle has been filled
     if (needUserConfirmation && handDesc.size()>0)
     {
         // ask user to confirm whether simulated hand & descriptors are good
@@ -137,7 +130,7 @@ bool HandAffManagerModule::updateModule()
         else
         {
             yDebug("current hand posture is %s", currPosture.c_str());
-            saveDescToFile(currPosture);
+            saveDesc(currPosture);
         }
     }
 
@@ -146,14 +139,109 @@ bool HandAffManagerModule::updateModule()
 }
 
 /***************************************************/
-void HandAffManagerModule::saveDescToFile(const std::string &label)
+bool HandAffManagerModule::getHandDesc()
 {
+    // acquire provisional hand descriptors into handDesc Bottle
+
+    if (inHandDescPort.getInputCount()<1)
+    {
+        yError("no connection to hand descriptors");
+        return false;
+    }
+
+    handDesc.clear();
+
+    // try for a few seconds
+    const double waitTime = 5.0;
+    Bottle *inHandDesc = inHandDescPort.read(false);
+    double t1 = yarp::os::Time::now();
+    while ((yarp::os::Time::now()-t1 < waitTime) && (inHandDesc == NULL))
+    {
+        inHandDesc = inHandDescPort.read(false);
+        yarp::os::Time::delay(0.1);
+    }
+
+    if (inHandDesc != NULL)
+    {
+        const int expectedDescSize = 41;
+        if (inHandDesc->size() != expectedDescSize)
+            yError("got %d hand descriptors instead of %d", inHandDesc->size(), expectedDescSize);
+
+        // whole
+        const int firstIdx = 2;
+        const int lastIdx = 14;
+        // top
+        //const int firstIdx = 15;
+        //const int lastIdx = 27;
+        for (int d=firstIdx; d<=lastIdx; ++d)
+            handDesc.addDouble(inHandDesc->get(d).asDouble());
+    }
+    else
+    {
+        yError("did not receive hand descriptors after trying for %f seconds", waitTime);
+        return false;
+    }
+
+    yInfo("provisional hand descriptors acquired:");
+    yInfo("%s", handDesc.toString().c_str());
+    needUserConfirmation = true;
+
+    return true;
+}
+
+/***************************************************/
+bool HandAffManagerModule::getHandImage()
+{
+    // acquire provisional hand image into handImage
+
+    if (inHandImgPort.getInputCount()<1)
+    {
+        yError("no connection to hand image");
+        return false;
+    }
+
+    // try for a few seconds
+    const double waitTime = 5.0;
+    ImageOf<PixelBgr> *inHandImg = inHandImgPort.read(false);
+    double t1 = yarp::os::Time::now();
+    while ((yarp::os::Time::now()-t1 < waitTime) && (inHandImg == NULL))
+    {
+        inHandImg = inHandImgPort.read(false);
+        yarp::os::Time::delay(0.1);
+    }
+
+    if (inHandImg != NULL)
+    {
+        //handImageTimeStr.clear();
+        handImage = cv::Mat::zeros(cv::Size(inHandImg->width(),inHandImg->height()), CV_8UC3);
+
+        // TODO use iplToMat helper
+        handImage = cv::cvarrToMat(static_cast<IplImage*>(inHandImg->getIplImage()));
+        //handImageTimeStr = getDateAndTime();
+    }
+    else
+        yError("did not receive hand image after trying for %f seconds", waitTime);
+
+    return true;
+}
+
+/***************************************************/
+bool HandAffManagerModule::saveDescAndImage(const string &label)
+{
+    return saveDesc(label) && saveImage(label);
+}
+
+/***************************************************/
+bool HandAffManagerModule::saveDesc(const string &label)
+{
+    // TODO adapt function to both hands and objects
+
     // sanity checks
     const int numDesc = 13;
     if (handDesc.size() != numDesc)
     {
         yError("got %d descriptors, was expecting %d", handDesc.size(), numDesc);
-        return;
+        return false;
     }
 
     // write data row
@@ -164,6 +252,41 @@ void HandAffManagerModule::saveDescToFile(const std::string &label)
     csvHandsObjects << endrow;
 
     handDesc.clear();
+    return true;
+}
+
+/***************************************************/
+bool HandAffManagerModule::saveImage(const string &label)
+{
+    // TODO adapt function to both hands and objects
+
+    if (handImage.empty())
+    {
+        yError("handImage is empty, cannot save it");
+        return false;
+    }
+
+    string handFilename = "hand_";
+    string handImageTimeStr = getDateAndTime(); // TODO do it at acquisition time
+    handFilename += handImageTimeStr;
+    handFilename += ".jpg";
+    cv::imwrite(handFilename.c_str(), handImage);
+
+    return true;
+}
+
+string HandAffManagerModule::getDateAndTime()
+{
+    // http://stackoverflow.com/a/16358264/1638888
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer[80];
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(buffer,sizeof(buffer),"%Y-%m-%d_%H%M%S",timeinfo);
+    string timestr(buffer);
+
+    return timestr;
 }
 
 // IDL functions
@@ -256,72 +379,10 @@ bool HandAffManagerModule::setHandPosture(const string &posture)
 }
 
 /***************************************************/
-bool HandAffManagerModule::getHandDescriptors()
+bool HandAffManagerModule::getHand()
 {
-    // sanity checks
-    if (inHandDescPort.getInputCount()<1)
-    {
-        yError("no connection to hand descriptors");
-        return false;
-    }
-
-    // acquire provisional hand descriptors
-    handDesc.clear();
-    Bottle *inHandDesc = inHandDescPort.read(true);
-    if (inHandDesc != NULL)
-    {
-        const int expectedDescSize = 41;
-        if (inHandDesc->size() != expectedDescSize)
-            yWarning("got %d hand descriptors instead of %d", inHandDesc->size(), expectedDescSize);
-
-        // whole
-        const int firstIdx = 2;
-        const int lastIdx = 14;
-        // top
-        //const int firstIdx = 15;
-        //const int lastIdx = 27;
-        for (int d=firstIdx; d<=lastIdx; ++d)
-            handDesc.addDouble(inHandDesc->get(d).asDouble());
-
-        // acquire provisional hand image
-        if (inHandImgPort.getInputCount()>0)
-        {
-            // TODO: attempt for 5 seconds instead of blocking read
-            ImageOf<PixelBgr> *inHandImg = inHandImgPort.read(true);
-            if (inHandImg != NULL)
-            {
-                cv::Mat inHandMat;
-                // TODO use iplToMat helper
-                inHandMat = cv::cvarrToMat(static_cast<IplImage*>(inHandImg->getIplImage()));
-                string handFilename = "hand_";
-
-                // TODO factorize with configure()
-                // create hands and objects descriptors file with current date and time
-                // in filename, http://stackoverflow.com/a/16358264/1638888
-                time_t rawtime;
-                struct tm * timeinfo;
-                char buffer[80];
-                time (&rawtime);
-                timeinfo = localtime(&rawtime);
-                strftime(buffer,sizeof(buffer),"%Y-%m-%d_%H:%M:%S",timeinfo);
-                std::string timestr(buffer);
-
-                handFilename += timestr;
-                handFilename += ".jpg";
-                cv::imwrite(handFilename.c_str(), inHandMat);
-            }
-        }
-        else
-        {
-            yError("not receiving hand image -> cannot save it!");
-        }
-    }
-
-    yInfo("hand descriptors acquired:");
-    yInfo("%s", handDesc.toString().c_str());
-    needUserConfirmation = true;
-
-    return true;
+    // acquire provisional hand descriptors and image
+    return getHandDesc() && getHandImage();
 }
 
 /***************************************************/

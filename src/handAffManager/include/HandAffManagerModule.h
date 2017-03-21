@@ -50,6 +50,8 @@ private:
     yarp::os::RpcClient rpcGazePort;
 
     yarp::os::Bottle handDesc;
+    cv::Mat handImage;
+    //std::string handImageTimeStr;
 
     bool needUserConfirmation;
     bool userResponse;
@@ -68,12 +70,20 @@ public:
     double getPeriod();
     bool updateModule();
 
-    void saveDescToFile(const std::string &label);
+    bool getHandDesc();
+    bool getHandImage();
+
+    bool saveDescAndImage(const std::string &label);
+    bool saveDesc(const std::string &label);
+    bool saveImage(const std::string &label);
+
+    // helper functions, TODO put them in an external file
+    std::string getDateAndTime();
 
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
     bool setHandPosture(const std::string &posture);
-    bool getHandDescriptors();
+    bool getHand();
     bool yes();
     bool no();
     yarp::os::Bottle getBestObject3D();
