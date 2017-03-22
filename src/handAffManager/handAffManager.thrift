@@ -10,8 +10,8 @@
 
 struct Bottle { }
 (
-yarp.name = "yarp::os::Bottle"
-yarp.includefile="yarp/os/Bottle.h"
+    yarp.name = "yarp::os::Bottle"
+    yarp.includefile = "yarp/os/Bottle.h"
 )
 
 service handAffManager_IDL
@@ -46,6 +46,17 @@ service handAffManager_IDL
     string getObject();
 
     /**
+     * Ask the real robot to perform a specific motor actions (tapFromLeft,
+     * tapFromRight, push, draw) on the "best" object currently seen by
+     * segmentation, and record effects. These effects then need to be verified
+     * by the user before saving to disk.
+     * @param string containing the desired action: tapFromLeft,
+     * tapFromRight, push, draw
+     * @return string containing the next interactive instruction for the user
+     */
+    string start(1:string action);
+
+    /**
      * Provide positive user response to a program request for information.
      * @return true/false on success/failure
      */
@@ -56,6 +67,14 @@ service handAffManager_IDL
      * @return true/false on success/failure
      */
     bool no();
+
+    /**
+     * Get the 2D position of the "best" object currently seen by segmentation,
+     * determined according to these criteria: (i) sufficiently large area,
+     * (ii) closest to robot.
+     * @return Bottle containing 2D coordinates u v
+     */
+    Bottle getBestObject2D();
 
     /**
      * Get the 3D position of the "best" object currently seen by segmentation,

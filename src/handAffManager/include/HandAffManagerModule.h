@@ -13,6 +13,7 @@
 #define HAND_AFFORDANCE_MANAGER_MODULE_H
 
 #include <ctime>
+#include <sstream>
 #include <string>
 
 #include <boost/filesystem.hpp>
@@ -69,6 +70,7 @@ private:
 
     std::string currPosture;
     std::string currObj;
+    std::string currAction;
 
 public:
 
@@ -97,8 +99,10 @@ public:
     std::string getHand();
     bool setObjectName(const std::string &objName);
     std::string getObject();
+    std::string start(const std::string &action);
     bool yes();
     bool no();
+    yarp::os::Bottle getBestObject2D();
     yarp::os::Bottle getBestObject3D();
     bool quit();
 };

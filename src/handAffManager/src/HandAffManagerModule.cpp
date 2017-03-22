@@ -135,9 +135,10 @@ bool HandAffManagerModule::updateModule()
         }
         else
         {
-            // all good
+            // all good so far
             yDebug("current hand posture is %s", currPosture.c_str());
-            saveDescAndImage(currPosture);
+            if (saveDescAndImage(currPosture))
+                currPosture = ""; // reset variable
         }
     }
 
@@ -158,7 +159,7 @@ bool HandAffManagerModule::updateModule()
         }
         yInfo("yes -> will save object descriptors and image to file");
 
-        // make sure that currPosture is up to date
+        // make sure that currObj is up to date
         if (currObj == "")
         {
             yWarning("I don't know the current object label, please set it with setObject");
@@ -166,9 +167,10 @@ bool HandAffManagerModule::updateModule()
         }
         else
         {
-            // all good
+            // all good so far
             yDebug("current object is %s", currObj.c_str());
-            saveDescAndImage(currObj);
+            if (saveDescAndImage(currObj))
+                currObj = ""; // reset variable
         }
     }
 
@@ -205,6 +207,8 @@ bool HandAffManagerModule::getHandDesc()
         const int expectedDescSize = 41;
         if (inHandDesc->size() != expectedDescSize)
             yError("got %d hand descriptors instead of %d", inHandDesc->size(), expectedDescSize);
+
+        handDesc.clear();
 
         // whole
         const int firstIdx = 2;
@@ -297,6 +301,8 @@ bool HandAffManagerModule::getObjDesc()
         const int expectedDescSize = 41;
         if (inObjDesc->size() != expectedDescSize)
             yError("got %d object descriptors instead of %d", inObjDesc->size(), expectedDescSize);
+
+        objDesc.clear();
 
         // whole
         const int firstIdx = 2;
@@ -481,6 +487,8 @@ bool HandAffManagerModule::setHandPosture(const string &posture)
         yDebug("requesting %s hand posture on the real robot", posture.c_str());
         Bottle handActionsCmd;
         Bottle handActionsReply;
+        handActionsCmd.clear();
+        handActionsReply.clear();
         handActionsCmd.addString("setFingers");
         handActionsCmd.addString(posture);
         rpcHandActionsPort.write(handActionsCmd, handActionsReply);
@@ -505,6 +513,8 @@ bool HandAffManagerModule::setHandPosture(const string &posture)
     // move head and arm *in the simulator* so that hand is fully visible
     Bottle simCmd;
     Bottle simReply;
+    simCmd.clear();
+    simReply.clear();
     simCmd.addString("resetKinematics"); // arm
     yDebug("setting simulated arm kinematics to be like the real robot...");
     rpcRobotHandProcessorPort.write(simCmd, simReply);
@@ -589,6 +599,84 @@ string HandAffManagerModule::getObject()
 }
 
 /***************************************************/
+string HandAffManagerModule::start(const string &action)
+{
+    // sanity checks
+    if (action!="tapFromLeft" || action!="tapFromRight" || action!="push" || action!="draw")
+    {
+        return "invalid action! The valid ones are: tapFromLeft, tapFromRight, push, draw";
+    }
+
+    if (currPosture == "")
+    {
+        return "I don't know the current hand posture, please set it with setHandPosture";
+    }
+
+    if (rpcHandActionsPort.getOutputCount()<1)
+    {
+        return "no connection to handActions RPC server";
+    }
+
+    // target object initial position information
+    currAction = action;
+    Bottle init2D = getBestObject2D();
+    if (init2D.size() != 2)
+    {
+        return "problem with init2D";
+    }
+    Bottle init3D = getBestObject3D();
+    if (init3D.size() != 3)
+    {
+        return "problem with init3D";
+    }
+
+    // do the motor action
+    yWarning("requesting %s motor action on the real robot", action.c_str());
+    yarp::os::Time::delay(1.0);
+    Bottle handActionsCmd;
+    Bottle handActionsReply;
+    handActionsCmd.clear();
+    handActionsReply.clear();
+    handActionsCmd.addString(action);
+    rpcHandActionsPort.write(handActionsCmd, handActionsReply);
+    if (handActionsReply.size()>0 &&
+        handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
+    {
+        yInfo("successfully performed %s", action.c_str());
+    }
+    else
+    {
+        yError("problem when requesting %s motor action", action.c_str());
+        return "could not perform the motor action";
+    }
+
+    // target object final position information
+    Bottle final2D = getBestObject2D();
+    if (final2D.size() != 2)
+    {
+        return "problem with final2D";
+    }
+    Bottle final3D = getBestObject3D();
+    if (final3D.size() != 3)
+    {
+        return "problem with final3D";
+    }
+
+    // effect computation and request for confirmation
+    double effX = final2D.get(0).asDouble() - init2D.get(0).asDouble();
+    double effY = final2D.get(1).asDouble() - init2D.get(1).asDouble();
+
+    needUserConfirmation = true;
+
+    stringstream sstm;
+    sstm << "successfully performed the action and computed the effects:\n" <<
+          "along table x: " << effX << ", y:" << effY << "\n" <<
+          "if they look OK please type 'yes', otherwise type 'no'";
+
+    return sstm.str();
+}
+
+/***************************************************/
 bool HandAffManagerModule::yes()
 {
     needUserConfirmation = false; // reset variable
@@ -602,6 +690,39 @@ bool HandAffManagerModule::no()
     needUserConfirmation = false; // reset variable
     userResponse = false;
     return true;
+}
+
+/***************************************************/
+Bottle HandAffManagerModule::getBestObject2D()
+{
+    // the selection is done by descriptorReduction according to:
+    // (i) sufficiently large area
+    // (ii) closest to robot (highest image y)
+
+    Bottle res;
+    res.clear();
+
+    if (inObjDescPort.getInputCount()>0)
+    {
+        Bottle *inObjDesc = inObjDescPort.read(false);
+        double t1 = yarp::os::Time::now();
+        while ((yarp::os::Time::now()-t1 < 5.0) && (inObjDesc == NULL))
+        {
+            inObjDesc = inObjDescPort.read(false);
+            yarp::os::Time::delay(0.1);
+        }
+
+        if (inObjDesc!=NULL)
+        {
+            // descriptorReduction already ensures that there is only 1 blob
+            const double u = inObjDesc->get(0).asDouble();
+            const double v = inObjDesc->get(1).asDouble();
+            res.addDouble(u);
+            res.addDouble(v);
+        }
+    }
+
+    return res;
 }
 
 /***************************************************/
@@ -643,6 +764,8 @@ Bottle HandAffManagerModule::getBestObject3D()
             // convert coords from 2D to 3D via RPC queries to gaze control
             Bottle cmd;
             Bottle reply;
+            cmd.clear();
+            reply.clear();
             // use homography, equivalent to IGaze client get3DPointOnPlane()
             cmd.addVocab(Vocab::encode("get"));
             cmd.addVocab(Vocab::encode("3D"));
