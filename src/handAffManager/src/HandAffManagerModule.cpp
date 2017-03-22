@@ -560,6 +560,12 @@ string HandAffManagerModule::getHand()
 /***************************************************/
 bool HandAffManagerModule::setObjectName(const string &objName)
 {
+    if (objName=="")
+    {
+        yError("invalid object name");
+        return false;
+    }
+
     currObj = objName;
     yInfo("target object is now: %s", currObj.c_str());
     return true;
