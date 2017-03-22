@@ -121,7 +121,7 @@ bool HandAffManagerModule::updateModule()
         {
             yWarning("no -> will reset hand descriptors and image, please restart the acquisition");
             handDesc.clear();
-            //handImage = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
+            //handImageSim = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
             //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
             return true;
         }
@@ -153,7 +153,7 @@ bool HandAffManagerModule::updateModule()
         {
             yWarning("no -> will reset object descriptors and image, please restart the acquisition");
             handDesc.clear();
-            //handImage = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
+            //handImageSim = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
             //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
             return true;
         }
@@ -235,7 +235,7 @@ bool HandAffManagerModule::getHandDesc()
 bool HandAffManagerModule::getHandImage()
 {
     // acquire provisional hand image; if successful put it
-    // in the handImage Mat
+    // in the handImageSim Mat
 
     if (inHandImgPort.getInputCount()<1)
     {
@@ -256,9 +256,9 @@ bool HandAffManagerModule::getHandImage()
     if (inHandImg != NULL)
     {
         //handImageTimeStr.clear();
-        handImage = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
+        handImageSim = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
 
-        handImage = iplToMat(*inHandImg);
+        handImageSim = iplToMat(*inHandImg);
         //handImageTimeStr = getDateAndTime();
     }
     else
@@ -410,9 +410,9 @@ bool HandAffManagerModule::saveImage(const string &label)
     if (isHand)
     {
         // hand
-        if (handImage.empty())
+        if (handImageSim.empty())
         {
-            yError("handImage is empty, cannot save it");
+            yError("handImageSim is empty, cannot save it");
             return false;
         }
         filename += "hand_";
@@ -435,7 +435,7 @@ bool HandAffManagerModule::saveImage(const string &label)
     filename += imageTimeStr;
     filename += ".jpg";
 
-    cv::imwrite(filename.c_str(), (isHand ? handImage : objImage));
+    cv::imwrite(filename.c_str(), (isHand ? handImageSim : objImage));
 
     yInfo("sucessfully saved image of %s to file", label.c_str());
 

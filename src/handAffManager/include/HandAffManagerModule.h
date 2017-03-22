@@ -62,7 +62,7 @@ private:
     csvfile csvHandsObjects;
     yarp::os::Bottle handDesc;
     yarp::os::Bottle objDesc;
-    cv::Mat handImage;
+    cv::Mat handImageSim;
     cv::Mat objImage;
     //std::string handImageTimeStr;
 
