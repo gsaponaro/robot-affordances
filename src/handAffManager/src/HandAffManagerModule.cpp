@@ -599,7 +599,7 @@ string HandAffManagerModule::getObject()
 }
 
 /***************************************************/
-string HandAffManagerModule::start(const string &action)
+string HandAffManagerModule::getEffect(const string &action)
 {
     // sanity checks
     if (action!="tapFromLeft" || action!="tapFromRight" || action!="push" || action!="draw")

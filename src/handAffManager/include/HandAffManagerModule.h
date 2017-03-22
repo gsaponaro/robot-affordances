@@ -99,7 +99,7 @@ public:
     std::string getHand();
     bool setObjectName(const std::string &objName);
     std::string getObject();
-    std::string start(const std::string &action);
+    std::string getEffect(const std::string &action);
     bool yes();
     bool no();
     yarp::os::Bottle getBestObject2D();

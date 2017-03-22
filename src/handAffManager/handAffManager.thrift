@@ -54,7 +54,7 @@ service handAffManager_IDL
      * tapFromRight, push, draw
      * @return string containing the next interactive instruction for the user
      */
-    string start(1:string action);
+    string getEffect(1:string action);
 
     /**
      * Provide positive user response to a program request for information.
