@@ -95,7 +95,8 @@ public:
     bool attach(yarp::os::RpcServer &source);
     bool setHandPosture(const std::string &posture);
     std::string getHand();
-    bool setObject(const std::string &objName);
+    bool setObjectName(const std::string &objName);
+    std::string getObject();
     bool yes();
     bool no();
     yarp::os::Bottle getBestObject3D();

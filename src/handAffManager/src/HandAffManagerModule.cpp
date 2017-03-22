@@ -558,10 +558,28 @@ string HandAffManagerModule::getHand()
 }
 
 /***************************************************/
-bool HandAffManagerModule::setObject(const string &objName)
+bool HandAffManagerModule::setObjectName(const string &objName)
 {
     currObj = objName;
+    yInfo("target object is now: %s", currObj.c_str());
     return true;
+}
+
+/***************************************************/
+string HandAffManagerModule::getObject()
+{
+    // acquire provisional object descriptors
+    if (!getObjDesc())
+        return "failed acquiring object descriptors";
+
+    // acquire provisional object image
+    if (!getObjImage())
+        return "failed acquiring object image";
+
+    // acquisition OK, now we need to ask the user for confirmation
+    needUserConfirmation = true;
+
+    return "successfully acquired object descriptors and image: if they look OK please type 'yes', otherwise type 'no'";
 }
 
 /***************************************************/

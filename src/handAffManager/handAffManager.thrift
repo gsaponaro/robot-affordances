@@ -36,7 +36,14 @@ service handAffManager_IDL
      * @param objName the name of the target object
      * @return true/false on success/failure
      */
-    bool setObject(1:string objName);
+    bool setObjectName(1:string objName);
+
+    /**
+     * Acquire provisional information about the target object (shape
+     * descriptors and image) from the real robot perception.
+     * @return string containing the next interactive instruction for the user
+     */
+    string getObject();
 
     /**
      * Provide positive user response to a program request for information.
