@@ -174,6 +174,36 @@ bool HandAffManagerModule::updateModule()
         }
     }
 
+    // enter here after the provisional effects Bottle has been filled
+    if (needUserConfirmation && effects.size()>0)
+    {
+        // in RPC, we asked user to confirm whether effects and images are good (yes or no)
+        while(needUserConfirmation)
+            yarp::os::Time::delay(0.1);
+
+        if (!userResponse)
+        {
+            yWarning("no -> will reset effects and images, please restart the acquisition");
+            effects.clear();
+            return true;
+        }
+        yInfo("yes -> will save effects and images to file");
+
+        if (currPosture=="" || currObj=="" || currAction=="")
+        {
+            yError("one or more mandatory fields for the effects file are missing!");
+            return true;
+        }
+        else
+        {
+            // all good so far
+            yDebug("posture=%s object=%s action=%s", currPosture.c_str(), currObj.c_str(), currAction.c_str());
+            // TODO
+            //if (saveEffectsAndImages())
+            //    effects.clear(); // reset variable
+        }
+    }
+
     //return !closing;
     return true;
 }
@@ -663,11 +693,20 @@ string HandAffManagerModule::getEffect(const string &action)
     }
 
     // effect computation and request for confirmation
-    double effX = final3D.get(0).asDouble() - init3D.get(0).asDouble();
-    double effY = final3D.get(1).asDouble() - init3D.get(1).asDouble();
+    effects.clear();
+    effects.addDouble(init3D.get(0).asDouble()); // X robot frame
+    effects.addDouble(init3D.get(1).asDouble()); // Y robot frame
+    effects.addDouble(init2D.get(0).asDouble()); // u image frame
+    effects.addDouble(init2D.get(1).asDouble()); // v image frame
+    effects.addDouble(final3D.get(0).asDouble()); // X robot frame
+    effects.addDouble(final3D.get(1).asDouble()); // etc.
+    effects.addDouble(final2D.get(0).asDouble());
+    effects.addDouble(final2D.get(1).asDouble());
 
     needUserConfirmation = true;
 
+    double effX = final3D.get(0).asDouble() - init3D.get(0).asDouble();
+    double effY = final3D.get(1).asDouble() - init3D.get(1).asDouble();
     stringstream sstm;
     sstm << "successfully performed the action and computed the effects in the root frame:\n" <<
           "X: " << effX << ", Y:" << effY << "\n" <<

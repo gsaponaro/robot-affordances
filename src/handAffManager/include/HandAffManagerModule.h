@@ -59,6 +59,7 @@ private:
     bool needUserConfirmation;
     bool userResponse;
 
+    // hands and objects
     csvfile csvHandsObjects;
     yarp::os::Bottle handDesc;
     yarp::os::Bottle objDesc;
@@ -71,6 +72,8 @@ private:
     std::string currPosture;
     std::string currObj;
     std::string currAction;
+
+    yarp::os::Bottle effects;
 
 public:
 
