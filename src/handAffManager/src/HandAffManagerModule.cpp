@@ -663,14 +663,14 @@ string HandAffManagerModule::start(const string &action)
     }
 
     // effect computation and request for confirmation
-    double effX = final2D.get(0).asDouble() - init2D.get(0).asDouble();
-    double effY = final2D.get(1).asDouble() - init2D.get(1).asDouble();
+    double effX = final3D.get(0).asDouble() - init3D.get(0).asDouble();
+    double effY = final3D.get(1).asDouble() - init3D.get(1).asDouble();
 
     needUserConfirmation = true;
 
     stringstream sstm;
-    sstm << "successfully performed the action and computed the effects:\n" <<
-          "along table x: " << effX << ", y:" << effY << "\n" <<
+    sstm << "successfully performed the action and computed the effects in the root frame:\n" <<
+          "X: " << effX << ", Y:" << effY << "\n" <<
           "if they look OK please type 'yes', otherwise type 'no'";
 
     return sstm.str();
