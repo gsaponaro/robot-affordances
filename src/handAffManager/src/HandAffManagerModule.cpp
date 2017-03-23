@@ -152,7 +152,7 @@ bool HandAffManagerModule::updateModule()
         if (!userResponse)
         {
             yWarning("no -> will reset object descriptors and image, please restart the acquisition");
-            handDesc.clear();
+            objDesc.clear();
             //handImageSim = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
             //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
             return true;
