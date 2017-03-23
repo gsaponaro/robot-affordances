@@ -475,6 +475,26 @@ bool HandAffManagerModule::getHandImage()
 }
 
 /***************************************************/
+bool HandAffManagerModule::setObjectName(const string &objName)
+{
+    /**
+     * Set the current target object name.
+     * @param objName the name of the target object
+     * @return true/false on success/failure
+     */
+
+    if (objName=="")
+    {
+        yError("invalid object name");
+        return false;
+    }
+
+    currObj = objName;
+    yInfo("target object is now: %s", currObj.c_str());
+    return true;
+}
+
+/***************************************************/
 bool HandAffManagerModule::getObjDesc()
 {
     // acquire provisional object descriptors; if successful put them
@@ -694,7 +714,8 @@ bool HandAffManagerModule::attach(RpcServer &source)
 string HandAffManagerModule::getHand(const string &posture)
 {
     // move real and simulated hand, set currPosture variable
-    setHandPosture(posture);
+    if (!setHandPosture(posture))
+        return "problem setting the hand posture";
 
     // acquire provisional hand descriptors
     if (!getHandDesc())
@@ -711,22 +732,11 @@ string HandAffManagerModule::getHand(const string &posture)
 }
 
 /***************************************************/
-bool HandAffManagerModule::setObjectName(const string &objName)
+string HandAffManagerModule::getObject(const string &objName)
 {
-    if (objName=="")
-    {
-        yError("invalid object name");
-        return false;
-    }
+    if (!setObjectName(objName))
+        return "problem setting the object name";
 
-    currObj = objName;
-    yInfo("target object is now: %s", currObj.c_str());
-    return true;
-}
-
-/***************************************************/
-string HandAffManagerModule::getObject()
-{
     // acquire provisional object descriptors
     if (!getObjDesc())
         return "failed acquiring object descriptors";

@@ -90,6 +90,7 @@ public:
     bool getHandDesc();
     bool getHandImage();
 
+    bool setObjectName(const std::string &objName);
     bool getObjDesc();
     bool getObjImage();
 
@@ -103,8 +104,7 @@ public:
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
     std::string getHand(const std::string &posture);
-    bool setObjectName(const std::string &objName);
-    std::string getObject();
+    std::string getObject(const std::string &objName);
     std::string getEffect(const std::string &action);
     bool yes();
     bool no();

@@ -27,18 +27,13 @@ service handAffManager_IDL
     string getHand(1:string posture);
 
     /**
-     * Set the current target object name.
-     * @param objName the name of the target object
-     * @return true/false on success/failure
-     */
-    bool setObjectName(1:string objName);
-
-    /**
      * Acquire provisional information about the target object (shape
-     * descriptors and image) from the real robot perception.
+     * descriptors and image) from the real robot perception. This information
+     * then needs to be verified by the user before saving to disk.
+     * @param objName the name of the target object
      * @return string containing the next interactive instruction for the user
      */
-    string getObject();
+    string getObject(1:string objName);
 
     /**
      * Ask the real robot to perform a specific motor actions (tapFromLeft,
