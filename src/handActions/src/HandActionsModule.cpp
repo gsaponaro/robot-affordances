@@ -340,13 +340,16 @@ bool HandActionsModule::updateModule()
 }
 
 /***************************************************/
-bool HandActionsModule::getBestObject3D(double x, double y, double z)
+Bottle HandActionsModule::getBestObject3D()
 {
+    Bottle res;
+    res.clear();
+
     // sanity check
     if (rpcManagerPort.getOutputCount()<1)
     {
         yError("no connection to handAffManager RPC server");
-        return false;
+        return res;
     }
 
     Bottle handMgrCmd;
@@ -360,18 +363,17 @@ bool HandActionsModule::getBestObject3D(double x, double y, double z)
 
     if (validReply)
     {
-        x = handMgrReply.get(0).asList()->get(0).asDouble();
-        y = handMgrReply.get(0).asList()->get(1).asDouble();
-        z = handMgrReply.get(0).asList()->get(2).asDouble();
-        return true;
+        //res.addDouble(handMgrReply.get(0).asList()->get(0).asDouble());
+        //res.addDouble(handMgrReply.get(0).asList()->get(1).asDouble());
+        //res.addDouble(handMgrReply.get(0).asList()->get(2).asDouble());
+        res = *handMgrReply.get(0).asList();
     }
     else
     {
         yError("invalid reply to getBestObject3D: %s", handMgrReply.toString().c_str());
-        return false;
     }
 
-    return validReply;
+    return res;
 }
 
 /***************************************************/
@@ -610,12 +612,17 @@ bool HandActionsModule::setFingers(const std::string &posture)
 /***************************************************/
 bool HandActionsModule::tapFromLeft()
 {
-    double x, y, z;
-    if (!getBestObject3D(x,y,z))
+    Bottle best3D = getBestObject3D();
+    if (best3D.size() != 3)
     {
         //yError("problem with getBestObject3D");
         return false;
     }
+
+    double x, y, z;
+    x = best3D.get(0).asDouble();
+    y = best3D.get(1).asDouble();
+    z = best3D.get(2).asDouble();
 
     return tapFromLeftCoords(x,y,z);
 }
@@ -623,12 +630,17 @@ bool HandActionsModule::tapFromLeft()
 /***************************************************/
 bool HandActionsModule::tapFromRight()
 {
-    double x, y, z;
-    if (!getBestObject3D(x,y,z))
+    Bottle best3D = getBestObject3D();
+    if (best3D.size() != 3)
     {
         //yError("problem with getBestObject3D");
         return false;
     }
+
+    double x, y, z;
+    x = best3D.get(0).asDouble();
+    y = best3D.get(1).asDouble();
+    z = best3D.get(2).asDouble();
 
     return tapFromRightCoords(x,y,z);
 }
@@ -636,12 +648,17 @@ bool HandActionsModule::tapFromRight()
 /***************************************************/
 bool HandActionsModule::push()
 {
-    double x, y, z;
-    if (!getBestObject3D(x,y,z))
+    Bottle best3D = getBestObject3D();
+    if (best3D.size() != 3)
     {
         //yError("problem with getBestObject3D");
         return false;
     }
+
+    double x, y, z;
+    x = best3D.get(0).asDouble();
+    y = best3D.get(1).asDouble();
+    z = best3D.get(2).asDouble();
 
     return pushCoords(x,y,z);
 }
@@ -649,12 +666,17 @@ bool HandActionsModule::push()
 /***************************************************/
 bool HandActionsModule::draw()
 {
-    double x, y, z;
-    if (!getBestObject3D(x,y,z))
+    Bottle best3D = getBestObject3D();
+    if (best3D.size() != 3)
     {
         //yError("problem with getBestObject3D");
         return false;
     }
+
+    double x, y, z;
+    x = best3D.get(0).asDouble();
+    y = best3D.get(1).asDouble();
+    z = best3D.get(2).asDouble();
 
     return drawCoords(x,y,z);}
 

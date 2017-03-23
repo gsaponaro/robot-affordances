@@ -76,7 +76,7 @@ public:
     double getPeriod();
     bool updateModule();
 
-    bool getBestObject3D(double x, double y, double z);
+    yarp::os::Bottle getBestObject3D();
 
     void moveHand(const int postureType);
     bool safetyCheck(const yarp::sig::Vector &targetPos, const std::string &side);
