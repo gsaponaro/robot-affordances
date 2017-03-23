@@ -43,6 +43,9 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     rpcGazePortName = "/" + moduleName + "/gaze:rpc";
     rpcGazePort.open(rpcGazePortName.c_str());
 
+    initMotor = false;
+    initSim = false;
+
     needUserConfirmation = false;
     userResponse = false;
 
@@ -108,6 +111,81 @@ double HandAffManagerModule::getPeriod()
 /***************************************************/
 bool HandAffManagerModule::updateModule()
 {
+    // initialization of motor part (handActions)
+    if (!initMotor && rpcHandActionsPort.getOutputCount()>0)
+    {
+        Bottle handActionsCmd;
+        Bottle handActionsReply;
+        handActionsCmd.clear();
+        handActionsReply.clear();
+        // TODO: replace "home"+"look_down" with "home all" RPC when it is ready
+        handActionsCmd.addString("home");
+        rpcHandActionsPort.write(handActionsCmd, handActionsReply);
+        if (handActionsReply.size()>0 &&
+            handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
+        {
+            yInfo("successfully moved robot to home");
+        }
+        else
+        {
+            yError("problem when moving robot to home");
+        }
+
+        handActionsCmd.clear();
+        handActionsReply.clear();
+        handActionsCmd.addString("look_down");
+        rpcHandActionsPort.write(handActionsCmd, handActionsReply);
+        if (handActionsReply.size()>0 &&
+            handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
+        {
+            yInfo("successfully looked down");
+        }
+        else
+        {
+            yError("problem when looking down");
+        }
+
+        initMotor = true;
+    }
+
+    // initialization of graphical hand simulator
+    if (!initSim && rpcRobotHandProcessorPort.getOutputCount()>0)
+    {
+        Bottle simCmd;
+        Bottle simReply;
+        simCmd.clear();
+        simReply.clear();
+        simCmd.addString("resetKinematics");
+        rpcRobotHandProcessorPort.write(simCmd, simReply);
+        if (simReply.size()>0 &&
+            simReply.get(0).asVocab()==Vocab::encode("ok"))
+        {
+            yInfo("successfully reset kinematics of simulator");
+        }
+        else
+        {
+            yError("problem when resetting kinematics of simulator");
+        }
+
+        simCmd.clear();
+        simReply.clear();
+        simCmd.addString("look");
+        const string target = "left_hand"; // TODO parameterize
+        simCmd.addString(target);
+        rpcRobotHandProcessorPort.write(simCmd, simReply);
+        if (simReply.size()>0 &&
+            simReply.get(0).asVocab()==Vocab::encode("ok"))
+        {
+            yInfo("successfully looked at target %s in the simulator", target.c_str());
+        }
+        else
+        {
+            yError("problem when looking at target %s in the simulator", target.c_str());
+        }
+
+        initSim = true;
+    }
+
     // enter here after the provisional handDesc Bottle has been filled
     if (needUserConfirmation && handDesc.size()>0)
     {

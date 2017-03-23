@@ -56,6 +56,9 @@ private:
     yarp::os::RpcClient rpcRobotHandProcessorPort;
     yarp::os::RpcClient rpcGazePort;
 
+    bool initMotor;
+    bool initSim;
+
     bool needUserConfirmation;
     bool userResponse;
 
