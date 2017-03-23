@@ -83,11 +83,15 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
     finalApproach[2] += 0.03;               // Offset - avoid collision with table
     initialApproach = finalApproach;
     initialApproach[2] += 0.1;              // avoid collision with objects during the approach phase
+    yDebug("going to intermediate approach waypoint");
     iarm->goToPoseSync(initialApproach,o);
     iarm->waitMotionDone();
     // ADD a Delay here?!
+    yDebug("going to final approach target");
     iarm->goToPoseSync(finalApproach,o);
     iarm->waitMotionDone();
+    yDebug("reached final approach target");
+    yarp::os::Time::delay(1.0);
 
     return true;
 }
@@ -422,7 +426,8 @@ bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &
 {
     // all actions
     const double xMinThresh = -0.20;
-    if (targetPos[0] > xMinThresh)
+    const double xMaxThresh = -0.45;
+    if (targetPos[0]>xMinThresh || targetPos[0]<xMaxThresh)
     {
         yWarning("unsafe x");
         return false;
@@ -464,10 +469,10 @@ bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &
     }
 
     // push, draw with any arm
-    const double xMaxThresh = -0.35;
+    const double xMaxThreshStrict = xMaxThresh + 0.10;
     if (side=="top" || side=="bottom")
     {
-        if (targetPos[0] < xMaxThresh)
+        if (targetPos[0] < xMaxThreshStrict)
         {
             yWarning("unsafe x");
             return false;
