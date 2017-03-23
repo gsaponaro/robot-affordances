@@ -37,14 +37,17 @@ service handAffManager_IDL
 
     /**
      * Ask the real robot to perform a specific motor actions (tapFromLeft,
-     * tapFromRight, push, draw) on the "best" object currently seen by
-     * segmentation, and record effects. These effects then need to be verified
+     * tapFromRight, push, draw) with one of the permitted postures (straight,
+     * fortyfive, bent) on a target object (the "best" one currently seen by
+     * segmentation), and record effects. These effects then need to be verified
      * by the user before saving to disk.
      * @param string containing the desired action: tapFromLeft,
      * tapFromRight, push, draw
+     * @param posture the name of the posture: straight, fortyfive, bent
+     * @param objName the name of the target object
      * @return string containing the next interactive instruction for the user
      */
-    string getEffect(1:string action);
+    string startEffect(1:string action, 2:string posture, 3:string objName);
 
     /**
      * Provide positive user response to a program request for information.

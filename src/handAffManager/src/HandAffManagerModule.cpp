@@ -752,17 +752,25 @@ string HandAffManagerModule::getObject(const string &objName)
 }
 
 /***************************************************/
-string HandAffManagerModule::getEffect(const string &action)
+string HandAffManagerModule::startEffect(const string &action, const string &posture, const string &objName)
 {
     // sanity checks
     if (action!="tapFromLeft" || action!="tapFromRight" || action!="push" || action!="draw")
     {
         return "invalid action! The valid ones are: tapFromLeft, tapFromRight, push, draw";
     }
+    currAction = action; // TODO remove from the whole module, now redundant
 
+    /*
     if (currPosture == "")
     {
         return "I don't know the current hand posture, please set it with setHandPosture";
+    }
+    */
+
+    if (posture!="straight" || posture!="fortyfive" || posture!="bent")
+    {
+        return "invalid posture! The valid ones are: straight, fortyfive, bent";
     }
 
     if (rpcHandActionsPort.getOutputCount()<1)
@@ -771,7 +779,7 @@ string HandAffManagerModule::getEffect(const string &action)
     }
 
     // target object initial position information
-    currAction = action;
+
     Bottle init2D = getBestObject2D();
     if (init2D.size() != 2)
     {
@@ -805,7 +813,7 @@ string HandAffManagerModule::getEffect(const string &action)
 
     yarp::os::Time::delay(2.0);
 
-    // TODO atabak suggestion: wait for "stop" to get final
+    // TODO atabak suggestion: wait for "stopEffect" to get final
     //needUserConfirmation = true;
 
     // target object final position information

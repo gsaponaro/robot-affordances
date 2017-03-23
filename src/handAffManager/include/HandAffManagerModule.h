@@ -105,7 +105,7 @@ public:
     bool attach(yarp::os::RpcServer &source);
     std::string getHand(const std::string &posture);
     std::string getObject(const std::string &objName);
-    std::string getEffect(const std::string &action);
+    std::string startEffect(const std::string &action, const std::string &posture, const std::string &objName);
     bool yes();
     bool no();
     yarp::os::Bottle getBestObject2D();
