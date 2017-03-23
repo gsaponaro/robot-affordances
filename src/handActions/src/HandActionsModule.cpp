@@ -527,11 +527,13 @@ bool HandActionsModule::home()
     double elapsedTime=0.0;
     double startTime=Time::now();
 
-    while(!done && elapsedTime<2.0)
+    const double maxTimeout = 3.0;
+
+    while(!done && elapsedTime<maxTimeout)
     {
         posT->checkMotionDone(&done);
         Time::delay(0.04);
-        elapsedTime= Time::now()-startTime;
+        elapsedTime = Time::now()-startTime;
     }
 
     // move arm
@@ -549,11 +551,11 @@ bool HandActionsModule::home()
     elapsedTime=0.0;
     startTime=Time::now();
 
-    while(!done && elapsedTime<2.0)
+    while(!done && elapsedTime<maxTimeout)
     {
         posA->checkMotionDone(&done);
         Time::delay(0.04);
-        elapsedTime= Time::now()-startTime;
+        elapsedTime = Time::now()-startTime;
     }
 
     // move torso yaw and roll
@@ -563,11 +565,11 @@ bool HandActionsModule::home()
     elapsedTime=0.0;
     startTime=Time::now();
 
-    while(!done && elapsedTime<2.0)
+    while(!done && elapsedTime<maxTimeout)
     {
         posT->checkMotionDone(&done);
         Time::delay(0.04);
-        elapsedTime= Time::now()-startTime;
+        elapsedTime = Time::now()-startTime;
     }
 
     return true;
