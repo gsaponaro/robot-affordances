@@ -86,6 +86,7 @@ public:
     double getPeriod();
     bool updateModule();
 
+    bool setHandPosture(const std::string &posture);
     bool getHandDesc();
     bool getHandImage();
 
@@ -101,8 +102,7 @@ public:
 
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
-    bool setHandPosture(const std::string &posture);
-    std::string getHand();
+    std::string getHand(const std::string &posture);
     bool setObjectName(const std::string &objName);
     std::string getObject();
     std::string getEffect(const std::string &action);

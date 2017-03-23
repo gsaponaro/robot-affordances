@@ -17,19 +17,14 @@ struct Bottle { }
 service handAffManager_IDL
 {
     /**
-     * Set robot fingers to one of the permitted postures: straight, fortyfive,
-     * bent. This is done first on the real robot, then in the Unity simulator.
+     * Set the robot hand to one of the available postures (straight, fortyfive,
+     * bent), then acquire provisional information about the robot hand: shape
+     * descriptors and image from the Unity simulator. This information then
+     * needs to be verified by the user before saving to disk.
      * @param posture the name of the posture: straight, fortyfive, bent
-     * @return true/false on success/failure
-     */
-    bool setHandPosture(1:string posture);
-
-    /**
-     * Acquire provisional information about the robot hand (shape descriptors
-     * and image) from the Unity simulator.
      * @return string containing the next interactive instruction for the user
      */
-    string getHand();
+    string getHand(1:string posture);
 
     /**
      * Set the current target object name.

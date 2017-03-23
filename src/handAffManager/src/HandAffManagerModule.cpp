@@ -289,6 +289,98 @@ bool HandAffManagerModule::updateModule()
 }
 
 /***************************************************/
+bool HandAffManagerModule::setHandPosture(const string &posture)
+{
+    /**
+     * Set robot fingers to one of the permitted postures: straight, fortyfive,
+     * bent. This is done first on the real robot, then in the Unity simulator.
+     * @param posture the name of the posture: straight, fortyfive, bent
+     * @return true/false on success/failure
+     */
+
+    // sanity checks
+    if (rpcHandActionsPort.getOutputCount()<1)
+    {
+        yError("no connection to handActions RPC server");
+        return false;
+    }
+
+    if (rpcRobotHandProcessorPort.getOutputCount()<1)
+    {
+        yError("no connection to robotHandProcessor RPC server");
+        return false;
+    }
+
+    // set robot hand *on the real robot*
+    if (posture=="straight" || posture=="fortyfive" || posture=="bent")
+    {
+        yDebug("requesting %s hand posture on the real robot", posture.c_str());
+        Bottle handActionsCmd;
+        Bottle handActionsReply;
+        handActionsCmd.clear();
+        handActionsReply.clear();
+        handActionsCmd.addString("setFingers");
+        handActionsCmd.addString(posture);
+        rpcHandActionsPort.write(handActionsCmd, handActionsReply);
+        if (handActionsReply.size()>0 &&
+            handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
+        {
+            yInfo("successfully set real hand posture to %s", posture.c_str());
+            currPosture = posture; // save it for later
+        }
+        else
+        {
+            yError("problem when setting real hand posture to %s", posture.c_str());
+            return false;
+        }
+    }
+    else
+    {
+        yError("valid finger postures are: straight, fortyfive, bent");
+        return false;
+    }
+
+    // move head and arm *in the simulator* so that hand is fully visible
+    Bottle simCmd;
+    Bottle simReply;
+    simCmd.clear();
+    simReply.clear();
+    simCmd.addString("resetKinematics"); // arm
+    yDebug("setting simulated arm kinematics to be like the real robot...");
+    rpcRobotHandProcessorPort.write(simCmd, simReply);
+    yDebug("...done");
+
+    if (simReply.size()>0 &&
+        simReply.get(0).asVocab()==Vocab::encode("ok"))
+    {
+        yInfo("successfully simulated reset of arm positions");
+    }
+    else
+    {
+        yError("problem when simulating reset of arm positions");
+        return false;
+    }
+    simCmd.clear();
+    simReply.clear();
+    simCmd.addString("look");
+    string desiredHand = "left_hand";
+    simCmd.addString(desiredHand);
+    rpcRobotHandProcessorPort.write(simCmd, simReply);
+    if (simReply.size()>0 &&
+        simReply.get(0).asVocab()==Vocab::encode("ok"))
+    {
+        yInfo("successfully simulated looking at %s", desiredHand.c_str());
+    }
+    else
+    {
+        yError("problem when simulating looking at %s", desiredHand.c_str());
+        return false;
+    }
+
+    return true;
+}
+
+/***************************************************/
 bool HandAffManagerModule::getHandDesc()
 {
     // acquire provisional hand descriptors; if successful put them
@@ -599,93 +691,11 @@ bool HandAffManagerModule::attach(RpcServer &source)
 }
 
 /***************************************************/
-bool HandAffManagerModule::setHandPosture(const string &posture)
+string HandAffManagerModule::getHand(const string &posture)
 {
-    // sanity checks
-    if (rpcHandActionsPort.getOutputCount()<1)
-    {
-        yError("no connection to handActions RPC server");
-        return false;
-    }
+    // move real and simulated hand, set currPosture variable
+    setHandPosture(posture);
 
-    if (rpcRobotHandProcessorPort.getOutputCount()<1)
-    {
-        yError("no connection to robotHandProcessor RPC server");
-        return false;
-    }
-
-    // set robot hand *on the real robot*
-    if (posture=="straight" || posture=="fortyfive" || posture=="bent")
-    {
-        yDebug("requesting %s hand posture on the real robot", posture.c_str());
-        Bottle handActionsCmd;
-        Bottle handActionsReply;
-        handActionsCmd.clear();
-        handActionsReply.clear();
-        handActionsCmd.addString("setFingers");
-        handActionsCmd.addString(posture);
-        rpcHandActionsPort.write(handActionsCmd, handActionsReply);
-        if (handActionsReply.size()>0 &&
-            handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
-        {
-            yInfo("successfully set real hand posture to %s", posture.c_str());
-            currPosture = posture; // save it for later
-        }
-        else
-        {
-            yError("problem when setting real hand posture to %s", posture.c_str());
-            return false;
-        }
-    }
-    else
-    {
-        yError("valid finger postures are: straight, fortyfive, bent");
-        return false;
-    }
-
-    // move head and arm *in the simulator* so that hand is fully visible
-    Bottle simCmd;
-    Bottle simReply;
-    simCmd.clear();
-    simReply.clear();
-    simCmd.addString("resetKinematics"); // arm
-    yDebug("setting simulated arm kinematics to be like the real robot...");
-    rpcRobotHandProcessorPort.write(simCmd, simReply);
-    yDebug("...done");
-
-    if (simReply.size()>0 &&
-        simReply.get(0).asVocab()==Vocab::encode("ok"))
-    {
-        yInfo("successfully simulated reset of arm positions");
-    }
-    else
-    {
-        yError("problem when simulating reset of arm positions");
-        return false;
-    }
-    simCmd.clear();
-    simReply.clear();
-    simCmd.addString("look");
-    string desiredHand = "left_hand";
-    simCmd.addString(desiredHand);
-    rpcRobotHandProcessorPort.write(simCmd, simReply);
-    if (simReply.size()>0 &&
-        simReply.get(0).asVocab()==Vocab::encode("ok"))
-    {
-        yInfo("successfully simulated looking at %s", desiredHand.c_str());
-    }
-    else
-    {
-        yError("problem when simulating looking at %s", desiredHand.c_str());
-        return false;
-    }
-
-    return true;
-}
-
-/***************************************************/
-string HandAffManagerModule::getHand()
-{
     // acquire provisional hand descriptors
     if (!getHandDesc())
         return "failed acquiring hand descriptors";
