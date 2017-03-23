@@ -243,7 +243,7 @@
   </connection>
 
   <connection>
-      <from>/iCubUnitySim/cam/left</from>
+      <from>/robotHandProcessor/image:o</from>
       <to>/handAffManager/handImage:i</to>
       <protocol>udp</protocol>
   </connection>
