@@ -46,10 +46,13 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     needUserConfirmation = false;
     userResponse = false;
 
+    basePath = rf.getHomeContextPath().c_str();
+    yDebug("basePath: %s", basePath.c_str());
+
     // create hands and objects descriptors file with current date and time
     string timestr = getDateAndTime();
     string filenameHandsObjects;
-    filenameHandsObjects = "handsAndObjectsDescriptors_" + timestr + ".csv";
+    filenameHandsObjects = basePath+"/"+"handsAndObjectsDescriptors_" + timestr + ".csv";
     yDebug("handsObjects filename is %s", filenameHandsObjects.c_str());
     csvHandsObjects.setFilename(filenameHandsObjects);
 
@@ -59,10 +62,6 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
         // central normalized moments
         << "nu00" << "nu11" << "nu02" << "nu30" << "nu21" << "nu12" << "nu03"
         << endrow;
-
-    // effects files
-    basePath = rf.getHomeContextPath().c_str();
-    //yDebug("basePath: %s", basePath.c_str());
 
     //closing = false;
 
@@ -125,6 +124,7 @@ bool HandAffManagerModule::updateModule()
             //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
             return true;
         }
+
         yInfo("yes -> will save hand descriptors and image to file");
 
         // make sure that currPosture is up to date
@@ -157,6 +157,7 @@ bool HandAffManagerModule::updateModule()
             //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
             return true;
         }
+
         yInfo("yes -> will save object descriptors and image to file");
 
         // make sure that currObj is up to date
@@ -187,6 +188,7 @@ bool HandAffManagerModule::updateModule()
             effects.clear();
             return true;
         }
+
         yInfo("yes -> will save effects and images to file");
 
         if (currPosture=="" || currObj=="" || currAction=="")
@@ -405,26 +407,49 @@ bool HandAffManagerModule::saveDescAndImage(const string &label)
 /***************************************************/
 bool HandAffManagerModule::saveDesc(const string &label)
 {
-    // TODO adapt function to both hands and objects
+    bool isHand = (label=="straight") ||
+                  (label=="fortyfive") ||
+                  (label=="bent");
 
     // sanity checks
     const int numDesc = 13;
-    if (handDesc.size() != numDesc)
+
+    // TODO
+    //Bottle *desc;
+    //    *desc = handDesc;
+    if (isHand)
     {
-        yError("got %d descriptors, was expecting %d", handDesc.size(), numDesc);
-        return false;
+        // hand
+        if (handDesc.size() != numDesc)
+        {
+            yError("got %d descriptors, was expecting %d", handDesc.size(), numDesc);
+            return false;
+        }
+    }
+    else
+    {
+        // object
+        if (objDesc.size() != numDesc)
+        {
+            yError("got %d descriptors, was expecting %d", objDesc.size(), numDesc);
+            return false;
+        }
     }
 
     // write data row
     csvHandsObjects << label;
     for (int d=0; d<numDesc; ++d)
-        csvHandsObjects << handDesc.get(d).asDouble();
+        csvHandsObjects << (isHand ? handDesc.get(d).asDouble() : objDesc.get(d).asDouble());
 
     csvHandsObjects << endrow;
 
     yInfo("sucessfully saved descriptors of %s to file", label.c_str());
 
-    handDesc.clear();
+    if (isHand)
+        handDesc.clear();
+    else
+        objDesc.clear();
+
     return true;
 }
 
@@ -465,7 +490,7 @@ bool HandAffManagerModule::saveImage(const string &label)
     filename += imageTimeStr;
     filename += ".jpg";
 
-    cv::imwrite(filename.c_str(), (isHand ? handImageSim : objImage));
+    cv::imwrite((basePath+"/"+filename).c_str(), (isHand ? handImageSim : objImage));
 
     yInfo("sucessfully saved image of %s to file", label.c_str());
 
