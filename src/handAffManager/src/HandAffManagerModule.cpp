@@ -705,6 +705,11 @@ string HandAffManagerModule::getEffect(const string &action)
         return "could not perform the motor action";
     }
 
+    yarp::os::Time::delay(2.0);
+
+    // TODO atabak suggestion: wait for "stop" to get final
+    //needUserConfirmation = true;
+
     // target object final position information
     Bottle final2D = getBestObject2D();
     if (final2D.size() != 2)
@@ -736,6 +741,7 @@ string HandAffManagerModule::getEffect(const string &action)
     sstm << "successfully performed the action and computed the effects in the root frame:\n" <<
           "X: " << effX << ", Y:" << effY << "\n" <<
           "if they look OK please type 'yes', otherwise type 'no'";
+    // TODO confirmation images
 
     return sstm.str();
 }
