@@ -1,0 +1,41 @@
+<module>
+    <name>hand Actions</name>
+
+    <doxygen-group>Vislab</doxygen-group>
+    <description>hand Actions</description>
+    <copypolicy>Released under the terms of the GNU GPL v2.0</copypolicy>
+    <version>1.0</version>
+
+    <description-long>
+    This module is responsible for the action performed in the affodances exploration (TODO: Complete description)
+    </description-long>
+    <authors>
+        <author> Pedro Vicente </author>
+    </authors>
+
+    <data>
+        <input port_type="service">
+            <type>master</type>
+            <port carrier="tcp">/handActions/rpc:i</port>
+            <description>receives rpc commands: homeAll, look_down(), tapFromLeft(), tapFromRight(), ...</description>
+        </input>
+
+        <!-- output datas if available -->
+        <output port_type="service">
+            <type>yarp::os::Bottle</type>
+            <port carrier="tcp">/handActions/handAffManager:rpc</port>
+            <description>client to ObjectRecognition</description>
+        </output>
+    </data>
+
+    <services>
+      <server>
+        <type>handActions</type>
+        <idl>handAction.thrift</idl>
+        <port>/handActions/rpc:i</port>
+        <description>service port</description>
+      </server>
+    </services>
+ 
+
+</module>
