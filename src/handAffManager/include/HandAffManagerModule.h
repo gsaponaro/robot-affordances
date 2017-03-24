@@ -62,13 +62,15 @@ private:
     bool needUserConfirmation;
     bool userResponse;
 
-    // hands and objects
-    csvfile csvHandsObjects;
+    csvfile csvHands;
     yarp::os::Bottle handDesc;
-    yarp::os::Bottle objDesc;
     cv::Mat handImageSim;
+
+    csvfile csvObjects;
+    yarp::os::Bottle objDesc;
     cv::Mat objImage;
-    //std::string handImageTimeStr;
+    yarp::os::Bottle armJoints;
+    yarp::os::Bottle headJoints;
 
     std::string basePath;
 
@@ -92,6 +94,7 @@ public:
 
     bool setObjectName(const std::string &objName);
     bool getObjDesc();
+    bool getSimArmHead();
     bool getObjImage();
 
     bool saveDescAndImage(const std::string &label);

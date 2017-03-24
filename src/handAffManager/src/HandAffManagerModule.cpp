@@ -52,18 +52,34 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     basePath = rf.getHomeContextPath().c_str();
     yDebug("basePath: %s", basePath.c_str());
 
-    // create hands and objects descriptors file with current date and time
+    // time string that will be attached to filenames
     string timestr = getDateAndTime();
-    string filenameHandsObjects;
-    filenameHandsObjects = basePath+"/"+"handsAndObjectsDescriptors_" + timestr + ".csv";
-    yDebug("handsObjects filename is %s", filenameHandsObjects.c_str());
-    csvHandsObjects.setFilename(filenameHandsObjects);
 
-    // write header row
-    csvHandsObjects << "handOrObjectName" << "convexity" << "eccentricity"
+    // create hand descriptors file and write header row
+    string filenameHands;
+    filenameHands = basePath + "/hands_" + timestr + ".csv";
+    yDebug("hands filename is %s", filenameHands.c_str());
+    csvHands.setFilename(filenameHands);
+    csvHands << "postureName" << "convexity" << "eccentricity"
         << "compactness" << "circularity" << "squareness" << "convexityDefects"
         // central normalized moments
         << "nu00" << "nu11" << "nu02" << "nu30" << "nu21" << "nu12" << "nu03"
+        << endrow;
+
+    string filenameObjects;
+    filenameObjects = basePath + "/objects_" + timestr + ".csv";
+    yDebug("objects filename is %s", filenameObjects.c_str());
+    csvObjects.setFilename(filenameObjects);
+    csvObjects << "objectName" << "convexity" << "eccentricity"
+        << "compactness" << "circularity" << "squareness" << "convexityDefects"
+        // central normalized moments
+        << "nu00" << "nu11" << "nu02" << "nu30" << "nu21" << "nu12" << "nu03"
+        // arm joints configuration in Unity simulator
+        << "arm0" << "arm1" << "arm2" << "arm3" << "arm4" << "arm5" << "arm6"
+        << "arm7" << "arm8" << "arm9" << "arm10" << "arm11" << "arm12"
+        << "arm13" << "arm14" << "arm15"
+        // head joints configuration in Unity simulator
+        << "head0" << "head1" << "head2" << "head3" << "head4" << "head5"
         << endrow;
 
     //closing = false;
@@ -186,8 +202,8 @@ bool HandAffManagerModule::updateModule()
         initSim = true;
     }
 
-    // enter here after the provisional handDesc Bottle has been filled
-    if (needUserConfirmation && handDesc.size()>0)
+    // enter here after the provisional hand data has been acquired
+    if (needUserConfirmation && handDesc.size()>0 && !handImageSim.empty())
     {
         // in RPC, we asked user to confirm whether simulated hand descriptors
         // and image are good (yes or no)
@@ -196,14 +212,14 @@ bool HandAffManagerModule::updateModule()
 
         if (!userResponse)
         {
-            yWarning("no -> will reset hand descriptors and image, please restart the acquisition");
+            yWarning("no -> will reset hand information, please restart the acquisition");
             handDesc.clear();
             //handImageSim = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
             //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
             return true;
         }
 
-        yInfo("yes -> will save hand descriptors and image to file");
+        yInfo("yes -> will save hand information to disk");
 
         // make sure that currPosture is up to date
         if (currPosture == "")
@@ -220,8 +236,8 @@ bool HandAffManagerModule::updateModule()
         }
     }
 
-    // enter here after the provisional objDesc Bottle has been filled
-    if (needUserConfirmation && objDesc.size()>0)
+    // enter here after the provisional object data has been acquired
+    if (needUserConfirmation && objDesc.size()>0 && !objImage.empty() && armJoints.size()>0 && headJoints.size()>0)
     {
         // in RPC, we asked user to confirm whether object descriptors and image are good (yes or no)
         while(needUserConfirmation)
@@ -229,14 +245,16 @@ bool HandAffManagerModule::updateModule()
 
         if (!userResponse)
         {
-            yWarning("no -> will reset object descriptors and image, please restart the acquisition");
+            yWarning("no -> will reset object information, please restart the acquisition");
             objDesc.clear();
+            armJoints.clear();
+            headJoints.clear();
             //handImageSim = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
             //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
             return true;
         }
 
-        yInfo("yes -> will save object descriptors and image to file");
+        yInfo("yes -> will save object information to disk");
 
         // make sure that currObj is up to date
         if (currObj == "")
@@ -249,7 +267,11 @@ bool HandAffManagerModule::updateModule()
             // all good so far
             yDebug("current object is %s", currObj.c_str());
             if (saveDescAndImage(currObj))
-                currObj = ""; // reset variable
+            {
+                currObj = ""; // reset variables
+                armJoints.clear();
+                headJoints.clear();
+            }
         }
     }
 
@@ -548,6 +570,61 @@ bool HandAffManagerModule::getObjDesc()
 }
 
 /***************************************************/
+bool HandAffManagerModule::getSimArmHead()
+{
+    // get the arm and head joints configuration in the Unity simulator,
+    // write them to armJoints and headJoints
+
+    if (rpcRobotHandProcessorPort.getOutputCount()<1)
+    {
+        yError("no connection to robotHandProcessor");
+        return false;
+    }
+
+    Bottle simCmd;
+    Bottle simReply;
+    simCmd.clear();
+    simReply.clear();
+    simCmd.addString("getArmPoss");
+    rpcRobotHandProcessorPort.write(simCmd, simReply);
+    const int numArmJoints = 16;
+    if (simReply.size()>0 &&
+        simReply.get(0).isList() &&
+        simReply.get(0).asList()->size()==numArmJoints)
+    {
+        armJoints.clear();
+        armJoints = *simReply.get(0).asList();
+        yInfo("successfully acquired simulator arm joints");
+    }
+    else
+    {
+        yError("problem when acquiring simulator arm joints");
+        return false;
+    }
+
+    simCmd.clear();
+    simReply.clear();
+    simCmd.addString("getHeadPoss");
+    rpcRobotHandProcessorPort.write(simCmd, simReply);
+    const int numHeadJoints = 6;
+    if (simReply.size()>0 &&
+        simReply.get(0).isList() &&
+        simReply.get(0).asList()->size()==numHeadJoints)
+    {
+        headJoints.clear();
+        headJoints = *simReply.get(0).asList();
+        yInfo("successfully acquired simulator head joints");
+    }
+    else
+    {
+        yError("problem when acquiring simulator head joints");
+        return false;
+    }
+
+    return true;
+}
+
+/***************************************************/
 bool HandAffManagerModule::getObjImage()
 {
     // acquire provisional object image; if successful put it
@@ -612,26 +689,53 @@ bool HandAffManagerModule::saveDesc(const string &label)
         // hand
         if (handDesc.size() != numDesc)
         {
-            yError("got %d descriptors, was expecting %d", handDesc.size(), numDesc);
+            yError("got %d hand descriptors, was expecting %d", handDesc.size(), numDesc);
             return false;
         }
+
+        // write data row
+        csvHands << label;
+        for (int d=0; d<numDesc; ++d)
+            csvHands << handDesc.get(d).asDouble();
+
+        csvHands << endrow;
     }
     else
     {
         // object
         if (objDesc.size() != numDesc)
         {
-            yError("got %d descriptors, was expecting %d", objDesc.size(), numDesc);
+            yError("got %d object descriptors, was expecting %d", objDesc.size(), numDesc);
             return false;
         }
+
+        const int numArmJoints = 16;
+        if (armJoints.size() != numArmJoints)
+        {
+            yError("got %d arm joints, was expecting %d", armJoints.size(), numArmJoints);
+            return false;
+        }
+
+        const int numHeadJoints = 6;
+        if (headJoints.size() != numHeadJoints)
+        {
+            yError("got %d head joints, was expecting %d", headJoints.size(), numHeadJoints);
+            return false;
+        }
+
+        // write data row
+        csvObjects << label;
+        for (int d=0; d<numDesc; ++d)
+            csvObjects << objDesc.get(d).asDouble();
+
+        for (int a=0; a<numArmJoints; ++a)
+            csvObjects << armJoints.get(a).asDouble();
+
+        for (int h=0; h<numHeadJoints; ++h)
+            csvObjects << headJoints.get(h).asDouble();
+
+        csvObjects << endrow;
     }
-
-    // write data row
-    csvHandsObjects << label;
-    for (int d=0; d<numDesc; ++d)
-        csvHandsObjects << (isHand ? handDesc.get(d).asDouble() : objDesc.get(d).asDouble());
-
-    csvHandsObjects << endrow;
 
     yInfo("sucessfully saved descriptors of %s to file", label.c_str());
 
@@ -740,6 +844,10 @@ string HandAffManagerModule::getObject(const string &objName)
     // acquire provisional object descriptors
     if (!getObjDesc())
         return "failed acquiring object descriptors";
+
+    // acquire arm and head joints configuration used in Unity for the desc
+    if (!getSimArmHead())
+        return "failed acquiring arm and head joints from the simulator";
 
     // acquire provisional object image
     if (!getObjImage())
