@@ -522,8 +522,8 @@ bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &
     }
 
     // push, draw with any arm
-    const double xMaxThreshStrict = xMaxThresh + 0.10;
-    const double yMinThreshStrict = 0.10*(arm=="right_arm" ? 1 : -1);;
+    const double xMaxThreshStrict = xMaxThresh + 0.05;
+    const double yMinThreshStrict = 0.12*(arm=="right_arm" ? 1 : -1);;
     if (side=="top" || side=="bottom")
     {
         if (targetPos[0] < xMaxThreshStrict)
