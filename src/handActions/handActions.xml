@@ -1,7 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet type="text/xsl" href="yarpmanifest.xsl"?>
 <module>
-    <name>hand Actions</name>
+    <name>handActions</name>
 
-    <doxygen-group>Vislab</doxygen-group>
+    <doxygen-group>robot-affordances</doxygen-group>
     <description>hand Actions</description>
     <copypolicy>Released under the terms of the GNU GPL v2.0</copypolicy>
     <version>1.0</version>
@@ -9,22 +11,24 @@
     <description-long>
     This module is responsible for the action performed in the affodances exploration (TODO: Complete description)
     </description-long>
+
+
+
     <authors>
-        <author> Pedro Vicente </author>
+        <author email="pvicente@isr.tecnico.ulisboa.pt"> Pedro Vicente </author>
+        <author email="gsaponaro@isr.tecnico.ulisboa.pt">Giovanni Saponaro</author>
     </authors>
 
     <data>
         <input port_type="service">
-            <type>master</type>
+            <type>yarp::os::Bottle</type>
             <port carrier="tcp">/handActions/rpc:i</port>
             <description>receives rpc commands: homeAll, look_down(), tapFromLeft(), tapFromRight(), ...</description>
         </input>
-
-        <!-- output datas if available -->
         <output port_type="service">
             <type>yarp::os::Bottle</type>
             <port carrier="tcp">/handActions/handAffManager:rpc</port>
-            <description>client to ObjectRecognition</description>
+            <description>RPC client to AffManager</description>
         </output>
     </data>
 

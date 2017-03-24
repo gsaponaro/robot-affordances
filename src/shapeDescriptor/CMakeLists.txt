@@ -37,3 +37,4 @@ add_executable(${PROJECT_NAME} ${source} ${header})
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+yarp_install(FILES shapeDescriptor.xml DESTINATION ${ICUBCONTRIB_MODULES_INSTALL_DIR})
