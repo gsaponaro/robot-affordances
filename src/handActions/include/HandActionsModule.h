@@ -61,6 +61,8 @@ protected:
     yarp::sig::Vector straightHandPoss, fortyfiveHandPoss, bentHandPoss;
     yarp::sig::Vector handVels;
 
+    double offAppTap,offAppDraw,offAppPush,distanceMovement;
+
     void fixate(const yarp::sig::Vector &x);
     yarp::sig::Vector computeHandOrientation();
     bool approachTargetWithHand(const yarp::sig::Vector &x, const yarp::sig::Vector &o, std::string side);

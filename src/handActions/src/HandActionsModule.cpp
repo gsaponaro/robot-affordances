@@ -55,28 +55,28 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
     if(side.compare("right")==0) // tapFromRight
     {
         yDebug("tapFromRight");
-        finalApproach[1] += 0.1;
+        finalApproach[1] += offAppTap;
     }
     else if(side.compare("left")==0) // tapFromLeft
     {
         yDebug("tapFromLeft");
-        finalApproach[1] -= 0.1;
+        finalApproach[1] -= offAppTap;
     }
     else if(side.compare("bottom")==0) // push
     {
         yDebug("push");
-        finalApproach[0] += 0.15;
+        finalApproach[0] += offAppPush;
     }
     else if(side.compare("top")==0) // draw
     {
         yDebug("draw");
-        finalApproach[0] -= 0.10;
+        finalApproach[0] -= offAppDraw;
         // increase y when using right_arm, decrease y when using left_arm
         finalApproach[1] += 0.03*(arm=="right_arm" ? 1 : -1);
     }
     finalApproach[2] += 0.03;               // Offset - avoid collision with table
     initialApproach = finalApproach;
-    initialApproach[2] += 0.1;              // avoid collision with objects during the approach phase
+    initialApproach[2] += 0.05;              // avoid collision with objects during the approach phase
     yDebug("going to intermediate approach waypoint");
     iarm->goToPoseSync(initialApproach,o);
     iarm->waitMotionDone();
@@ -100,22 +100,22 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
     Vector targetModified=targetPos;
     if(side.compare("right")==0) // tapFromRight
     {
-        targetModified[1] -= 0.1;
+        targetModified[1] -= distanceMovement - offAppTap;
         iarm->setTrajTime(0.7);
     }
     else if(side.compare("left")==0) // tapFromLeft
     {
-        targetModified[1] += 0.1;
+        targetModified[1] += distanceMovement - offAppTap;
         iarm->setTrajTime(0.7);
     }
     else if(side.compare("bottom")==0) // push
     {
-        targetModified[0] -= 0.1;
+        targetModified[0] -= distanceMovement - offAppPush;
         iarm->setTrajTime(1.3);
     }
     else if(side.compare("top")==0) // draw
     {
-        targetModified[0] += 0.1;
+        targetModified[0] += distanceMovement - offAppDraw;
         // increase y when using right_arm, decrease y when using left_arm
         targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
         iarm->setTrajTime(1.3);
@@ -124,6 +124,7 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
     iarm->goToPoseSync(targetModified,o);
     iarm->waitMotionDone();
     iarm->setTrajTime(tempotempo);
+    yDebug("reached final Roll target");
 }
 
 /***************************************************/
@@ -158,6 +159,13 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     rpcPort.open("/"+moduleName+"/rpc:i");
     attach(rpcPort);
 
+
+    // Defining Offsets to the actions
+    offAppTap        = 0.05; // 5cm from the object center
+    distanceMovement = 0.12; 
+    offAppDraw       = 0.03; // 5cm from the object center
+    offAppPush       = 0.13; // 3cm from the object center
+    
     straightHandPoss.resize(9, 0.0);
     straightHandPoss[0] =  0.0; // j7
     straightHandPoss[1] = 10.0;
@@ -515,6 +523,7 @@ bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &
 
     // push, draw with any arm
     const double xMaxThreshStrict = xMaxThresh + 0.10;
+    const double yMinThreshStrict = 0.10*(arm=="right_arm" ? 1 : -1);;
     if (side=="top" || side=="bottom")
     {
         if (targetPos[0] < xMaxThreshStrict)
@@ -522,6 +531,17 @@ bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &
             yWarning("unsafe x");
             return false;
         }
+        if (arm == "left_arm" && targetPos[1] > yMinThreshStrict)
+        {
+            yWarning("unsafe y");
+            return false;
+        }
+        if (arm == "right_arm" && targetPos[1] < yMinThreshStrict)
+        {
+            yWarning("unsafe y");
+            return false;
+        }
+
     }
 
     yDebug("safety check ok");
@@ -811,7 +831,7 @@ bool HandActionsModule::tapFromRightCoords(const double x, const double y, const
     Vector o=computeHandOrientation();
     yInfo()<<"computed orientation = ("<<o.toString(3,3)<<")";
 
-    if ( approachTargetWithHand(targetPos,o,"right") )
+    if (approachTargetWithHand(targetPos,o,"right") )
         roll(targetPos,o,"right");
 
     homeAll();
