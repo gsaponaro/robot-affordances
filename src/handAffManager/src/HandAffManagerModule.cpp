@@ -55,22 +55,12 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     // time string that will be attached to filenames
     string timestr = getDateAndTime();
 
-    // create hand descriptors file and write header row
+    // create hand descriptors file (incl. kinematics) and write header row
     string filenameHands;
     filenameHands = basePath + "/hands_" + timestr + ".csv";
     yDebug("hands filename is %s", filenameHands.c_str());
     csvHands.setFilename(filenameHands);
     csvHands << "postureName" << "convexity" << "eccentricity"
-        << "compactness" << "circularity" << "squareness" << "convexityDefects"
-        // central normalized moments
-        << "nu00" << "nu11" << "nu02" << "nu30" << "nu21" << "nu12" << "nu03"
-        << endrow;
-
-    string filenameObjects;
-    filenameObjects = basePath + "/objects_" + timestr + ".csv";
-    yDebug("objects filename is %s", filenameObjects.c_str());
-    csvObjects.setFilename(filenameObjects);
-    csvObjects << "objectName" << "convexity" << "eccentricity"
         << "compactness" << "circularity" << "squareness" << "convexityDefects"
         // central normalized moments
         << "nu00" << "nu11" << "nu02" << "nu30" << "nu21" << "nu12" << "nu03"
@@ -80,6 +70,17 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
         << "arm13" << "arm14" << "arm15"
         // head joints configuration in Unity simulator
         << "head0" << "head1" << "head2" << "head3" << "head4" << "head5"
+        << endrow;
+
+    // create object descriptors file and write header row
+    string filenameObjects;
+    filenameObjects = basePath + "/objects_" + timestr + ".csv";
+    yDebug("objects filename is %s", filenameObjects.c_str());
+    csvObjects.setFilename(filenameObjects);
+    csvObjects << "objectName" << "convexity" << "eccentricity"
+        << "compactness" << "circularity" << "squareness" << "convexityDefects"
+        // central normalized moments
+        << "nu00" << "nu11" << "nu02" << "nu30" << "nu21" << "nu12" << "nu03"
         << endrow;
 
     //closing = false;
@@ -135,6 +136,8 @@ bool HandAffManagerModule::updateModule()
         handActionsCmd.clear();
         handActionsReply.clear();
         handActionsCmd.addString("homeAll");
+        yInfo("moving all robot parts to home...");
+        yarp::os::Time::delay(1.0);
         rpcHandActionsPort.write(handActionsCmd, handActionsReply);
         if (handActionsReply.size()>0 &&
             handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
@@ -152,43 +155,14 @@ bool HandAffManagerModule::updateModule()
     // initialization of graphical hand simulator
     if (!initSim && rpcRobotHandProcessorPort.getOutputCount()>0)
     {
-        Bottle simCmd;
-        Bottle simReply;
-        simCmd.clear();
-        simReply.clear();
-        simCmd.addString("resetKinematics");
-        rpcRobotHandProcessorPort.write(simCmd, simReply);
-        if (simReply.size()>0 &&
-            simReply.get(0).asVocab()==Vocab::encode("ok"))
-        {
-            yInfo("successfully reset kinematics of simulator");
-        }
+        if (simResetAndLook())
+            initSim = true;
         else
-        {
-            yError("problem when resetting kinematics of simulator");
-        }
-
-        simCmd.clear();
-        simReply.clear();
-        simCmd.addString("look");
-        const string target = "left_hand"; // TODO parameterize
-        simCmd.addString(target);
-        rpcRobotHandProcessorPort.write(simCmd, simReply);
-        if (simReply.size()>0 &&
-            simReply.get(0).asVocab()==Vocab::encode("ok"))
-        {
-            yInfo("successfully looked at target %s in the simulator", target.c_str());
-        }
-        else
-        {
-            yError("problem when looking at target %s in the simulator", target.c_str());
-        }
-
-        initSim = true;
+            yWarning("problem initializing the graphical hand simulator");
     }
 
     // enter here after the provisional hand data has been acquired
-    if (needUserConfirmation && handDesc.size()>0 && !handImageSim.empty())
+    if (needUserConfirmation && handDesc.size()>0 && !handImageSim.empty() && armJoints.size()>0 && headJoints.size()>0)
     {
         // in RPC, we asked user to confirm whether simulated hand descriptors
         // and image are good (yes or no)
@@ -199,6 +173,8 @@ bool HandAffManagerModule::updateModule()
         {
             yWarning("no -> will reset hand information, please restart the acquisition");
             handDesc.clear();
+            armJoints.clear();
+            headJoints.clear();
             //handImageSim = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
             //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
             return true;
@@ -210,11 +186,15 @@ bool HandAffManagerModule::updateModule()
 
         yDebug("current hand posture is %s", currPosture.c_str());
         if (saveDescAndImage(currPosture))
-            currPosture = ""; // reset variable
+        {
+            currPosture = ""; // reset variables
+            armJoints.clear();
+            headJoints.clear();
+        }
     }
 
     // enter here after the provisional object data has been acquired
-    if (needUserConfirmation && objDesc.size()>0 && !objImage.empty() && armJoints.size()>0 && headJoints.size()>0)
+    if (needUserConfirmation && objDesc.size()>0 && !objImage.empty())
     {
         // in RPC, we asked user to confirm whether object descriptors and image are good (yes or no)
         while(needUserConfirmation)
@@ -224,8 +204,6 @@ bool HandAffManagerModule::updateModule()
         {
             yWarning("no -> will reset object information, please restart the acquisition");
             objDesc.clear();
-            armJoints.clear();
-            headJoints.clear();
             //handImageSim = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
             //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
             return true;
@@ -236,11 +214,7 @@ bool HandAffManagerModule::updateModule()
         yAssert(currObj!="");
 
         if (saveDescAndImage(currObj))
-        {
-            currObj = ""; // reset variables
-            armJoints.clear();
-            headJoints.clear();
-        }
+            currObj = ""; // reset variable
     }
 
     // enter here after the provisional effects Bottle has been filled
@@ -273,6 +247,46 @@ bool HandAffManagerModule::updateModule()
     }
 
     //return !closing;
+    return true;
+}
+
+/***************************************************/
+bool HandAffManagerModule::simResetAndLook()
+{
+    Bottle simCmd;
+    Bottle simReply;
+    simCmd.clear();
+    simReply.clear();
+    simCmd.addString("resetKinematics");
+    rpcRobotHandProcessorPort.write(simCmd, simReply);
+    if (simReply.size()>0 &&
+        simReply.get(0).asVocab()==Vocab::encode("ok"))
+    {
+        yInfo("successfully reset kinematics of simulator");
+    }
+    else
+    {
+        yError("problem when resetting kinematics of simulator");
+        return false;
+    }
+
+    simCmd.clear();
+    simReply.clear();
+    simCmd.addString("look");
+    const string target = "left_hand"; // TODO parameterize
+    simCmd.addString(target);
+    rpcRobotHandProcessorPort.write(simCmd, simReply);
+    if (simReply.size()>0 &&
+        simReply.get(0).asVocab()==Vocab::encode("ok"))
+    {
+        yInfo("successfully looked at target %s in the simulator", target.c_str());
+    }
+    else
+    {
+        yError("problem when looking at target %s in the simulator", target.c_str());
+        return false;
+    }
+
     return true;
 }
 
@@ -329,41 +343,9 @@ bool HandAffManagerModule::setHandPosture(const string &posture)
     }
 
     // move head and arm *in the simulator* so that hand is fully visible
-    Bottle simCmd;
-    Bottle simReply;
-    simCmd.clear();
-    simReply.clear();
-    simCmd.addString("resetKinematics"); // arm
-    yDebug("setting simulated arm kinematics to be like the real robot...");
-    rpcRobotHandProcessorPort.write(simCmd, simReply);
-    yDebug("...done");
+    simResetAndLook();
 
-    if (simReply.size()>0 &&
-        simReply.get(0).asVocab()==Vocab::encode("ok"))
-    {
-        yInfo("successfully simulated reset of arm positions");
-    }
-    else
-    {
-        yError("problem when simulating reset of arm positions");
-        return false;
-    }
-    simCmd.clear();
-    simReply.clear();
-    simCmd.addString("look");
-    string desiredHand = "left_hand";
-    simCmd.addString(desiredHand);
-    rpcRobotHandProcessorPort.write(simCmd, simReply);
-    if (simReply.size()>0 &&
-        simReply.get(0).asVocab()==Vocab::encode("ok"))
-    {
-        yInfo("successfully simulated looking at %s", desiredHand.c_str());
-    }
-    else
-    {
-        yError("problem when simulating looking at %s", desiredHand.c_str());
-        return false;
-    }
+    yarp::os::Time::delay(1.0);
 
     return true;
 }
@@ -415,8 +397,8 @@ bool HandAffManagerModule::getHandDesc()
         return false;
     }
 
-    yInfo("provisional hand descriptors acquired successfully:");
-    yInfo("%s", handDesc.toString().c_str());
+    yDebug("provisional hand descriptors acquired successfully:");
+    yDebug("%s", handDesc.toString().c_str());
 
     return true;
 }
@@ -457,7 +439,7 @@ bool HandAffManagerModule::getHandImage()
         return false;
     }
 
-    yInfo("provisional hand image acquired successfully");
+    //yDebug("provisional hand image acquired successfully");
 
     return true;
 }
@@ -478,7 +460,7 @@ bool HandAffManagerModule::setObjectName(const string &objName)
     }
 
     currObj = objName;
-    yInfo("target object is now: %s", currObj.c_str());
+    yDebug("target object is now: %s", currObj.c_str());
     return true;
 }
 
@@ -529,8 +511,8 @@ bool HandAffManagerModule::getObjDesc()
         return false;
     }
 
-    yInfo("provisional object descriptors acquired successfully:");
-    yInfo("%s", objDesc.toString().c_str());
+    //yDebug("provisional object descriptors acquired successfully:");
+    //yDebug("%s", objDesc.toString().c_str());
 
     return true;
 }
@@ -626,7 +608,7 @@ bool HandAffManagerModule::getObjImage()
         return false;
     }
 
-    yInfo("provisional object image acquired successfully");
+    //yDebug("provisional object image acquired successfully");
 
     return true;
 }
@@ -659,22 +641,6 @@ bool HandAffManagerModule::saveDesc(const string &label)
             return false;
         }
 
-        // write data row
-        csvHands << label;
-        for (int d=0; d<numDesc; ++d)
-            csvHands << handDesc.get(d).asDouble();
-
-        csvHands << endrow;
-    }
-    else
-    {
-        // object
-        if (objDesc.size() != numDesc)
-        {
-            yError("got %d object descriptors, was expecting %d", objDesc.size(), numDesc);
-            return false;
-        }
-
         const int numArmJoints = 16;
         if (armJoints.size() != numArmJoints)
         {
@@ -690,15 +656,31 @@ bool HandAffManagerModule::saveDesc(const string &label)
         }
 
         // write data row
+        csvHands << label;
+        for (int d=0; d<numDesc; ++d)
+            csvHands << handDesc.get(d).asDouble();
+
+        for (int a=0; a<numArmJoints; ++a)
+            csvHands << armJoints.get(a).asDouble();
+
+        for (int h=0; h<numHeadJoints; ++h)
+            csvHands << headJoints.get(h).asDouble();
+
+        csvHands << endrow;
+    }
+    else
+    {
+        // object
+        if (objDesc.size() != numDesc)
+        {
+            yError("got %d object descriptors, was expecting %d", objDesc.size(), numDesc);
+            return false;
+        }
+
+        // write data row
         csvObjects << label;
         for (int d=0; d<numDesc; ++d)
             csvObjects << objDesc.get(d).asDouble();
-
-        for (int a=0; a<numArmJoints; ++a)
-            csvObjects << armJoints.get(a).asDouble();
-
-        for (int h=0; h<numHeadJoints; ++h)
-            csvObjects << headJoints.get(h).asDouble();
 
         csvObjects << endrow;
     }
@@ -783,9 +765,12 @@ bool HandAffManagerModule::attach(RpcServer &source)
 /***************************************************/
 string HandAffManagerModule::getHand(const string &posture)
 {
-    // move real and simulated hand, set currPosture variable
-    if (!setHandPosture(posture))
-        return "problem setting the hand posture";
+    // if necessary move real and simulated hand, set currPosture variable
+    if (currPosture != posture)
+    {
+      if (!setHandPosture(posture))
+          return "problem setting the hand posture";
+    }
 
     // acquire provisional hand descriptors
     if (!getHandDesc())
@@ -795,10 +780,21 @@ string HandAffManagerModule::getHand(const string &posture)
     if (!getHandImage())
         return "failed acquiring hand image";
 
+    // acquire arm and head joints configuration used in Unity for the desc
+    if (!getSimArmHead())
+        return "failed acquiring arm and head joints from the simulator";
+
     // acquisition OK, now we need to ask the user for confirmation
     needUserConfirmation = true;
 
-    return "successfully acquired hand descriptors and image: if they look OK please type 'yes', otherwise type 'no'";
+    //return "successfully acquired hand descriptors and image: if they look OK please type 'yes', otherwise type 'no'";
+    stringstream sstm;
+    sstm << "successfully acquired provisional hand image, kinematics and descriptors: "
+         << handDesc.toString().c_str()
+         << " if they look OK please type 'yes', otherwise type 'no'";
+    // TODO confirmation images
+
+    return sstm.str();
 }
 
 /***************************************************/
@@ -811,10 +807,6 @@ string HandAffManagerModule::getObject(const string &objName)
     if (!getObjDesc())
         return "failed acquiring object descriptors";
 
-    // acquire arm and head joints configuration used in Unity for the desc
-    if (!getSimArmHead())
-        return "failed acquiring arm and head joints from the simulator";
-
     // acquire provisional object image
     if (!getObjImage())
         return "failed acquiring object image";
@@ -822,7 +814,13 @@ string HandAffManagerModule::getObject(const string &objName)
     // acquisition OK, now we need to ask the user for confirmation
     needUserConfirmation = true;
 
-    return "successfully acquired object descriptors and image: if they look OK please type 'yes', otherwise type 'no'";
+    stringstream sstm;
+    sstm << "successfully acquired provisional object image and descriptors: "
+         << objDesc.toString().c_str()
+         << " if they look OK please type 'yes', otherwise type 'no'";
+    // TODO confirmation images
+
+    return sstm.str();
 }
 
 /***************************************************/

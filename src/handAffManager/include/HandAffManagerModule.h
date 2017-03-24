@@ -65,12 +65,12 @@ private:
     csvfile csvHands;
     yarp::os::Bottle handDesc;
     cv::Mat handImageSim;
+    yarp::os::Bottle armJoints;
+    yarp::os::Bottle headJoints;
 
     csvfile csvObjects;
     yarp::os::Bottle objDesc;
     cv::Mat objImage;
-    yarp::os::Bottle armJoints;
-    yarp::os::Bottle headJoints;
 
     std::string basePath;
 
@@ -87,6 +87,8 @@ public:
     bool close();
     double getPeriod();
     bool updateModule();
+
+    bool simResetAndLook();
 
     bool setHandPosture(const std::string &posture);
     bool getHandDesc();
