@@ -15,10 +15,10 @@ service handActions_IDL
     bool look_down();
 
     /**
-     * Move the robot arms to the home position.
+     * Move both robot arms, the torso and the head to the home positions.
      * @return true/false on success/failure
      */
-    bool home();
+    bool homeAll();
 
     /**
      * Set fingers to one of the permitted postures: straight, fortyfive, bent.

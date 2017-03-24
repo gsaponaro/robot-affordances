@@ -30,6 +30,7 @@ protected:
     yarp::dev::PolyDriver drvGaze;
     yarp::dev::PolyDriver drvArm;
     yarp::dev::PolyDriver drvArmPos;
+    yarp::dev::PolyDriver drvArmPosOther;
     yarp::dev::PolyDriver drvTorso;
 
     std::string arm;
@@ -39,12 +40,15 @@ protected:
     yarp::dev::IEncoders *encsA;
     yarp::dev::ICartesianControl *iarm;
     yarp::dev::IPositionControl2 *posA;
+    yarp::dev::IPositionControl2 *posAOther;
     yarp::dev::IPositionControl2 *posT;
 
     yarp::dev::IControlMode2 *ctrlMA;
+    yarp::dev::IControlMode2 *ctrlMAOther;
     yarp::dev::IControlMode2 *ctrlMT;
 
     bool closing;
+    bool twohands;
     yarp::os::RpcServer rpcPort;
 
     std::string rpcManagerPortName;
@@ -75,7 +79,10 @@ public:
     bool close();
     double getPeriod();
     bool updateModule();
-
+    bool homeOtherArm();
+    bool homeTorso();
+    bool homeTorsoPitch();
+    bool homeArm();
     yarp::os::Bottle getBestObject3D();
 
     void moveHand(const int postureType);
@@ -84,7 +91,7 @@ public:
     // IDL functions
     bool attach(yarp::os::RpcServer &source);
     bool look_down();
-    bool home();
+    bool homeAll();
     bool setFingers(const std::string &posture);
     bool tapFromLeft();
     bool tapFromRight();

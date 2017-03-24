@@ -140,11 +140,16 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     string moduleName = rf.check("name",Value("handActions")).asString();
     string robot = rf.check("robot",Value("icub")).asString();
     arm = rf.check("arm",Value("left_arm")).asString();
+    string other_arm;
     if (arm!="left_arm" && arm!="right_arm")
     {
         yWarning("invalid arm %s specified, using the default (left_arm)", arm.c_str());
         arm = "left_arm";
     }
+    if(arm=="left_arm")
+        other_arm = "right_arm";
+    else
+        other_arm = "left_arm";
     useHand = rf.check("useHand",Value("on")).asString()=="on"?true:false;
     if (useHand)
     {
@@ -280,6 +285,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
         posA->setRefSpeed(firstHandJoint+j,handVels[j]);
     }
 
+
     /******** Position Torso Control Interface *******/
     Property optionTorso("(device remote_controlboard)");
     optionTorso.put("remote",("/"+robot+"/torso").c_str());
@@ -298,6 +304,33 @@ bool HandActionsModule::configure(ResourceFinder &rf)
         return false;
     }
 
+    twohands = rf.check("twohands",Value(true)).asBool();
+    /******** Position Arm Control Interface - The Other Arm*******/
+    if(!twohands) {
+        yDebug("Just openning the hand fot the actions: %s", arm.c_str());
+        return true; // The other arm interface will not be availabl
+    }
+    Property options2;
+    options2.put("device", "remote_controlboard");
+    options2.put("local", "/"+moduleName+"/position_control/"+other_arm);
+    options2.put("remote", "/"+robot+"/"+other_arm);
+    drvArmPosOther.open(options2);
+
+    if (!drvArmPosOther.isValid())
+    {
+        cout << moduleName << ": unable to connect to device: remote_controlboard of " << other_arm<< endl;
+        return false;
+    }
+
+    if (!drvArmPosOther.view(posAOther) || !drvArmPosOther.view(ctrlMAOther))
+    {
+        cout << moduleName << ": problems acquiring interfaces to remote_controlboard of " << other_arm << endl;
+        return false;
+    }
+    yDebug("Drivers open %s", arm.c_str());
+
+    bool sucess = homeOtherArm();
+    yDebug("%s in the home position", other_arm.c_str());
     return true;
 }
 
@@ -506,28 +539,80 @@ bool HandActionsModule::look_down()
 }
 
 /***************************************************/
-bool HandActionsModule::home()
-{
-    // set control modes
-    ctrlMA->getControlModes(controlModesArm);
+bool HandActionsModule::homeOtherArm() {
 
-    const int lastArmJoint = 7;
-    for(int i=0; i<lastArmJoint; i++)
+    const double ARM_DEF_HOME[] = {-80.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0};
+    for(int i=0; i<7; i++)
     {
-        if (controlModesArm[i]!=VOCAB_CM_POSITION)
-        {
-            ctrlMA->setControlMode(i,VOCAB_CM_POSITION);
-        }
+        ctrlMAOther->setControlMode(i,VOCAB_CM_POSITION);
     }
+    for (int i=0; i<7; i++) // arm joints, no hand joints
+    {
+        posAOther->positionMove(i, ARM_DEF_HOME[i]);
+    }
+    bool done=false;
+    double elapsedTime=0.0;
+    double startTime=Time::now();
+
+    const double maxTimeout = 3.0;
+
+    while(!done && elapsedTime<maxTimeout)
+    {
+        posAOther->checkMotionDone(&done);
+        Time::delay(0.04);
+        elapsedTime = Time::now()-startTime;
+    }
+    return true;
+
+}
+/***************************************************/
+bool HandActionsModule::homeAll()
+{
+    if(twohands)
+        homeOtherArm();
+    if(!homeTorsoPitch())
+        yWarning("Problems sending torso pitch to home position");
+    if(!homeArm())
+        yWarning("Problems sending %s Arm to home position", arm.c_str());
+    if(!homeTorso())
+        yWarning("Problems sending torso to home position");
+    if(!look_down())
+        yWarning("Problems sending head to home position");
+    return true;
+}
+/***************************************************/
+bool HandActionsModule::homeTorso()
+{
 
     for(int i=0; i<3; i++)
     {
         ctrlMT->setControlMode(i,VOCAB_CM_POSITION);
     }
+    const double TORSO_DEF_HOME[] = {0.0, 0.0, 0.0};
+    bool done=false;
+    double elapsedTime=0.0;
+    double startTime=Time::now();
+    const double maxTimeout = 3.0;
 
+    while(!done && elapsedTime<maxTimeout)
+    {
+        posT->checkMotionDone(&done);
+        Time::delay(0.04);
+        elapsedTime = Time::now()-startTime;
+    }
+
+    return true;
+}
+
+/***************************************************/
+bool HandActionsModule::homeTorsoPitch()
+{
+
+        
     // move torso pitch
     const double TORSO_DEF_HOME[] = {0.0, 0.0, 0.0};
     const int torsoPitchIdx = 2;
+    ctrlMT->setControlMode(torsoPitchIdx ,VOCAB_CM_POSITION);
     posT->positionMove(torsoPitchIdx, TORSO_DEF_HOME[torsoPitchIdx]);
 
     bool done=false;
@@ -542,8 +627,23 @@ bool HandActionsModule::home()
         Time::delay(0.04);
         elapsedTime = Time::now()-startTime;
     }
+    return true;
+}
+/***************************************************/
+bool HandActionsModule::homeArm()
+{
+    // set control modes
+    ctrlMA->getControlModes(controlModesArm);
+    const int lastArmJoint = 7;
+    for(int i=0; i<lastArmJoint; i++)
+    {
+        if (controlModesArm[i]!=VOCAB_CM_POSITION)
+        {
+            ctrlMA->setControlMode(i,VOCAB_CM_POSITION);
+        }
+    }
 
-    // move arm
+   // move arm
     const double ARM_DEF_HOME[] = {-50.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0};
 
     //posA->setRefSpeeds(handVels.data()); // 9 or 16 values?
@@ -554,9 +654,10 @@ bool HandActionsModule::home()
         posA->positionMove(i, ARM_DEF_HOME[i]);
     }
 
-    done=false;
-    elapsedTime=0.0;
-    startTime=Time::now();
+    bool done=false;
+    double elapsedTime=0.0;
+    double startTime=Time::now();
+    const double maxTimeout = 3.0;
 
     while(!done && elapsedTime<maxTimeout)
     {
@@ -564,21 +665,6 @@ bool HandActionsModule::home()
         Time::delay(0.04);
         elapsedTime = Time::now()-startTime;
     }
-
-    // move torso yaw and roll
-    posT->positionMove(TORSO_DEF_HOME);
-
-    done=false;
-    elapsedTime=0.0;
-    startTime=Time::now();
-
-    while(!done && elapsedTime<maxTimeout)
-    {
-        posT->checkMotionDone(&done);
-        Time::delay(0.04);
-        elapsedTime = Time::now()-startTime;
-    }
-
     return true;
 }
 
@@ -697,7 +783,7 @@ bool HandActionsModule::tapFromLeftCoords(const double x, const double y, const 
     if ( approachTargetWithHand(targetPos,o,"left") )
         roll(targetPos,o,"left");
 
-    home();
+    homeAll();
     look_down();
 
     return true;
@@ -720,7 +806,7 @@ bool HandActionsModule::tapFromRightCoords(const double x, const double y, const
     if ( approachTargetWithHand(targetPos,o,"right") )
         roll(targetPos,o,"right");
 
-    home();
+    homeAll();
     look_down();
 
     return true;
@@ -743,7 +829,7 @@ bool HandActionsModule::pushCoords(const double x, const double y, const double 
     if ( approachTargetWithHand(targetPos,o,"bottom") )
         roll(targetPos,o,"bottom");
 
-    home();
+    homeAll();
     look_down();
 
     return true;
@@ -766,7 +852,7 @@ bool HandActionsModule::drawCoords(const double x, const double y, const double 
     if ( approachTargetWithHand(targetPos,o,"top") )
         roll(targetPos,o,"top");
 
-    home();
+    homeAll();
     look_down();
 
     return true;
