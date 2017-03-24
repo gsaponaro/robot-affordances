@@ -162,10 +162,10 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 
     // Defining Offsets to the actions
     offAppTap        = 0.05; // 5cm from the object center
-    distanceMovement = 0.12; 
+    distanceMovement = 0.12;
     offAppDraw       = 0.03; // 5cm from the object center
     offAppPush       = 0.13; // 3cm from the object center
-    
+
     straightHandPoss.resize(9, 0.0);
     straightHandPoss[0] =  0.0; // j7
     straightHandPoss[1] = 10.0;
@@ -318,7 +318,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     twoArms = rf.check("twoArms",Value("on")).asString()=="on"?true:false;
     /******** Position Arm Control Interface - The Other Arm*******/
     if(!twoArms) {
-        yDebug("Just openning the hand for the actions: %s", arm.c_str());
+        yDebug("Just opening the hand for the actions: %s", arm.c_str());
         return true; // The other arm interface will not be availabl
     }
     Property options2;
@@ -640,7 +640,7 @@ bool HandActionsModule::homeTorsoPitch()
 {
 
     // move torso pitch
-    const double torsoPitchHome = -15.0; 
+    const double torsoPitchHome = -15.0;
     const int torsoPitchIdx = 2;
     ctrlMT->setControlMode(torsoPitchIdx ,VOCAB_CM_POSITION);
     posT->positionMove(torsoPitchIdx, torsoPitchHome);
