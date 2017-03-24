@@ -206,19 +206,11 @@ bool HandAffManagerModule::updateModule()
 
         yInfo("yes -> will save hand information to disk");
 
-        // make sure that currPosture is up to date
-        if (currPosture == "")
-        {
-            yWarning("I don't know the current hand posture, please set it with setHandPosture");
-            return true;
-        }
-        else
-        {
-            // all good so far
-            yDebug("current hand posture is %s", currPosture.c_str());
-            if (saveDescAndImage(currPosture))
-                currPosture = ""; // reset variable
-        }
+        yAssert(currPosture!="");
+
+        yDebug("current hand posture is %s", currPosture.c_str());
+        if (saveDescAndImage(currPosture))
+            currPosture = ""; // reset variable
     }
 
     // enter here after the provisional object data has been acquired
@@ -239,24 +231,15 @@ bool HandAffManagerModule::updateModule()
             return true;
         }
 
-        yInfo("yes -> will save object information to disk");
+        yInfo("yes -> will save object information to disk, object name is %s", currObj.c_str());
 
-        // make sure that currObj is up to date
-        if (currObj == "")
+        yAssert(currObj!="");
+
+        if (saveDescAndImage(currObj))
         {
-            yWarning("I don't know the current object label, please set it with setObject");
-            return true;
-        }
-        else
-        {
-            // all good so far
-            yDebug("current object is %s", currObj.c_str());
-            if (saveDescAndImage(currObj))
-            {
-                currObj = ""; // reset variables
-                armJoints.clear();
-                headJoints.clear();
-            }
+            currObj = ""; // reset variables
+            armJoints.clear();
+            headJoints.clear();
         }
     }
 
@@ -276,19 +259,17 @@ bool HandAffManagerModule::updateModule()
 
         yInfo("yes -> will save effects and images to file");
 
-        if (currPosture=="" || currObj=="" || currAction=="")
-        {
-            yError("one or more mandatory fields for the effects file are missing!");
-            return true;
-        }
-        else
-        {
-            // all good so far
-            yDebug("posture=%s object=%s action=%s", currPosture.c_str(), currObj.c_str(), currAction.c_str());
-            // TODO
-            //if (saveEffectsAndImages())
-            //    effects.clear(); // reset variable
-        }
+        yAssert(currPosture!="");
+        yAssert(currObj!="");
+        yAssert(currAction!="");
+
+        yDebug("posture=%s object=%s action=%s", currPosture.c_str(), currObj.c_str(), currAction.c_str());
+        // TODO
+        //if (saveEffectsAndImages())
+        //{
+        //    effects.clear(); // reset variables
+        //    currAction = "";
+        //}
     }
 
     //return !closing;
@@ -852,14 +833,6 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
     {
         return "invalid action! The valid ones are: tapFromLeft, tapFromRight, push, draw";
     }
-    currAction = action; // TODO remove from the whole module, now redundant
-
-    /*
-    if (currPosture == "")
-    {
-        return "I don't know the current hand posture, please set it with setHandPosture";
-    }
-    */
 
     if (posture!="straight" || posture!="fortyfive" || posture!="bent")
     {
@@ -870,6 +843,8 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
     {
         return "no connection to handActions RPC server";
     }
+
+    currAction = action; // save it for later
 
     // target object initial position information
 
