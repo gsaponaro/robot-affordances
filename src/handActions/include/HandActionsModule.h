@@ -48,7 +48,7 @@ protected:
     yarp::dev::IControlMode2 *ctrlMT;
 
     bool closing;
-    bool twohands;
+    bool twoArms;
     yarp::os::RpcServer rpcPort;
 
     std::string rpcManagerPortName;

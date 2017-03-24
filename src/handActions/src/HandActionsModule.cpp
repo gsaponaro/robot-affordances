@@ -307,11 +307,10 @@ bool HandActionsModule::configure(ResourceFinder &rf)
         drvTorso.close();
         return false;
     }
-
-    twohands = rf.check("twohands",Value(true)).asBool();
+    twoArms = rf.check("twoArms",Value("on")).asString()=="on"?true:false;
     /******** Position Arm Control Interface - The Other Arm*******/
-    if(!twohands) {
-        yDebug("Just openning the hand fot the actions: %s", arm.c_str());
+    if(!twoArms) {
+        yDebug("Just openning the hand for the actions: %s", arm.c_str());
         return true; // The other arm interface will not be availabl
     }
     Property options2;
@@ -340,10 +339,11 @@ bool HandActionsModule::configure(ResourceFinder &rf)
         drvArmPosOther.close();
         return false;
     }
-    yDebug("Drivers open %s", arm.c_str());
+    yDebug("Drivers open for both arms");
 
-    bool sucess = homeOtherArm();
-    yDebug("%s in the home position", other_arm.c_str());
+    if(!homeOtherArm())
+        yWarning("%s (other arm) not in the home position", other_arm.c_str());
+    yDebug("%s (other arm) in the home position", other_arm.c_str());
     return true;
 }
 
@@ -541,7 +541,7 @@ bool HandActionsModule::attach(RpcServer &source)
 bool HandActionsModule::look_down()
 {
     Vector ang(3,0.0);
-    ang[1] = -40.0;
+    ang[1] = -45.0;
     igaze->lookAtAbsAngles(ang);
     igaze->waitMotionDone();
 
@@ -551,7 +551,7 @@ bool HandActionsModule::look_down()
 /***************************************************/
 bool HandActionsModule::homeOtherArm() {
 
-    const double ARM_DEF_HOME[] = {-80.0,  60.0,  0.0,    40.0,    0.0,  0.0,   0.0};
+    const double ARM_DEF_HOME[] = {-80.0,  80.0,  0.0,    55.0,    0.0,  0.0,   0.0};
     for(int i=0; i<7; i++)
     {
         ctrlMAOther->setControlMode(i,VOCAB_CM_POSITION);
@@ -578,7 +578,7 @@ bool HandActionsModule::homeOtherArm() {
 /***************************************************/
 bool HandActionsModule::homeAll()
 {
-    if(twohands)
+    if(twoArms)
         homeOtherArm();
     if(!homeTorsoPitch())
         yWarning("Problems sending torso pitch to home position");
@@ -604,6 +604,7 @@ bool HandActionsModule::homeTorso()
     double startTime=Time::now();
     const double maxTimeout = 3.0;
 
+    posT->positionMove(TORSO_DEF_HOME);
     while(!done && elapsedTime<maxTimeout)
     {
         posT->checkMotionDone(&done);
