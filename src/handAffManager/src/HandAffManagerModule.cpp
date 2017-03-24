@@ -134,31 +134,16 @@ bool HandAffManagerModule::updateModule()
         Bottle handActionsReply;
         handActionsCmd.clear();
         handActionsReply.clear();
-        // TODO: replace "home"+"look_down" with "home all" RPC when it is ready
-        handActionsCmd.addString("home");
+        handActionsCmd.addString("homeAll");
         rpcHandActionsPort.write(handActionsCmd, handActionsReply);
         if (handActionsReply.size()>0 &&
             handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
         {
-            yInfo("successfully moved robot to home");
+            yInfo("successfully moved all robot parts to home");
         }
         else
         {
-            yError("problem when moving robot to home");
-        }
-
-        handActionsCmd.clear();
-        handActionsReply.clear();
-        handActionsCmd.addString("look_down");
-        rpcHandActionsPort.write(handActionsCmd, handActionsReply);
-        if (handActionsReply.size()>0 &&
-            handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
-        {
-            yInfo("successfully looked down");
-        }
-        else
-        {
-            yError("problem when looking down");
+            yError("problem when moving robot parts to home");
         }
 
         initMotor = true;
