@@ -20,9 +20,6 @@ using namespace yarp::math;
 /***************************************************/
 void HandActionsModule::fixate(const Vector &x)
 {
-    if (!useHand)
-        return;
-
     igaze->lookAtFixationPoint(x);
     igaze->waitMotionDone();
     //igaze->setTrackingMode(true);
@@ -41,9 +38,6 @@ Vector HandActionsModule::computeHandOrientation()
 /***************************************************/
 bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o, string side)
 {
-    if (!useHand)
-        return false;
-
     if (!safetyCheck(x,side))
     {
         yWarning("action is dangerous, I will not do it!");
@@ -99,8 +93,6 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
 /***************************************************/
 void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string side)
 {
-    if (!useHand)
-        return;
 
     double tempotempo;
     iarm->getTrajTime(&tempotempo);
@@ -219,7 +211,6 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     if (!drvGaze.open(optGaze))
     {
         yError()<<"Unable to open the Gaze Controller";
-        drvArm.close(); // IMPORTANT - Because drvArm was already open
         return false;
     }
 
@@ -250,6 +241,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     if (!ok)
     {
         yError()<<"Unable to open the Cartesian Controller";
+        drvGaze.close();
         return false;
     }
 
@@ -265,12 +257,17 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     if (!drvArmPos.isValid())
     {
         cout << moduleName << ": unable to connect to device: remote_controlboard of " << arm << endl;
+        drvGaze.close();
+        drvArm.close();
         return false;
     }
 
     if (!drvArmPos.view(posA) || !drvArmPos.view(encsA) || !drvArmPos.view(ctrlMA))
     {
         cout << moduleName << ": problems acquiring interfaces to remote_controlboard of " << arm << endl;
+        drvGaze.close();
+        drvArm.close();
+        drvArmPos.close();
         return false;
     }
 
@@ -294,13 +291,20 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     if (!drvTorso.open(optionTorso))
     {
         yError()<<"Joints Torso controller not available";
-        terminate();
+        //terminate();
+        drvGaze.close();
+        drvArm.close();
+        drvArmPos.close();
         return false;
     }
 
     if (!drvTorso.view(posT) || !drvTorso.view(ctrlMT))
     {
         yError("problems acquiring interfaces to remote_controlboard of torso");
+        drvGaze.close();
+        drvArm.close();
+        drvArmPos.close();
+        drvTorso.close();
         return false;
     }
 
@@ -319,12 +323,21 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     if (!drvArmPosOther.isValid())
     {
         cout << moduleName << ": unable to connect to device: remote_controlboard of " << other_arm<< endl;
+        drvGaze.close();
+        drvArm.close();
+        drvArmPos.close();
+        drvTorso.close();
         return false;
     }
 
     if (!drvArmPosOther.view(posAOther) || !drvArmPosOther.view(ctrlMAOther))
     {
         cout << moduleName << ": problems acquiring interfaces to remote_controlboard of " << other_arm << endl;
+        drvGaze.close();
+        drvArm.close();
+        drvArmPos.close();
+        drvTorso.close();
+        drvArmPosOther.close();
         return false;
     }
     yDebug("Drivers open %s", arm.c_str());
@@ -346,14 +359,11 @@ bool HandActionsModule::interruptModule()
 /***************************************************/
 bool HandActionsModule::close()
 {
-    if (useHand)
-    {
-        drvGaze.close();
-        drvArm.close();
-        drvArmPos.close();
-        drvTorso.close();
-    }
-
+    drvGaze.close();
+    drvArm.close();
+    drvArmPos.close();
+    drvTorso.close();
+    drvArmPosOther.close();
     rpcManagerPort.close();
     rpcPort.close();
 
@@ -608,12 +618,11 @@ bool HandActionsModule::homeTorso()
 bool HandActionsModule::homeTorsoPitch()
 {
 
-        
     // move torso pitch
-    const double TORSO_DEF_HOME[] = {0.0, 0.0, 0.0};
+    const double torsoPitchHome = -15.0; 
     const int torsoPitchIdx = 2;
     ctrlMT->setControlMode(torsoPitchIdx ,VOCAB_CM_POSITION);
-    posT->positionMove(torsoPitchIdx, TORSO_DEF_HOME[torsoPitchIdx]);
+    posT->positionMove(torsoPitchIdx, torsoPitchHome);
 
     bool done=false;
     double elapsedTime=0.0;
@@ -784,8 +793,6 @@ bool HandActionsModule::tapFromLeftCoords(const double x, const double y, const 
         roll(targetPos,o,"left");
 
     homeAll();
-    look_down();
-
     return true;
 }
 
@@ -807,8 +814,6 @@ bool HandActionsModule::tapFromRightCoords(const double x, const double y, const
         roll(targetPos,o,"right");
 
     homeAll();
-    look_down();
-
     return true;
 }
 
@@ -830,7 +835,6 @@ bool HandActionsModule::pushCoords(const double x, const double y, const double 
         roll(targetPos,o,"bottom");
 
     homeAll();
-    look_down();
 
     return true;
 }
@@ -852,9 +856,12 @@ bool HandActionsModule::drawCoords(const double x, const double y, const double 
     if ( approachTargetWithHand(targetPos,o,"top") )
         roll(targetPos,o,"top");
 
-    homeAll();
+    homeArm();
+    yDebug("Arm at home position");
+    homeTorso();
+    yDebug("Torso at home position");
     look_down();
-
+    yDebug("Head at home position");
     return true;
 }
 
