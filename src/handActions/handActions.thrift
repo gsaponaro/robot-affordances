@@ -28,25 +28,29 @@ service handActions_IDL
     bool setFingers(1:string posture);
 
     /**
-     * Tap an object from the left. Only one object must be visible.
+     * Tap an object from the left. The target object is determined by vision
+     * and geometric criteria.
      * @return true/false on success/failure
      */
     bool tapFromLeft();
 
     /**
-     * Tap an object from the right. Only one object must be visible.
+     * Tap an object from the right. The target object is determined by vision
+     * and geometric criteria.
      * @return true/false on success/failure
      */
     bool tapFromRight();
 
     /**
-     * Push an object away from the robot. Only one object must be visible.
+     * Push an object away from the robot. The target object is determined by vision
+     * and geometric criteria.
      * @return true/false on success/failure
      */
     bool push();
 
     /**
-     * Draw an object closer to the robot. Only one object must be visible.
+     * Draw an object closer to the robot. The target object is determined by vision
+     * and geometric criteria.
      * @return true/false on success/failure
      */
     bool draw();
