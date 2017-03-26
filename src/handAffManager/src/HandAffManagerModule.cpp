@@ -886,13 +886,15 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
     currAction = action; // save it for later
 
     // target object initial position information
-
-    Bottle init2D = getBestObject2D();
+    init2D.clear();
+    init2D = getBestObject2D();
     if (init2D.size() != 2)
     {
         return "problem with init2D";
     }
-    Bottle init3D = getBestObject3D();
+
+    init3D.clear();
+    init3D = getBestObject3D();
     if (init3D.size() != 3)
     {
         return "problem with init3D";
@@ -911,6 +913,7 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
         handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
     {
         yInfo("successfully performed %s", action.c_str());
+        // TODO save provisional image 1, showTempImage
     }
     else
     {
@@ -918,21 +921,32 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
         return "could not perform the motor action";
     }
 
-    yarp::os::Time::delay(2.0);
+    stringstream sstm;
+    sstm << "started acquiring the effects of " <<
+         action << " " << posture << " " << objName <<
+         " - when the final position is reached, type 'stopEffect'";
 
-    // TODO atabak suggestion: wait for "stopEffect" to get final
-    //needUserConfirmation = true;
+    return sstm.str();
+}
+
+/***************************************************/
+string HandAffManagerModule::stopEffect()
+{
+    yDebug("stopping data acquisition of %s %s %s",
+           currAction.c_str(), currPosture.c_str(), currObj.c_str());
+
+    // TODO save provisional image 2, showTempImage
 
     // target object final position information
     Bottle final2D = getBestObject2D();
     if (final2D.size() != 2)
     {
-        return "problem with final2D";
+       return "problem with final2D";
     }
     Bottle final3D = getBestObject3D();
     if (final3D.size() != 3)
     {
-        return "problem with final3D";
+       return "problem with final3D";
     }
 
     // effect computation and request for confirmation
@@ -951,9 +965,9 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
     double effX = final3D.get(0).asDouble() - init3D.get(0).asDouble();
     double effY = final3D.get(1).asDouble() - init3D.get(1).asDouble();
     stringstream sstm;
-    sstm << "successfully performed the action and computed the effects in the root frame:\n" <<
-          "X: " << effX << ", Y:" << effY << "\n" <<
-          "if they look OK please type 'yes', otherwise type 'no'";
+    sstm << "successfully computed the effects " <<
+         "X: " << effX << ", Y:" << effY <<
+         " if they look OK please type 'yes', otherwise type 'no'";
     // TODO confirmation images
 
     return sstm.str();

@@ -39,8 +39,10 @@ service handAffManager_IDL
      * Ask the real robot to perform a specific motor actions (tapFromLeft,
      * tapFromRight, push, draw) with one of the permitted postures (straight,
      * fortyfive, bent) on a target object (the "best" one currently seen by
-     * segmentation), and record effects. These effects then need to be verified
-     * by the user before saving to disk.
+     * segmentation), and start recording effects (i.e., make a "photograph"
+     * of the initial state before the action). When the action is over and the
+     * target object has reached its final position, the user needs to send a
+     * "stopEffect" command.
      * @param string containing the desired action: tapFromLeft,
      * tapFromRight, push, draw
      * @param posture the name of the posture: straight, fortyfive, bent
@@ -48,6 +50,15 @@ service handAffManager_IDL
      * @return string containing the next interactive instruction for the user
      */
     string startEffect(1:string action, 2:string posture, 3:string objName);
+
+    /**
+    * Tell the system that the motor action recording (previously initiated by
+    * "startEffect") has now stopped, and the target object has reached its
+    * final position. This command makes a "photograph" of the final state,
+    * then will ask for user confirmation before saving the result to disk.
+    * @return string containing the next interactive instruction for the user
+    */
+    string stopEffect();
 
     /**
      * Provide positive user response to a program request for information.

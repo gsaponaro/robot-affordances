@@ -80,6 +80,8 @@ private:
     std::string currObj;
     std::string currAction;
 
+    yarp::os::Bottle init2D;
+    yarp::os::Bottle init3D;
     yarp::os::Bottle effects;
 
 public:
@@ -114,6 +116,7 @@ public:
     std::string getHand(const std::string &posture);
     std::string getObject(const std::string &objName);
     std::string startEffect(const std::string &action, const std::string &posture, const std::string &objName);
+    std::string stopEffect();
     bool yes();
     bool no();
     yarp::os::Bottle getBestObject2D();
