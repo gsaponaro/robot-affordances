@@ -34,6 +34,9 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     inObjDescPortName = "/" + moduleName + "/objDesc:i";
     inObjDescPort.open(inObjDescPortName.c_str());
 
+    outTempImgPortName = "/" + moduleName + "/tempImage:o";
+    outTempImgPort.open(outTempImgPortName.c_str());
+
     rpcHandActionsPortName = "/" + moduleName + "/handActions:rpc";
     rpcHandActionsPort.open(rpcHandActionsPortName.c_str());
 
@@ -98,6 +101,7 @@ bool HandAffManagerModule::interruptModule()
     inHandDescPort.interrupt();
     inObjImgPort.interrupt();
     inObjDescPort.interrupt();
+    outTempImgPort.interrupt();
     rpcHandActionsPort.interrupt();
     rpcRobotHandProcessorPort.interrupt();
     rpcPort.interrupt();
@@ -112,6 +116,7 @@ bool HandAffManagerModule::close()
     inHandDescPort.close();
     inObjImgPort.close();
     inObjDescPort.close();
+    outTempImgPort.close();
     rpcHandActionsPort.close();
     rpcRobotHandProcessorPort.close();
     rpcPort.close();
@@ -614,6 +619,38 @@ bool HandAffManagerModule::getObjImage()
 }
 
 /***************************************************/
+bool HandAffManagerModule::showTempImage(const string &type)
+{
+    if (outTempImgPort.getOutputCount()<1)
+        return false;
+
+    ImageOf<PixelBgr> outTempImg = outTempImgPort.prepare();
+    const cv::Scalar Red = cv::Scalar(0,0,255);
+
+    if (type=="hand" && handDesc.size()>0)
+    {
+        outTempImg.resize(handImageSim.cols, handImageSim.rows);
+        cv::putText(handImageSim,"provisional",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+        handImageSim.copyTo(iplToMat(outTempImg));
+    }
+    else if (type=="object" && objDesc.size()>0)
+    {
+        outTempImg.resize(objImage.cols, objImage.rows);
+        cv::putText(handImageSim,"provisional",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+        objImage.copyTo(iplToMat(outTempImg));
+    }
+    else
+    {
+        outTempImgPort.unprepare();
+        return false;
+    }
+
+    outTempImgPort.write();
+
+    return true;
+}
+
+/***************************************************/
 bool HandAffManagerModule::saveDescAndImage(const string &label)
 {
     return saveDesc(label) && saveImage(label);
@@ -780,6 +817,8 @@ string HandAffManagerModule::getHand(const string &posture)
     if (!getHandImage())
         return "failed acquiring hand image";
 
+    showTempImage("hand");
+
     // acquire arm and head joints configuration used in Unity for the desc
     if (!getSimArmHead())
         return "failed acquiring arm and head joints from the simulator";
@@ -810,6 +849,8 @@ string HandAffManagerModule::getObject(const string &objName)
     // acquire provisional object image
     if (!getObjImage())
         return "failed acquiring object image";
+
+    showTempImage("object");
 
     // acquisition OK, now we need to ask the user for confirmation
     needUserConfirmation = true;

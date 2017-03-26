@@ -107,6 +107,12 @@
       <parameters>--name /view/hand/desc --x 660 --y 360 --p 33</parameters>
   </module>
 
+  <module>
+      <name>yarpview</name>
+      <node>localhost</node>
+      <parameters>--name /view/temp --x 990 --y 360 --p 33</parameters>
+  </module>
+
   <!-- motor modules -->
 
   <module>
@@ -278,6 +284,13 @@
       <from>/handAffManager/gaze:rpc</from>
       <to>/iKinGazeCtrl/rpc</to>
   </connection>
+
+  <connection>
+      <from>/handAffManager/tempImage:o</from>
+      <to>/view/temp</to>
+      <protocol>udp</protocol>
+  </connection>
+
 
   <!-- motor connections -->
 

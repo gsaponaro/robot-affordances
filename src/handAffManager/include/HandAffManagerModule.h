@@ -45,6 +45,7 @@ private:
     std::string inHandDescPortName;
     std::string inObjImgPortName;
     std::string inObjDescPortName;
+    std::string outTempImgPortName;
     std::string rpcHandActionsPortName;
     std::string rpcRobotHandProcessorPortName;
     std::string rpcGazePortName;
@@ -52,6 +53,7 @@ private:
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inObjImgPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inHandDescPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inObjDescPort;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outTempImgPort;
     yarp::os::RpcClient rpcHandActionsPort;
     yarp::os::RpcClient rpcRobotHandProcessorPort;
     yarp::os::RpcClient rpcGazePort;
@@ -99,6 +101,7 @@ public:
     bool getSimArmHead();
     bool getObjImage();
 
+    bool showTempImage(const std::string &type);
     bool saveDescAndImage(const std::string &label);
     bool saveDesc(const std::string &label);
     bool saveImage(const std::string &label);
