@@ -790,6 +790,101 @@ bool HandAffManagerModule::saveImage(const string &label)
 }
 
 /***************************************************/
+bool HandAffManagerModule::computeTipFrame(const std::string &posture,
+                                           const std::string &action,
+                                           yarp::os::Bottle &auxpos,
+                                           yarp::os::Bottle &auxori)
+{
+    // sanity checks
+
+    auxpos.clear();
+    auxori.clear();
+
+    if (posture=="straight" &&
+        (action=="tapFromLeft" || action=="tapFromRight" || action=="push"))
+    {
+        // case 1
+        auxpos.addDouble(0.07);
+        auxpos.addDouble(0.0);
+        auxpos.addDouble(0.0);
+
+        auxori.addDouble(1.0); // axis
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0); // angle
+    }
+    else if ((posture=="straight") && (action=="draw"))
+    {
+        // case 2
+        auxpos.addDouble(0.07);
+        auxpos.addDouble(0.0);
+        auxpos.addDouble(-0.03);
+
+        auxori.addDouble(1.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+    }
+    else if ((posture=="fortyfive" || posture=="bent") &&
+             (action=="push" || action=="draw"))
+    {
+        // case 3
+        auxpos.addDouble(0.02);
+        auxpos.addDouble(0.0);
+        auxpos.addDouble(-0.03); // should be positive if right_hand, negative if left_hand
+
+        auxori.addDouble(1.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+    }
+    else if (posture=="bent" && action=="tapFromLeft")
+    {
+        // case 4
+        auxpos.addDouble(0.02);
+        auxpos.addDouble(0.0);
+        auxpos.addDouble(-0.05); // should be positive if right_hand, negative if left_hand
+
+        auxori.addDouble(1.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+    }
+    else if (posture=="fortyfive" && action=="tapFromLeft")
+    {
+        // case 5
+        auxpos.addDouble(-0.01);
+        auxpos.addDouble(0.0);
+        auxpos.addDouble(-0.03); // should be positive if right_hand, negative if left_hand
+
+        auxori.addDouble(1.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+    }
+    else if ((posture=="fortyfive" || posture=="bent") &&
+             action=="tapFromRight")
+    {
+        // case 6
+        auxpos.addDouble(0.0);
+        auxpos.addDouble(0.0);
+        auxpos.addDouble(0.02); // should be negative if right_hand, positive if left_hand
+
+        auxori.addDouble(1.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+        auxori.addDouble(0.0);
+    }
+    else
+    {
+        yError("unknown tip frame transformation");
+        return false;
+    }
+
+    return true;
+}
+
+/***************************************************/
 bool HandAffManagerModule::saveEffectsAndImages(const string &posture,
                                                 const string &objName,
                                                 const string &action)
@@ -977,11 +1072,36 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
 
     showTempImage("effect_init");
 
+    // adjust the end effector depending on hand posture and action
+    Bottle auxpos;
+    auxpos.clear();
+    Bottle auxori;
+    auxori.clear();
+    if (!computeTipFrame(posture, action, auxpos, auxori))
+        yError("problem with computeTipFrame");
+    Bottle handActionsCmd;
+    Bottle handActionsReply;
+    handActionsCmd.clear();
+    handActionsReply.clear();
+    handActionsCmd.addString("attachTip");
+    handActionsCmd.addList() = auxpos;
+    handActionsCmd.addList() = auxori;
+    yDebug("requesting tip frame change pos: %s ori: %s", auxpos.toString().c_str(), auxori.toString().c_str());
+    rpcHandActionsPort.write(handActionsCmd, handActionsReply);
+    if (handActionsReply.size()>0 &&
+        handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
+    {
+        yInfo("successfully changed tip frame");
+    }
+    else
+    {
+        yError("problem when changing tip frame");
+        return "could not change tip frame";
+    }
+
     // do the motor action
     yWarning("requesting %s motor action on the real robot", action.c_str());
     yarp::os::Time::delay(1.0);
-    Bottle handActionsCmd;
-    Bottle handActionsReply;
     handActionsCmd.clear();
     handActionsReply.clear();
     handActionsCmd.addString(action);

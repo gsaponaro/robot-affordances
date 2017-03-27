@@ -92,6 +92,14 @@ service handActions_IDL
     bool drawCoords(1:double x, 2:double y, 3:double z);
 
     /**
+     * Change the end effector.
+     * @param offsetPos position of tip w.r.t. robot end effector (3 numbers)
+     * @param offsetOri orientation of tip in axis-angle representation (4 numbers)
+     * @return true/false on success/failure
+     */
+    bool attachTip(1: list<double> offsetPos, 2: list<double> offsetOri);
+
+    /**
      * Quit the module.
      * @return true/false on success/failure
      */

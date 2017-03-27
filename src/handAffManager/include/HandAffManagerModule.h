@@ -109,6 +109,10 @@ public:
     bool saveDescAndImage(const std::string &label);
     bool saveDesc(const std::string &label);
     bool saveImage(const std::string &label);
+
+    bool computeTipFrame(const std::string &posture, const std::string &action,
+                         yarp::os::Bottle &auxpos, yarp::os::Bottle &auxori);
+
     bool saveEffectsAndImages(const std::string &posture,
                               const std::string &objName,
                               const std::string &action);

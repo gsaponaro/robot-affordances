@@ -887,6 +887,33 @@ bool HandActionsModule::drawCoords(const double x, const double y, const double 
 }
 
 /***************************************************/
+bool HandActionsModule::attachTip(std::vector<double> &offsetPos, std::vector<double> &offsetOri)
+{
+    // sanity checks
+    if (offsetPos.size() != 3)
+    {
+        yError("wrong size of offsetPos");
+        return false;
+    }
+
+    if (offsetOri.size() != 4)
+    {
+        yError("wrong size of offsetOri");
+        return false;
+    }
+
+    Vector x(3, 0.0);
+    for (int i=0; i<offsetPos.size(); ++i)
+        x[i] = offsetPos[i];
+
+    Vector o(4, 0.0);
+    for (int i=0; i<offsetOri.size(); ++i)
+        o[i] = offsetOri[i];
+
+    return iarm->attachTipFrame(x,o);
+}
+
+/***************************************************/
 bool HandActionsModule::quit()
 {
     yInfo("quitting");
