@@ -621,39 +621,67 @@ bool HandAffManagerModule::showTempImage(const string &type)
     if (outTempImgPort.getOutputCount()<1)
         return false;
 
-    ImageOf<PixelBgr> outTempImg = outTempImgPort.prepare();
-    const cv::Scalar Red = cv::Scalar(0,0,255);
+    ImageOf<PixelBgr> &outTempImg = outTempImgPort.prepare();
 
-    if (type=="hand" && handDesc.size()>0)
+    const cv::Point org(10,50); // Bottom-left corner of the text string in the image.
+    const int myFont = cv::FONT_HERSHEY_SIMPLEX;
+    const double fontScale = 0.7;
+    const cv::Scalar Red = cv::Scalar(0,0,255);
+    const int Radius = 5;
+
+    if (type=="hand" && handDesc.size()>0 && !handImageSim.empty())
     {
+        //yDebug("showTempImage hand");
         cv::Mat handImageSim2 = handImageSim.clone();
         outTempImg.resize(handImageSim2.cols, handImageSim2.rows);
-        cv::putText(handImageSim2,"provisional",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+        cv::putText(handImageSim2,"unsaved hand image",org,myFont,fontScale,Red);
         handImageSim2.copyTo(iplToMat(outTempImg));
     }
-    else if (type=="object" && objDesc.size()>0)
+    else if (type=="object" && objDesc.size()>0 && !objImage.empty())
     {
+        //yDebug("showTempImage object");
         cv::Mat objImage2 = objImage.clone();
         outTempImg.resize(objImage2.cols, objImage2.rows);
-        cv::putText(objImage2,"provisional",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+        cv::putText(objImage2,"unsaved object image",org,myFont,fontScale,Red);
         objImage2.copyTo(iplToMat(outTempImg));
     }
-    else if (type=="effect_init")
+    else if (type=="effect_init" && !objImage.empty())
     {
-      cv::Mat objImage2 = objImage.clone();
-      outTempImg.resize(objImage2.cols, objImage2.rows); // TODO: rows*2
-      cv::putText(objImage2,"provisional initial",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
-      objImage2.copyTo(iplToMat(outTempImg));
+        //yDebug("showTempImage effect_init");
+        cv::Mat objImage2 = objImage.clone();
+        outTempImg.resize(objImage2.cols, objImage2.rows); // TODO: rows*2
+        cv::putText(objImage2,"unsaved initial position",org,myFont,fontScale,Red);
+        if (init2D.size()==2)
+        {
+            cv::Point com(init2D.get(0).asDouble(), init2D.get(1).asDouble());
+            cv::circle( objImage2,
+                    com,
+                    Radius,
+                    Red,
+                    -1 ); // filled
+        }
+        objImage2.copyTo(iplToMat(outTempImg));
     }
-    else if (type=="effect_final" && effects.size()>0)
+    else if (type=="effect_final" && effects.size()>0 && !objImage.empty())
     {
-      cv::Mat objImage2 = objImage.clone();
-      outTempImg.resize(objImage2.cols, objImage2.rows); // TODO: rows*2
-      cv::putText(objImage2,"provisional final",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
-      objImage2.copyTo(iplToMat(outTempImg));
+        //yDebug("showTempImage effect_final");
+        cv::Mat objImage2 = objImage.clone();
+        outTempImg.resize(objImage2.cols, objImage2.rows); // TODO: rows*2
+        cv::putText(objImage2,"unsaved final position",org,myFont,fontScale,Red);
+        if (final2D.size()==2)
+        {
+            cv::Point com(final2D.get(0).asDouble(), final2D.get(1).asDouble());
+            cv::circle( objImage2,
+                    com,
+                    Radius,
+                    Red,
+                    -1 ); // filled
+        }
+        objImage2.copyTo(iplToMat(outTempImg));
     }
     else
     {
+        yWarning("showTempImage: nothing to do");
         outTempImgPort.unprepare();
         return false;
     }
@@ -908,6 +936,7 @@ bool HandAffManagerModule::saveEffects(const string &posture,
     }
 
     // create effects file  and write header row
+    csvfile csvEffects;
     string timestr = getDateAndTime();
     string filename;
     filename = basePath+"/"+posture+"_"+objName+"_"+action+"_"+timestr+".csv";
@@ -1138,12 +1167,14 @@ string HandAffManagerModule::stopEffect()
     showTempImage("effect_final");
 
     // target object final position information
-    Bottle final2D = getBestObject2D();
+    final2D.clear();
+    final2D = getBestObject2D();
     if (final2D.size() != 2)
     {
        return "problem with final2D";
     }
-    Bottle final3D = getBestObject3D();
+    final3D.clear();
+    final3D = getBestObject3D();
     if (final3D.size() != 3)
     {
        return "problem with final3D";

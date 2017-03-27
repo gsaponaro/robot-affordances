@@ -74,8 +74,6 @@ private:
     yarp::os::Bottle objDesc;
     cv::Mat objImage;
 
-    csvfile csvEffects; // TODO: many?
-
     std::string basePath;
 
     std::string currPosture;
@@ -84,6 +82,8 @@ private:
 
     yarp::os::Bottle init2D;
     yarp::os::Bottle init3D;
+    yarp::os::Bottle final2D;
+    yarp::os::Bottle final3D;
     yarp::os::Bottle effects;
 
 public:
