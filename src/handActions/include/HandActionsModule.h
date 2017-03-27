@@ -103,7 +103,7 @@ public:
     bool tapFromRightCoords(const double x, const double y, const double z);
     bool pushCoords(const double x, const double y, const double z);
     bool drawCoords(const double x, const double y, const double z);
-    bool attachTip(std::vector<double> &offsetPos, std::vector<double> &offsetOri);
+    bool attachTip(const std::vector<double> &offsetPos, const std::vector<double> &offsetOri);
     bool quit();
 };
 

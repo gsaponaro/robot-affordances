@@ -74,7 +74,7 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
         // increase y when using right_arm, decrease y when using left_arm
         finalApproach[1] += 0.03*(arm=="right_arm" ? 1 : -1);
     }
-    finalApproach[2] += 0.03;               // Offset - avoid collision with table
+    finalApproach[2] += 0.04;               // Offset - avoid collision with table
     initialApproach = finalApproach;
     initialApproach[2] += 0.05;              // avoid collision with objects during the approach phase
     yDebug("going to intermediate approach waypoint");
@@ -120,7 +120,7 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
         targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
         iarm->setTrajTime(1.3);
     }
-    targetModified[2] += 0.03;            // Offset - avoid collision with table
+    targetModified[2] += 0.04;            // Offset - avoid collision with table
     iarm->goToPoseSync(targetModified,o);
     iarm->waitMotionDone();
     iarm->setTrajTime(tempotempo);
@@ -887,7 +887,7 @@ bool HandActionsModule::drawCoords(const double x, const double y, const double 
 }
 
 /***************************************************/
-bool HandActionsModule::attachTip(std::vector<double> &offsetPos, std::vector<double> &offsetOri)
+bool HandActionsModule::attachTip(const std::vector<double> &offsetPos, const std::vector<double> &offsetOri)
 {
     // sanity checks
     if (offsetPos.size() != 3)
@@ -909,6 +909,8 @@ bool HandActionsModule::attachTip(std::vector<double> &offsetPos, std::vector<do
     Vector o(4, 0.0);
     for (int i=0; i<offsetOri.size(); ++i)
         o[i] = offsetOri[i];
+
+    yDebug("attachTip x: %s, o: %s", x.toString().c_str(), o.toString().c_str());
 
     return iarm->attachTipFrame(x,o);
 }
