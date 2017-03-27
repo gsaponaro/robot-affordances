@@ -191,7 +191,7 @@ bool HandAffManagerModule::updateModule()
         yDebug("current hand posture is %s", currPosture.c_str());
         if (saveDescAndImage(currPosture))
         {
-            currPosture = ""; // reset variables
+            //currPosture = ""; // reset variables
             armJoints.clear();
             headJoints.clear();
         }
@@ -236,7 +236,7 @@ bool HandAffManagerModule::updateModule()
 
         yInfo("yes -> will save effects and images to file");
 
-        yAssert(currPosture!="");
+        yAssert(currPosture!=""); // TODO avoid this
         yAssert(currObj!="");
         yAssert(currAction!="");
 
@@ -536,6 +536,7 @@ bool HandAffManagerModule::getSimArmHead()
     simReply.clear();
     simCmd.addString("getArmPoss");
     rpcRobotHandProcessorPort.write(simCmd, simReply);
+    //yDebug("getArmPoss reply: %s", simReply.toString().c_str());
     const int numArmJoints = 16;
     if (simReply.size()>0 &&
         simReply.get(0).isList() &&
@@ -938,12 +939,12 @@ string HandAffManagerModule::getObject(const string &objName)
 string HandAffManagerModule::startEffect(const string &action, const string &posture, const string &objName)
 {
     // sanity checks
-    if (action!="tapFromLeft" || action!="tapFromRight" || action!="push" || action!="draw")
+    if (action!="tapFromLeft" && action!="tapFromRight" && action!="push" && action!="draw")
     {
         return "invalid action! The valid ones are: tapFromLeft, tapFromRight, push, draw";
     }
 
-    if (posture!="straight" || posture!="fortyfive" || posture!="bent")
+    if (posture!="straight" && posture!="fortyfive" && posture!="bent")
     {
         return "invalid posture! The valid ones are: straight, fortyfive, bent";
     }
