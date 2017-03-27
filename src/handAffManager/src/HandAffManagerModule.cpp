@@ -180,8 +180,7 @@ bool HandAffManagerModule::updateModule()
             handDesc.clear();
             armJoints.clear();
             headJoints.clear();
-            //handImageSim = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
-            //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
+            handImageSim = cv::Mat::zeros(handImageSim.rows,handImageSim.cols,CV_8UC3);
             return true;
         }
 
@@ -209,8 +208,7 @@ bool HandAffManagerModule::updateModule()
         {
             yWarning("no -> will reset object information, please restart the acquisition");
             objDesc.clear();
-            //handImageSim = cv::Mat::zeros(inHandImg->height(),inHandImg->width(),CV_8UC3);
-            //objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
+            objImage = cv::Mat::zeros(objImage.rows,objImage.cols,CV_8UC3);
             return true;
         }
 
@@ -243,12 +241,11 @@ bool HandAffManagerModule::updateModule()
         yAssert(currAction!="");
 
         yDebug("posture=%s object=%s action=%s", currPosture.c_str(), currObj.c_str(), currAction.c_str());
-        // TODO
-        //if (saveEffectsAndImages())
-        //{
-        //    effects.clear(); // reset variables
-        //    currAction = "";
-        //}
+        if (saveEffectsAndImages(currPosture, currObj, currAction))
+        {
+            effects.clear(); // reset variables
+            currAction = "";
+        }
     }
 
     //return !closing;
@@ -636,8 +633,20 @@ bool HandAffManagerModule::showTempImage(const string &type)
     else if (type=="object" && objDesc.size()>0)
     {
         outTempImg.resize(objImage.cols, objImage.rows);
-        cv::putText(handImageSim,"provisional",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+        cv::putText(objImage,"provisional",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
         objImage.copyTo(iplToMat(outTempImg));
+    }
+    else if (type=="effect_init")
+    {
+      outTempImg.resize(objImage.cols, objImage.rows); // TODO: rows*2
+      cv::putText(objImage,"provisional initial",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+      objImage.copyTo(iplToMat(outTempImg));
+    }
+    else if (type=="effect_final" && effects.size()>0)
+    {
+      outTempImg.resize(objImage.cols, objImage.rows); // TODO: rows*2
+      cv::putText(objImage,"provisional final",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+      objImage.copyTo(iplToMat(outTempImg));
     }
     else
     {
@@ -777,6 +786,64 @@ bool HandAffManagerModule::saveImage(const string &label)
 }
 
 /***************************************************/
+bool HandAffManagerModule::saveEffectsAndImages(const string &posture,
+                                                const string &objName,
+                                                const string &action)
+{
+    return saveEffects(posture,objName,action) &&
+           saveInitEffImage(posture,objName,action) &&
+           saveFinalEffImage(posture,objName,action);
+}
+
+/***************************************************/
+bool HandAffManagerModule::saveEffects(const string &posture,
+                                       const string &objName,
+                                       const string &action)
+{
+    // sanity checks
+    const int numEffects = 8;
+    if (effects.size() != numEffects)
+    {
+        yError("got %d effects, was expecting %d", effects.size(), numEffects);
+        return false;
+    }
+
+    // create effects file  and write header row
+    string timestr = getDateAndTime();
+    string filename;
+    filename = basePath+"/"+posture+"_"+objName+"_"+action+"_"+timestr+".csv";
+    yDebug("effects filename is %s", filename.c_str());
+    csvEffects.setFilename(filename);
+    csvEffects << "postureName" << "objectName" << "action"
+        << "initX" << "initY" << "initu" << "initv"
+        << "finalX" << "finalY" << "finalu" << "finalv"
+        << endrow;
+
+    // write data row
+    csvEffects << posture << objName << action;
+    for (int e=0; e<numEffects; ++e)
+        csvEffects << effects.get(e).asDouble();
+
+    csvEffects << endrow;
+}
+
+/***************************************************/
+bool HandAffManagerModule::saveInitEffImage(const string &posture,
+                                            const string &objName,
+                                            const string &action)
+{
+    // TODO
+}
+
+/***************************************************/
+bool HandAffManagerModule::saveFinalEffImage(const string &posture,
+                                             const string &objName,
+                                             const string &action)
+{
+    // TODO
+}
+
+/***************************************************/
 string HandAffManagerModule::getDateAndTime()
 {
     // http://stackoverflow.com/a/16358264/1638888
@@ -900,6 +967,12 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
         return "problem with init3D";
     }
 
+    // acquire provisional object image for effect_init visualization
+    if (!getObjImage())
+        return "failed acquiring effect_init object image";
+
+    showTempImage("effect_init");
+
     // do the motor action
     yWarning("requesting %s motor action on the real robot", action.c_str());
     yarp::os::Time::delay(1.0);
@@ -913,7 +986,6 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
         handActionsReply.get(0).asVocab()==Vocab::encode("ok"))
     {
         yInfo("successfully performed %s", action.c_str());
-        // TODO save provisional image 1, showTempImage
     }
     else
     {
@@ -935,7 +1007,11 @@ string HandAffManagerModule::stopEffect()
     yDebug("stopping data acquisition of %s %s %s",
            currAction.c_str(), currPosture.c_str(), currObj.c_str());
 
-    // TODO save provisional image 2, showTempImage
+    // acquire provisional object image for effect_final visualization
+    if (!getObjImage())
+        return "failed acquiring effect_final object image";
+
+    showTempImage("effect_final");
 
     // target object final position information
     Bottle final2D = getBestObject2D();
@@ -968,7 +1044,6 @@ string HandAffManagerModule::stopEffect()
     sstm << "successfully computed the effects " <<
          "X: " << effX << ", Y:" << effY <<
          " if they look OK please type 'yes', otherwise type 'no'";
-    // TODO confirmation images
 
     return sstm.str();
 }

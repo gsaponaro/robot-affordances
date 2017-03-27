@@ -74,6 +74,8 @@ private:
     yarp::os::Bottle objDesc;
     cv::Mat objImage;
 
+    csvfile csvEffects; // TODO: many?
+
     std::string basePath;
 
     std::string currPosture;
@@ -107,6 +109,18 @@ public:
     bool saveDescAndImage(const std::string &label);
     bool saveDesc(const std::string &label);
     bool saveImage(const std::string &label);
+    bool saveEffectsAndImages(const std::string &posture,
+                              const std::string &objName,
+                              const std::string &action);
+    bool saveEffects(const std::string &posture,
+                     const std::string &objName,
+                     const std::string &action);
+    bool saveInitEffImage(const std::string &posture,
+                          const std::string &objName,
+                          const std::string &action);
+    bool saveFinalEffImage(const std::string &posture,
+                           const std::string &objName,
+                           const std::string &action);
 
     // helper functions, TODO put them in an external file
     std::string getDateAndTime();
