@@ -83,9 +83,6 @@ void ShapeDescriptorThread::close()
 
 void ShapeDescriptorThread::interrupt()
 {
-    // critical section
-    LockGuard lg(mutex);
-
     yInfo("interrupting ports");
 
     closing = true;
