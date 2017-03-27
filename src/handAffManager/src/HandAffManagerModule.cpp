@@ -260,6 +260,7 @@ bool HandAffManagerModule::simResetAndLook()
     simCmd.clear();
     simReply.clear();
     simCmd.addString("resetKinematics");
+    yInfo("resetting simulator kinematics");
     rpcRobotHandProcessorPort.write(simCmd, simReply);
     if (simReply.size()>0 &&
         simReply.get(0).asVocab()==Vocab::encode("ok"))
@@ -318,7 +319,7 @@ bool HandAffManagerModule::setHandPosture(const string &posture)
     // set robot hand *on the real robot*
     if (posture=="straight" || posture=="fortyfive" || posture=="bent")
     {
-        yDebug("requesting %s hand posture on the real robot", posture.c_str());
+        yInfo("requesting %s hand posture on the real robot", posture.c_str());
         Bottle handActionsCmd;
         Bottle handActionsReply;
         handActionsCmd.clear();
@@ -399,8 +400,7 @@ bool HandAffManagerModule::getHandDesc()
         return false;
     }
 
-    yDebug("provisional hand descriptors acquired successfully:");
-    yDebug("%s", handDesc.toString().c_str());
+    yDebug("provisional hand descriptors acquired successfully - shown in RPC terminal");
 
     return true;
 }
@@ -513,8 +513,7 @@ bool HandAffManagerModule::getObjDesc()
         return false;
     }
 
-    //yDebug("provisional object descriptors acquired successfully:");
-    //yDebug("%s", objDesc.toString().c_str());
+    yDebug("provisional object descriptors acquired successfully - shown in RPC terminal");
 
     return true;
 }
@@ -626,27 +625,31 @@ bool HandAffManagerModule::showTempImage(const string &type)
 
     if (type=="hand" && handDesc.size()>0)
     {
-        outTempImg.resize(handImageSim.cols, handImageSim.rows);
-        cv::putText(handImageSim,"provisional",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
-        handImageSim.copyTo(iplToMat(outTempImg));
+        cv::Mat handImageSim2 = handImageSim.clone();
+        outTempImg.resize(handImageSim2.cols, handImageSim2.rows);
+        cv::putText(handImageSim2,"provisional",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+        handImageSim2.copyTo(iplToMat(outTempImg));
     }
     else if (type=="object" && objDesc.size()>0)
     {
-        outTempImg.resize(objImage.cols, objImage.rows);
-        cv::putText(objImage,"provisional",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
-        objImage.copyTo(iplToMat(outTempImg));
+        cv::Mat objImage2 = objImage.clone();
+        outTempImg.resize(objImage2.cols, objImage2.rows);
+        cv::putText(objImage2,"provisional",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+        objImage2.copyTo(iplToMat(outTempImg));
     }
     else if (type=="effect_init")
     {
-      outTempImg.resize(objImage.cols, objImage.rows); // TODO: rows*2
-      cv::putText(objImage,"provisional initial",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
-      objImage.copyTo(iplToMat(outTempImg));
+      cv::Mat objImage2 = objImage.clone();
+      outTempImg.resize(objImage2.cols, objImage2.rows); // TODO: rows*2
+      cv::putText(objImage2,"provisional initial",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+      objImage2.copyTo(iplToMat(outTempImg));
     }
     else if (type=="effect_final" && effects.size()>0)
     {
-      outTempImg.resize(objImage.cols, objImage.rows); // TODO: rows*2
-      cv::putText(objImage,"provisional final",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
-      objImage.copyTo(iplToMat(outTempImg));
+      cv::Mat objImage2 = objImage.clone();
+      outTempImg.resize(objImage2.cols, objImage2.rows); // TODO: rows*2
+      cv::putText(objImage2,"provisional final",cv::Point(10,50),cv::FONT_HERSHEY_SIMPLEX,0.6,Red);
+      objImage2.copyTo(iplToMat(outTempImg));
     }
     else
     {
