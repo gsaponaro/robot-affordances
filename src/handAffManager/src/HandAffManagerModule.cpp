@@ -158,7 +158,7 @@ bool HandAffManagerModule::updateModule()
     }
 
     // initialization of graphical hand simulator
-    if (!initSim && rpcRobotHandProcessorPort.getOutputCount()>0)
+    if (rpcRobotHandProcessorPort.getOutputCount()>0 && !initSim)
     {
         if (simResetAndLook())
             initSim = true;
