@@ -176,7 +176,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     offAppPush       = 0.13; // 3cm from the object center
 
     straightHandPoss.resize(9, 0.0);
-    straightHandPoss[0] =  0.0; // j7
+    straightHandPoss[0] = 50.0; // j7
     straightHandPoss[1] = 10.0;
     straightHandPoss[2] = 55.0;
     straightHandPoss[3] = 34.0;
