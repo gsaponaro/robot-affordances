@@ -170,10 +170,10 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 
 
     // Defining Offsets to the actions
-    offAppTap        = 0.05; // 5cm from the object center
+    offAppTap        = 0.05;
     distanceMovement = 0.12;
     offAppDraw       = 0.03;
-    offAppPush       = 0.13; // 3cm from the object center
+    offAppPush       = 0.05;
 
     straightHandPoss.resize(9, 0.0);
     straightHandPoss[0] = 50.0; // j7
