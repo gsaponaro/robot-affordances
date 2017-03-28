@@ -38,6 +38,7 @@ Vector HandActionsModule::computeHandOrientation()
 /***************************************************/
 bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o, string side)
 {
+    double timeout = 4.0;
     if (!safetyCheck(x,side))
     {
         yWarning("action is dangerous, I will not do it!");
@@ -79,11 +80,11 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
     initialApproach[2] += 0.05;              // avoid collision with objects during the approach phase
     yDebug("going to intermediate approach waypoint");
     iarm->goToPoseSync(initialApproach,o);
-    iarm->waitMotionDone();
+    iarm->waitMotionDone(0.1,timeout);
     // ADD a Delay here?!
     yDebug("going to final approach target");
     iarm->goToPoseSync(finalApproach,o);
-    iarm->waitMotionDone();
+    iarm->waitMotionDone(0.1,timeout);
     yDebug("reached final approach target");
     yarp::os::Time::delay(1.0);
 
@@ -95,6 +96,7 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
 {
 
     double tempotempo;
+    double timeout = 4.0;
     iarm->getTrajTime(&tempotempo);
     iarm->setTrajTime(0.7);
     Vector targetModified=targetPos;
@@ -122,7 +124,7 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
     }
     targetModified[2] += 0.04;            // Offset - avoid collision with table
     iarm->goToPoseSync(targetModified,o);
-    iarm->waitMotionDone();
+    iarm->waitMotionDone(0.1,timeout);
     iarm->setTrajTime(tempotempo);
     yDebug("reached final Roll target");
 }
@@ -467,10 +469,16 @@ void HandActionsModule::moveHand(const int postureType)
 
     // wait for the last positionMove to be complete
     bool done=false;
-    while (!done)
+
+    double elapsedTime=0.0;
+    double startTime=Time::now();
+    const double maxTimeout = 3.0;
+
+    while (!done && elapsedTime<maxTimeout)
     {
-        yarp::os::Time::delay(0.01);
         posA->checkMotionDone(&done);
+        Time::delay(0.04);
+        elapsedTime = Time::now()-startTime;
     }
 }
 
