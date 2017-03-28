@@ -4,6 +4,7 @@
 
   <dependencies>
       <port>/icub/camcalib/left/out</port>
+      <port>/icub/camcalib/right/out</port>
       <port>/icub/cartesianController/left_arm/state:o</port>
       <!-- <port>/icub/cartesianController/right_arm/state:o</port> -->
       <port>/wholeBodyDynamics/left_arm/cartesianEndEffectorWrench:o</port>
@@ -110,7 +111,13 @@
   <module>
       <name>yarpview</name>
       <node>localhost</node>
-      <parameters>--name /view/temp --x 0 --y 720 --p 33</parameters>
+      <parameters>--name /view/tempLeft --x 0 --y 720 --p 33</parameters>
+  </module>
+
+  <module>
+      <name>yarpview</name>
+      <node>localhost</node>
+      <parameters>--name /view/tempRight --x 330 --y 720 --p 33</parameters>
   </module>
 
   <!-- motor modules -->
@@ -261,7 +268,13 @@
 
   <connection>
       <from>/icub/camcalib/left/out</from>
-      <to>/handAffManager/objImage:i</to>
+      <to>/handAffManager/leftObjImage:i</to>
+      <protocol>udp</protocol>
+  </connection>
+
+  <connection>
+      <from>/icub/camcalib/right/out</from>
+      <to>/handAffManager/rightObjImage:i</to>
       <protocol>udp</protocol>
   </connection>
 
@@ -286,11 +299,16 @@
   </connection>
 
   <connection>
-      <from>/handAffManager/tempImage:o</from>
-      <to>/view/temp</to>
+      <from>/handAffManager/tempLeftImage:o</from>
+      <to>/view/tempLeft</to>
       <protocol>udp</protocol>
   </connection>
 
+  <connection>
+      <from>/handAffManager/tempRightImage:o</from>
+      <to>/view/tempRight</to>
+      <protocol>udp</protocol>
+  </connection>
 
   <!-- motor connections -->
 

@@ -43,17 +43,21 @@ private:
 
     std::string inHandImgPortName;
     std::string inHandDescPortName;
-    std::string inObjImgPortName;
+    std::string inLeftObjImgPortName;
+    std::string inRightObjImgPortName;
     std::string inObjDescPortName;
-    std::string outTempImgPortName;
+    std::string outProvisionalLeftImgPortName;
+    std::string outProvisionalRightImgPortName;
     std::string rpcHandActionsPortName;
     std::string rpcRobotHandProcessorPortName;
     std::string rpcGazePortName;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inHandImgPort;
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inObjImgPort;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inLeftObjImgPort;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > inRightObjImgPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inHandDescPort;
     yarp::os::BufferedPort<yarp::os::Bottle> inObjDescPort;
-    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outTempImgPort;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outProvisionalLeftImgPort;
+    yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelBgr> > outProvisionalRightImgPort;
     yarp::os::RpcClient rpcHandActionsPort;
     yarp::os::RpcClient rpcRobotHandProcessorPort;
     yarp::os::RpcClient rpcGazePort;
@@ -72,7 +76,8 @@ private:
 
     csvfile csvObjects;
     yarp::os::Bottle objDesc;
-    cv::Mat objImage;
+    cv::Mat leftObjImage;
+    cv::Mat rightObjImage;
 
     std::string basePath;
 
@@ -85,7 +90,8 @@ private:
     yarp::os::Bottle final2D;
     yarp::os::Bottle final3D;
     yarp::os::Bottle effects;
-    cv::Mat objImageInitial;
+    cv::Mat leftObjImageInitial;
+    cv::Mat rightObjImageInitial;
 
 public:
 
@@ -104,7 +110,7 @@ public:
     bool setObjectName(const std::string &objName);
     bool getObjDesc();
     bool getSimArmHead();
-    bool getObjImage();
+    bool getObjImages();
 
     bool showTempImage(const std::string &type);
     bool saveDescAndImage(const std::string &label);

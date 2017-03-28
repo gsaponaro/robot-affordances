@@ -28,14 +28,20 @@ bool HandAffManagerModule::configure(ResourceFinder &rf)
     inHandDescPortName = "/" + moduleName + "/handDesc:i";
     inHandDescPort.open(inHandDescPortName.c_str());
 
-    inObjImgPortName = "/" + moduleName + "/objImage:i";
-    inObjImgPort.open(inObjImgPortName.c_str());
+    inLeftObjImgPortName = "/" + moduleName + "/leftObjImage:i";
+    inLeftObjImgPort.open(inLeftObjImgPortName.c_str());
+
+    inRightObjImgPortName = "/" + moduleName + "/rightObjImage:i";
+    inRightObjImgPort.open(inRightObjImgPortName.c_str());
 
     inObjDescPortName = "/" + moduleName + "/objDesc:i";
     inObjDescPort.open(inObjDescPortName.c_str());
 
-    outTempImgPortName = "/" + moduleName + "/tempImage:o";
-    outTempImgPort.open(outTempImgPortName.c_str());
+    outProvisionalLeftImgPortName = "/" + moduleName + "/tempLeftImage:o";
+    outProvisionalLeftImgPort.open(outProvisionalLeftImgPortName.c_str());
+
+    outProvisionalRightImgPortName = "/" + moduleName + "/tempRightImage:o";
+    outProvisionalRightImgPort.open(outProvisionalRightImgPortName.c_str());
 
     rpcHandActionsPortName = "/" + moduleName + "/handActions:rpc";
     rpcHandActionsPort.open(rpcHandActionsPortName.c_str());
@@ -99,9 +105,11 @@ bool HandAffManagerModule::interruptModule()
 {
     inHandImgPort.interrupt();
     inHandDescPort.interrupt();
-    inObjImgPort.interrupt();
+    inLeftObjImgPort.interrupt();
+    inRightObjImgPort.interrupt();
     inObjDescPort.interrupt();
-    outTempImgPort.interrupt();
+    outProvisionalLeftImgPort.interrupt();
+    outProvisionalRightImgPort.interrupt();
     rpcHandActionsPort.interrupt();
     rpcRobotHandProcessorPort.interrupt();
     rpcPort.interrupt();
@@ -114,9 +122,11 @@ bool HandAffManagerModule::close()
 {
     inHandImgPort.close();
     inHandDescPort.close();
-    inObjImgPort.close();
+    inLeftObjImgPort.close();
+    inRightObjImgPort.close();
     inObjDescPort.close();
-    outTempImgPort.close();
+    outProvisionalLeftImgPort.close();
+    outProvisionalRightImgPort.interrupt();
     rpcHandActionsPort.close();
     rpcRobotHandProcessorPort.close();
     rpcPort.close();
@@ -198,7 +208,7 @@ bool HandAffManagerModule::updateModule()
     }
 
     // enter here after the provisional object data has been acquired
-    if (needUserConfirmation && objDesc.size()>0 && !objImage.empty())
+    if (needUserConfirmation && objDesc.size()>0 && !leftObjImage.empty())
     {
         // in RPC, we asked user to confirm whether object descriptors and image are good (yes or no)
         while(needUserConfirmation)
@@ -208,7 +218,7 @@ bool HandAffManagerModule::updateModule()
         {
             yWarning("no -> will reset object information, please restart the acquisition");
             objDesc.clear();
-            objImage = cv::Mat::zeros(objImage.rows,objImage.cols,CV_8UC3);
+            leftObjImage = cv::Mat::zeros(leftObjImage.rows,leftObjImage.cols,CV_8UC3);
             return true;
         }
 
@@ -580,42 +590,70 @@ bool HandAffManagerModule::getSimArmHead()
 }
 
 /***************************************************/
-bool HandAffManagerModule::getObjImage()
+bool HandAffManagerModule::getObjImages()
 {
-    // acquire provisional object image; if successful put it
-    // in the objImage Mat
+    // acquire provisional object images; if successful put them
+    // in the leftObjImage and rightObjImage Mat
 
-    if (inObjImgPort.getInputCount()<1)
+    const double waitTime = 5.0;
+
+    // left
+
+    if (inLeftObjImgPort.getInputCount()<1)
     {
-        yError("no connection to object image");
+        yError("no connection to left object image");
         return false;
     }
 
     // try for a few seconds
-    const double waitTime = 5.0;
-    ImageOf<PixelBgr> *inObjImg = inObjImgPort.read(false);
+    ImageOf<PixelBgr> *inLeftObjImg = inLeftObjImgPort.read(false);
     double t1 = yarp::os::Time::now();
-    while ((yarp::os::Time::now()-t1 < waitTime) && (inObjImg == NULL))
+    while ((yarp::os::Time::now()-t1 < waitTime) && (inLeftObjImg == NULL))
     {
-        inObjImg = inObjImgPort.read(false);
+        inLeftObjImg = inLeftObjImgPort.read(false);
         yarp::os::Time::delay(0.1);
     }
 
-    if (inObjImg != NULL)
+    if (inLeftObjImg != NULL)
     {
-        //objImageTimeStr.clear();
-        objImage = cv::Mat::zeros(inObjImg->height(),inObjImg->width(),CV_8UC3);
-
-        objImage = iplToMat(*inObjImg);
-        //objImageTimeStr = getDateAndTime();
+        leftObjImage = cv::Mat::zeros(inLeftObjImg->height(),inLeftObjImg->width(),CV_8UC3);
+        leftObjImage = iplToMat(*inLeftObjImg);
     }
     else
     {
-        yError("did not receive object image after trying for %f seconds", waitTime);
+        yError("did not receive left object image after trying for %f seconds", waitTime);
         return false;
     }
 
-    //yDebug("provisional object image acquired successfully");
+    // right
+
+    if (inRightObjImgPort.getInputCount()<1)
+    {
+        yError("no connection to right object image");
+        return false;
+    }
+
+    // try for a few seconds
+    ImageOf<PixelBgr> *inRightObjImg = inRightObjImgPort.read(false);
+    t1 = yarp::os::Time::now();
+    while ((yarp::os::Time::now()-t1 < waitTime) && (inRightObjImg == NULL))
+    {
+        inRightObjImg = inRightObjImgPort.read(false);
+        yarp::os::Time::delay(0.1);
+    }
+
+    if (inRightObjImg != NULL)
+    {
+        rightObjImage = cv::Mat::zeros(inRightObjImg->height(),inRightObjImg->width(),CV_8UC3);
+        rightObjImage = iplToMat(*inRightObjImg);
+    }
+    else
+    {
+        yError("did not receive right object image after trying for %f seconds", waitTime);
+        return false;
+    }
+
+    //yDebug("provisional object images acquired successfully");
 
     return true;
 }
@@ -623,10 +661,11 @@ bool HandAffManagerModule::getObjImage()
 /***************************************************/
 bool HandAffManagerModule::showTempImage(const string &type)
 {
-    if (outTempImgPort.getOutputCount()<1)
+    if (outProvisionalLeftImgPort.getOutputCount()<1)
         return false;
 
-    ImageOf<PixelBgr> &outTempImg = outTempImgPort.prepare();
+    ImageOf<PixelBgr> &outProvisionalLeftImg = outProvisionalLeftImgPort.prepare();
+    ImageOf<PixelBgr> &outProvisionalRightImg = outProvisionalRightImgPort.prepare();
 
     const cv::Point org(10,50); // Bottom-left corner of the text string in the image.
     const int myFont = cv::FONT_HERSHEY_SIMPLEX;
@@ -639,47 +678,57 @@ bool HandAffManagerModule::showTempImage(const string &type)
     {
         //yDebug("showTempImage hand");
         cv::Mat handImageSim2 = handImageSim.clone();
-        outTempImg.resize(handImageSim2.cols, handImageSim2.rows);
+        outProvisionalLeftImg.resize(handImageSim2.cols, handImageSim2.rows);
         cv::putText(handImageSim2,"unsaved hand image",org,myFont,fontScale,Red);
-        handImageSim2.copyTo(iplToMat(outTempImg));
+        handImageSim2.copyTo(iplToMat(outProvisionalLeftImg));
+        outProvisionalRightImgPort.unprepare(); // ugly
     }
-    else if (type=="object" && objDesc.size()>0 && !objImage.empty())
+    else if (type=="object" && objDesc.size()>0 && !leftObjImage.empty())
     {
         //yDebug("showTempImage object");
-        cv::Mat objImage2 = objImage.clone();
-        outTempImg.resize(objImage2.cols, objImage2.rows);
-        cv::putText(objImage2,"unsaved object image",org,myFont,fontScale,Red);
-        objImage2.copyTo(iplToMat(outTempImg));
+        cv::Mat leftObjImage2 = leftObjImage.clone();
+        outProvisionalLeftImg.resize(leftObjImage2.cols, leftObjImage2.rows);
+        cv::putText(leftObjImage2,"unsaved object image",org,myFont,fontScale,Red);
+        leftObjImage2.copyTo(iplToMat(outProvisionalLeftImg));
+        outProvisionalRightImgPort.unprepare(); // ugly
     }
-    else if (type=="effect_init" && !objImage.empty())
+    else if (type=="effect_init" && !leftObjImage.empty() && !rightObjImage.empty())
     {
         //yDebug("showTempImage effect_init");
-        cv::Mat objImage2 = objImage.clone();
-        outTempImg.resize(objImage2.cols, objImage2.rows); // TODO: rows*2
-        cv::putText(objImage2,"unsaved initial position",org,myFont,fontScale,Red);
+        // left
+        cv::Mat leftObjImage2 = leftObjImage.clone();
+        outProvisionalLeftImg.resize(leftObjImage2.cols, leftObjImage2.rows);
+        cv::putText(leftObjImage2,"unsaved initial left",org,myFont,fontScale,Red);
         if (init2D.size()==2)
         {
             cv::Point com(init2D.get(0).asDouble(), init2D.get(1).asDouble());
-            cv::circle( objImage2,
-                    com,
-                    Radius,
-                    Blue,
-                    -1 ); // filled
+            cv::circle(leftObjImage2,
+                       com,
+                       Radius,
+                       Blue,
+                       -1); // filled
         }
-        objImage2.copyTo(iplToMat(outTempImg));
+        leftObjImage2.copyTo(iplToMat(outProvisionalLeftImg));
+
+        // right
+        cv::Mat rightObjImage2 = rightObjImage.clone();
+        outProvisionalRightImg.resize(rightObjImage2.cols, rightObjImage2.rows);
+        cv::putText(rightObjImage2,"unsaved initial right",org,myFont,fontScale,Red);
+        rightObjImage2.copyTo(iplToMat(outProvisionalRightImg));
     }
-    else if (type=="effect_final" && !objImage.empty())
+    else if (type=="effect_final" && !leftObjImage.empty())
     {
         //yDebug("showTempImage effect_final");
-        cv::Mat objImage2 = objImage.clone();
-        outTempImg.resize(objImage2.cols, objImage2.rows); // TODO: rows*2
-        cv::putText(objImage2,"unsaved final position",org,myFont,fontScale,Red);
+        // left
+        cv::Mat leftObjImage2 = leftObjImage.clone();
+        outProvisionalLeftImg.resize(leftObjImage2.cols, leftObjImage2.rows);
+        cv::putText(leftObjImage2,"unsaved final left",org,myFont,fontScale,Red);
         cv::Point comInit;
         cv::Point comFinal;
         if (init2D.size()==2)
         {
             comInit = cv::Point(init2D.get(0).asDouble(), init2D.get(1).asDouble());
-            cv::circle(objImage2,
+            cv::circle(leftObjImage2,
                        comInit,
                        Radius,
                        Blue,
@@ -688,7 +737,7 @@ bool HandAffManagerModule::showTempImage(const string &type)
         if (final2D.size()==2)
         {
             comFinal = cv::Point(final2D.get(0).asDouble(), final2D.get(1).asDouble());
-            cv::circle(objImage2,
+            cv::circle(leftObjImage2,
                        comFinal,
                        Radius,
                        Red,
@@ -696,22 +745,30 @@ bool HandAffManagerModule::showTempImage(const string &type)
         }
         if (init2D.size()==2 && final2D.size()==2)
         {
-            cv::arrowedLine(objImage2,
+            cv::arrowedLine(leftObjImage2,
                             comInit,
                             comFinal,
                             Blue,
                             2); // thickness
         }
-        objImage2.copyTo(iplToMat(outTempImg));
+        leftObjImage2.copyTo(iplToMat(outProvisionalLeftImg));
+
+        // right
+        cv::Mat rightObjImage2 = rightObjImage.clone();
+        outProvisionalRightImg.resize(rightObjImage2.cols, rightObjImage2.rows);
+        cv::putText(rightObjImage2,"unsaved final right",org,myFont,fontScale,Red);
+        rightObjImage2.copyTo(iplToMat(outProvisionalRightImg));
     }
     else
     {
         yWarning("showTempImage: nothing to do");
-        outTempImgPort.unprepare();
+        outProvisionalLeftImgPort.unprepare();
+        outProvisionalRightImgPort.unprepare();
         return false;
     }
 
-    outTempImgPort.write();
+    outProvisionalLeftImgPort.write();
+    outProvisionalRightImgPort.write();
 
     return true;
 }
@@ -820,9 +877,9 @@ bool HandAffManagerModule::saveImage(const string &label)
     else
     {
         // object
-        if (objImage.empty())
+        if (leftObjImage.empty())
         {
-            yError("objImage is empty, cannot save it");
+            yError("leftObjImage is empty, cannot save it");
             return false;
         }
         filename += "object_";
@@ -835,7 +892,7 @@ bool HandAffManagerModule::saveImage(const string &label)
     filename += imageTimeStr;
     filename += ".jpg";
 
-    cv::imwrite((basePath+"/"+filename).c_str(), (isHand ? handImageSim : objImage));
+    cv::imwrite((basePath+"/"+filename).c_str(), (isHand ? handImageSim : leftObjImage));
 
     yInfo("sucessfully saved image of %s to file", label.c_str());
 
@@ -987,9 +1044,15 @@ bool HandAffManagerModule::saveInitEffImage(const string &posture,
 {
     string filename;
 
-    if (objImage.empty())
+    if (leftObjImage.empty())
     {
-        yError("effect_init objImage is empty, cannot save it");
+        yError("effect_init leftObjImage is empty, cannot save it");
+        return false;
+    }
+
+    if (rightObjImage.empty())
+    {
+        yError("effect_init rightObjImage is empty, cannot save it");
         return false;
     }
 
@@ -1001,11 +1064,19 @@ bool HandAffManagerModule::saveInitEffImage(const string &posture,
     filename += "_before_";
     string imageTimeStr = getDateAndTime(); // TODO do it at acquisition time instead
     filename += imageTimeStr;
-    filename += ".jpg";
 
-    cv::imwrite((basePath+"/"+filename).c_str(), objImageInitial);
+    string filenameLeft = filename;
+    filenameLeft += "_left_camera";
+    filenameLeft += ".jpg";
 
-    yInfo("sucessfully saved image %s to file", filename.c_str());
+    string filenameRight = filename;
+    filenameRight += "_right_camera";
+    filenameRight += ".jpg";
+
+    cv::imwrite((basePath+"/"+filenameLeft).c_str(), leftObjImageInitial);
+    cv::imwrite((basePath+"/"+filenameRight).c_str(), rightObjImageInitial);
+
+    yInfo("sucessfully saved initial images %s to files", imageTimeStr.c_str());
 
     return true;
 }
@@ -1017,9 +1088,15 @@ bool HandAffManagerModule::saveFinalEffImage(const string &posture,
 {
     string filename;
 
-    if (objImage.empty())
+    if (leftObjImage.empty())
     {
-        yError("effect_init objImage is empty, cannot save it");
+        yError("effect_init leftObjImage is empty, cannot save it");
+        return false;
+    }
+
+    if (rightObjImage.empty())
+    {
+        yError("effect_init rightObjImage is empty, cannot save it");
         return false;
     }
 
@@ -1031,11 +1108,19 @@ bool HandAffManagerModule::saveFinalEffImage(const string &posture,
     filename += "_after_";
     string imageTimeStr = getDateAndTime(); // TODO do it at acquisition time instead
     filename += imageTimeStr;
-    filename += ".jpg";
 
-    cv::imwrite((basePath+"/"+filename).c_str(), objImage);
+    string filenameLeft = filename;
+    filenameLeft += "_left_camera";
+    filenameLeft += ".jpg";
 
-    yInfo("sucessfully saved image %s to file", filename.c_str());
+    string filenameRight = filename;
+    filenameRight += "_right_camera";
+    filenameRight += ".jpg";
+
+    cv::imwrite((basePath+"/"+filenameLeft).c_str(), leftObjImageInitial);
+    cv::imwrite((basePath+"/"+filenameRight).c_str(), rightObjImageInitial);
+
+    yInfo("sucessfully saved final images %s to file", imageTimeStr.c_str());
 
     return true;
 }
@@ -1111,7 +1196,7 @@ string HandAffManagerModule::getObject(const string &objName)
         return "failed acquiring object descriptors";
 
     // acquire provisional object image
-    if (!getObjImage())
+    if (!getObjImages())
         return "failed acquiring object image";
 
     showTempImage("object");
@@ -1167,10 +1252,12 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
     }
 
     // acquire provisional object image for effect_init visualization
-    if (!getObjImage())
-        return "failed acquiring effect_init object image";
+    if (!getObjImages())
+        return "failed acquiring effect_init object image(s)";
 
-    objImageInitial = objImage.clone();
+    // save images for later, because we will overwrite them at final instant
+    leftObjImageInitial = leftObjImage.clone();
+    rightObjImageInitial = rightObjImage.clone();
 
     showTempImage("effect_init");
 
@@ -1234,7 +1321,7 @@ string HandAffManagerModule::stopEffect()
            currAction.c_str(), currPosture.c_str(), currObj.c_str());
 
     // acquire provisional object image for effect_final visualization
-    if (!getObjImage())
+    if (!getObjImages())
         return "failed acquiring effect_final object image";
 
     // target object final position information
