@@ -80,11 +80,16 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
     initialApproach[2] += 0.05;              // avoid collision with objects during the approach phase
     yDebug("going to intermediate approach waypoint");
     iarm->goToPoseSync(initialApproach,o);
-    iarm->waitMotionDone(0.1,timeout);
+    bool done = false;
+    done = iarm->waitMotionDone(0.1,timeout);
+    if(!done)
+        yWarning("Something went wrong with the initial approach, using timeout");
     // ADD a Delay here?!
     yDebug("going to final approach target");
     iarm->goToPoseSync(finalApproach,o);
-    iarm->waitMotionDone(0.1,timeout);
+    done = iarm->waitMotionDone(0.1,timeout);
+    if(!done)
+        yWarning("Something went wrong with the final approach, using timeout");
     yDebug("reached final approach target");
     yarp::os::Time::delay(1.0);
 
@@ -124,7 +129,9 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
     }
     targetModified[2] += 0.04;            // Offset - avoid collision with table
     iarm->goToPoseSync(targetModified,o);
-    iarm->waitMotionDone(0.1,timeout);
+    bool done = iarm->waitMotionDone(0.1,timeout);
+    if(!done)
+        yWarning("Something went wrong with the roll action, using timeout");
     iarm->setTrajTime(tempotempo);
     yDebug("reached final Roll target");
 }
