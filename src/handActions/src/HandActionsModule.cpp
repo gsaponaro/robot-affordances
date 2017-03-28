@@ -493,8 +493,8 @@ void HandActionsModule::moveHand(const int postureType)
 bool HandActionsModule::safetyCheck(const Vector &targetPos, const std::string &side)
 {
     // all actions
-    const double xMinThresh = -0.20;
-    const double xMaxThresh = -0.45;
+    const double xMinThresh = -0.23;
+    const double xMaxThresh = -0.51;
     if (targetPos[0]>xMinThresh || targetPos[0]<xMaxThresh)
     {
         yWarning("unsafe x");
