@@ -963,7 +963,7 @@ bool HandAffManagerModule::computeTipFrame(const std::string &posture,
     else if (posture=="fortyfive" && action=="tapFromLeft")
     {
         // case 5
-        auxpos.addDouble(-0.01);
+        auxpos.addDouble(0.01);
         auxpos.addDouble(0.0);
         auxpos.addDouble(-0.03); // should be positive if right_hand, negative if left_hand
 
