@@ -960,7 +960,29 @@ bool HandAffManagerModule::saveInitEffImage(const string &posture,
                                             const string &objName,
                                             const string &action)
 {
-    // TODO
+    string filename;
+
+    if (objImage.empty())
+    {
+        yError("effect_init objImage is empty, cannot save it");
+        return false;
+    }
+
+    filename += posture;
+    filename += "/";
+    filename += objName;
+    filename += "/";
+    filename += action;
+    filename += "_before_";
+    string imageTimeStr = getDateAndTime(); // TODO do it at acquisition time instead
+    filename += imageTimeStr;
+    filename += ".jpg";
+
+    cv::imwrite((basePath+"/"+filename).c_str(), objImage);
+
+    yInfo("sucessfully saved image %s to file", filename.c_str());
+
+    return true;
 }
 
 /***************************************************/
@@ -968,7 +990,29 @@ bool HandAffManagerModule::saveFinalEffImage(const string &posture,
                                              const string &objName,
                                              const string &action)
 {
-    // TODO
+    string filename;
+
+    if (objImage.empty())
+    {
+        yError("effect_init objImage is empty, cannot save it");
+        return false;
+    }
+
+    filename += posture;
+    filename += "/";
+    filename += objName;
+    filename += "/";
+    filename += action;
+    filename += "_after_";
+    string imageTimeStr = getDateAndTime(); // TODO do it at acquisition time instead
+    filename += imageTimeStr;
+    filename += ".jpg";
+
+    cv::imwrite((basePath+"/"+filename).c_str(), objImage);
+
+    yInfo("sucessfully saved image %s to file", filename.c_str());
+
+    return true;
 }
 
 /***************************************************/
