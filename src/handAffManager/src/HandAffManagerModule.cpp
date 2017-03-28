@@ -978,7 +978,7 @@ bool HandAffManagerModule::computeTipFrame(const std::string &posture,
         // case 6
         auxpos.addDouble(0.0);
         auxpos.addDouble(0.0);
-        auxpos.addDouble(0.02); // should be negative if right_hand, positive if left_hand
+        auxpos.addDouble(0.04); // should be negative if right_hand, positive if left_hand
 
         auxori.addDouble(1.0);
         auxori.addDouble(0.0);
