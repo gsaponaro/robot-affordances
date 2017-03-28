@@ -173,7 +173,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     offAppTap        = 0.05;
     distanceMovement = 0.12;
     offAppDraw       = 0.03;
-    offAppPush       = 0.05;
+    offAppPush       = 0.08;
 
     straightHandPoss.resize(9, 0.0);
     straightHandPoss[0] = 50.0; // j7
