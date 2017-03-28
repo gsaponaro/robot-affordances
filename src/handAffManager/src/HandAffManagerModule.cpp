@@ -231,6 +231,9 @@ bool HandAffManagerModule::updateModule()
         {
             yWarning("no -> will reset effects and images, please restart the acquisition");
             effects.clear();
+            currPosture = "";
+            currObj = "";
+            currAction = "";
             return true;
         }
 
@@ -244,6 +247,8 @@ bool HandAffManagerModule::updateModule()
         if (saveEffectsAndImages(currPosture, currObj, currAction))
         {
             effects.clear(); // reset variables
+            currPosture = "";
+            currObj = "";
             currAction = "";
         }
     }
@@ -627,6 +632,7 @@ bool HandAffManagerModule::showTempImage(const string &type)
     const int myFont = cv::FONT_HERSHEY_SIMPLEX;
     const double fontScale = 0.7;
     const cv::Scalar Red = cv::Scalar(0,0,255);
+    const cv::Scalar Blue = cv::Scalar(255,0,0);
     const int Radius = 5;
 
     if (type=="hand" && handDesc.size()>0 && !handImageSim.empty())
@@ -657,25 +663,44 @@ bool HandAffManagerModule::showTempImage(const string &type)
             cv::circle( objImage2,
                     com,
                     Radius,
-                    Red,
+                    Blue,
                     -1 ); // filled
         }
         objImage2.copyTo(iplToMat(outTempImg));
     }
-    else if (type=="effect_final" && effects.size()>0 && !objImage.empty())
+    else if (type=="effect_final" && !objImage.empty())
     {
         //yDebug("showTempImage effect_final");
         cv::Mat objImage2 = objImage.clone();
         outTempImg.resize(objImage2.cols, objImage2.rows); // TODO: rows*2
         cv::putText(objImage2,"unsaved final position",org,myFont,fontScale,Red);
+        cv::Point comInit;
+        cv::Point comFinal;
+        if (init2D.size()==2)
+        {
+            comInit = cv::Point(init2D.get(0).asDouble(), init2D.get(1).asDouble());
+            cv::circle(objImage2,
+                       comInit,
+                       Radius,
+                       Blue,
+                       -1); // filled
+        }
         if (final2D.size()==2)
         {
-            cv::Point com(final2D.get(0).asDouble(), final2D.get(1).asDouble());
-            cv::circle( objImage2,
-                    com,
-                    Radius,
-                    Red,
-                    -1 ); // filled
+            comFinal = cv::Point(final2D.get(0).asDouble(), final2D.get(1).asDouble());
+            cv::circle(objImage2,
+                       comFinal,
+                       Radius,
+                       Red,
+                       -1); // filled
+        }
+        if (init2D.size()==2 && final2D.size()==2)
+        {
+            cv::arrowedLine(objImage2,
+                            comInit,
+                            comFinal,
+                            Blue,
+                            2); // thickness
         }
         objImage2.copyTo(iplToMat(outTempImg));
     }
@@ -969,16 +994,16 @@ bool HandAffManagerModule::saveInitEffImage(const string &posture,
     }
 
     filename += posture;
-    filename += "/";
+    filename += "_";
     filename += objName;
-    filename += "/";
+    filename += "_";
     filename += action;
     filename += "_before_";
     string imageTimeStr = getDateAndTime(); // TODO do it at acquisition time instead
     filename += imageTimeStr;
     filename += ".jpg";
 
-    cv::imwrite((basePath+"/"+filename).c_str(), objImage);
+    cv::imwrite((basePath+"/"+filename).c_str(), objImageInitial);
 
     yInfo("sucessfully saved image %s to file", filename.c_str());
 
@@ -999,9 +1024,9 @@ bool HandAffManagerModule::saveFinalEffImage(const string &posture,
     }
 
     filename += posture;
-    filename += "/";
+    filename += "_";
     filename += objName;
-    filename += "/";
+    filename += "_";
     filename += action;
     filename += "_after_";
     string imageTimeStr = getDateAndTime(); // TODO do it at acquisition time instead
@@ -1123,6 +1148,8 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
     }
 
     currAction = action; // save it for later
+    currPosture = posture;
+    currObj = objName;
 
     // target object initial position information
     init2D.clear();
@@ -1142,6 +1169,8 @@ string HandAffManagerModule::startEffect(const string &action, const string &pos
     // acquire provisional object image for effect_init visualization
     if (!getObjImage())
         return "failed acquiring effect_init object image";
+
+    objImageInitial = objImage.clone();
 
     showTempImage("effect_init");
 
@@ -1208,8 +1237,6 @@ string HandAffManagerModule::stopEffect()
     if (!getObjImage())
         return "failed acquiring effect_final object image";
 
-    showTempImage("effect_final");
-
     // target object final position information
     final2D.clear();
     final2D = getBestObject2D();
@@ -1223,6 +1250,8 @@ string HandAffManagerModule::stopEffect()
     {
        return "problem with final3D";
     }
+
+    showTempImage("effect_final");
 
     // effect computation and request for confirmation
     effects.clear();

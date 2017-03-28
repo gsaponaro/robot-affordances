@@ -85,6 +85,7 @@ private:
     yarp::os::Bottle final2D;
     yarp::os::Bottle final3D;
     yarp::os::Bottle effects;
+    cv::Mat objImageInitial;
 
 public:
 
