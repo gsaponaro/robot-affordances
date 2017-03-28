@@ -38,7 +38,7 @@ Vector HandActionsModule::computeHandOrientation()
 /***************************************************/
 bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o, string side)
 {
-    double timeout = 4.0;
+    double timeout = 5.0;
     if (!safetyCheck(x,side))
     {
         yWarning("action is dangerous, I will not do it!");
@@ -118,14 +118,14 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
     else if(side.compare("bottom")==0) // push
     {
         targetModified[0] -= distanceMovement - offAppPush;
-        iarm->setTrajTime(1.3);
+        iarm->setTrajTime(0.9);
     }
     else if(side.compare("top")==0) // draw
     {
         targetModified[0] += distanceMovement - offAppDraw;
         // increase y when using right_arm, decrease y when using left_arm
         targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
-        iarm->setTrajTime(1.3);
+        iarm->setTrajTime(1.0);
     }
     targetModified[2] += 0.04;            // Offset - avoid collision with table
     iarm->goToPoseSync(targetModified,o);
@@ -172,7 +172,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
     // Defining Offsets to the actions
     offAppTap        = 0.05; // 5cm from the object center
     distanceMovement = 0.12;
-    offAppDraw       = 0.03; // 5cm from the object center
+    offAppDraw       = 0.03;
     offAppPush       = 0.13; // 3cm from the object center
 
     straightHandPoss.resize(9, 0.0);
