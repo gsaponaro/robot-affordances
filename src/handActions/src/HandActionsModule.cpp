@@ -74,7 +74,7 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
         yDebug("draw");
         finalApproach[0] -= offAppDraw;
         // increase y when using right_arm, decrease y when using left_arm
-        finalApproach[1] += 0.02*(arm=="right_arm" ? 1 : -1);
+        //finalApproach[1] += 0.02*(arm=="right_arm" ? 1 : -1);
         finalApproach[2] -= 0.01; // stricter than general
     }
     initialApproach = finalApproach;
@@ -127,7 +127,7 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
         // increase y when using right_arm, decrease y when using left_arm
         targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
         //targetModified[1] += 0.03; // left_arm ugly hack
-        iarm->setTrajTime(0.9); //0.6
+        iarm->setTrajTime(0.9); // TODO increase a little
         double timeHere;
         iarm->getTrajTime(&timeHere);
         yDebug("time %f",timeHere);
@@ -141,7 +141,7 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
         iarm->setTaskVelocities(xdot,odot);
         // TESTING!!!
         yDebug("waiting 2.5 seconds");
-        Time::delay(2.5);
+        Time::delay(2.5); // TODO increase to ~2.6
         yDebug("Stopping");
         iarm->stopControl();
         iarm->setTrajTime(tempotempo);
