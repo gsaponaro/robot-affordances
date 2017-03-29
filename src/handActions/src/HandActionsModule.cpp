@@ -891,10 +891,13 @@ bool HandActionsModule::drawCoords(const double x, const double y, const double 
 
     Vector o=computeHandOrientation();
     yInfo()<<"computed orientation = ("<<o.toString(3,3)<<")";
-
+    double min, max;
+    int axis = 2; // torso yaw
+    iarm->getLimits(axis,&min,&max);
+    iarm->setLimits(axis,-15.0,15.0);
     if ( approachTargetWithHand(targetPos,o,"top") )
         roll(targetPos,o,"top");
-
+    iarm->setLimits(axis,min,max);
     homeArm();
     yDebug("Arm at home position");
     homeTorso();
