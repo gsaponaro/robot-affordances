@@ -74,9 +74,8 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
         yDebug("draw");
         finalApproach[0] -= offAppDraw;
         // increase y when using right_arm, decrease y when using left_arm
-        finalApproach[1] += 0.03*(arm=="right_arm" ? 1 : -1);
-
-        finalApproach[2] -= 0.02; // stricter than general
+        finalApproach[1] += 0.02*(arm=="right_arm" ? 1 : -1);
+        finalApproach[2] -= 0.01; // stricter than general
     }
     initialApproach = finalApproach;
     initialApproach[2] += 0.05;              // avoid collision with objects during the approach phase
@@ -142,7 +141,7 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
         iarm->setTaskVelocities(xdot,odot);
         // TESTING!!!
         yDebug("waiting 2 seconds");
-        Time::delay(1.6);
+        Time::delay(2.0);
         yDebug("Stopping");
         iarm->stopControl();
         iarm->setTrajTime(tempotempo);
