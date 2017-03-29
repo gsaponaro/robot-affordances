@@ -125,10 +125,9 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
     {
         targetModified[0] += distanceMovement - offAppDraw;
         // increase y when using right_arm, decrease y when using left_arm
-        //targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
-
-        targetModified[1] += 0.03; // left_arm
-        iarm->setTrajTime(1.0);
+        targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
+        //targetModified[1] += 0.03; // left_arm ugly hack
+        iarm->setTrajTime(1.2);
     }
     targetModified[2] += 0.04;            // Offset - avoid collision with table
     iarm->goToPoseSync(targetModified,o);
@@ -894,7 +893,7 @@ bool HandActionsModule::drawCoords(const double x, const double y, const double 
     double min, max;
     int axis = 2; // torso yaw
     iarm->getLimits(axis,&min,&max);
-    iarm->setLimits(axis,-15.0,15.0);
+    iarm->setLimits(axis,-13.0,13.0);
     if ( approachTargetWithHand(targetPos,o,"top") )
         roll(targetPos,o,"top");
     iarm->setLimits(axis,min,max);
