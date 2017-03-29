@@ -45,14 +45,15 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
         return false;
     }
 
-    Vector dof(10,1.0),dummy;
+    Vector dof(10,1.0), dummy;
     // disable torso
-    //dof[0]=0;
-    //dof[1]=0;
-    //dof[2]=0;
+    //dof[0]=0; // pitch?
+    //dof[1]=0; // roll
+    //dof[2]=0; // yaw?
     iarm->setDOF(dof,dummy);
     Vector initialApproach;
     Vector finalApproach=x;
+    finalApproach[2] += 0.04; // general offset to avoid collision with table
     if(side.compare("right")==0) // tapFromRight
     {
         yDebug("tapFromRight");
@@ -74,8 +75,9 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
         finalApproach[0] -= offAppDraw;
         // increase y when using right_arm, decrease y when using left_arm
         finalApproach[1] += 0.03*(arm=="right_arm" ? 1 : -1);
+
+        finalApproach[2] -= 0.02; // stricter than general
     }
-    finalApproach[2] += 0.04;               // Offset - avoid collision with table
     initialApproach = finalApproach;
     initialApproach[2] += 0.05;              // avoid collision with objects during the approach phase
     yDebug("going to intermediate approach waypoint");
@@ -99,7 +101,6 @@ bool HandActionsModule::approachTargetWithHand(const Vector &x, const Vector &o,
 /***************************************************/
 void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string side)
 {
-
     double tempotempo;
     double timeout = 4.0;
     iarm->getTrajTime(&tempotempo);
@@ -124,7 +125,9 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
     {
         targetModified[0] += distanceMovement - offAppDraw;
         // increase y when using right_arm, decrease y when using left_arm
-        targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
+        //targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
+
+        targetModified[1] += 0.03; // left_arm
         iarm->setTrajTime(1.0);
     }
     targetModified[2] += 0.04;            // Offset - avoid collision with table
