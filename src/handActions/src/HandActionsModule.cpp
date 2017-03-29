@@ -123,11 +123,31 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
     }
     else if(side.compare("top")==0) // draw
     {
+
         targetModified[0] += distanceMovement - offAppDraw;
         // increase y when using right_arm, decrease y when using left_arm
         targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
         //targetModified[1] += 0.03; // left_arm ugly hack
-        iarm->setTrajTime(1.2);
+        iarm->setTrajTime(0.9); //0.6
+        double timeHere;
+        iarm->getTrajTime(&timeHere);
+        yDebug("time %f",timeHere);
+        Vector xdot(3); // move the end-effector along x-axis at specified velocity
+        xdot[0] = 0.10;    // 0.09 [m/s]
+        xdot[1] = 0.0;
+        xdot[2] = 0.0;
+        Vector odot(4); // no rotation is required
+        odot=0.0;       // [rad/s]
+        yDebug("Setting Task velocities");
+        iarm->setTaskVelocities(xdot,odot);
+        // TESTING!!!
+        yDebug("waiting 2 seconds");
+        Time::delay(1.6);
+        yDebug("Stopping");
+        iarm->stopControl();
+        iarm->setTrajTime(tempotempo);
+        yDebug("reached final Roll target_Draw");
+        return;
     }
     targetModified[2] += 0.04;            // Offset - avoid collision with table
     iarm->goToPoseSync(targetModified,o);
