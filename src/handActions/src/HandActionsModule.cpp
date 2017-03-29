@@ -140,8 +140,8 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
         yDebug("Setting Task velocities");
         iarm->setTaskVelocities(xdot,odot);
         // TESTING!!!
-        yDebug("waiting 2 seconds");
-        Time::delay(2.0);
+        yDebug("waiting 2.5 seconds");
+        Time::delay(2.5);
         yDebug("Stopping");
         iarm->stopControl();
         iarm->setTrajTime(tempotempo);
@@ -912,7 +912,7 @@ bool HandActionsModule::drawCoords(const double x, const double y, const double 
     double min, max;
     int axis = 2; // torso yaw
     iarm->getLimits(axis,&min,&max);
-    iarm->setLimits(axis,-13.0,13.0);
+    //iarm->setLimits(axis,-13.0,13.0);
     if ( approachTargetWithHand(targetPos,o,"top") )
         roll(targetPos,o,"top");
     iarm->setLimits(axis,min,max);
