@@ -18,6 +18,18 @@
       <node>localhost</node>
   </module>
 
+  <module>
+      <name>yarpview</name>
+      <node>localhost</node>
+      <parameters>--name /view/tempLeft --x 0 --y 0 --p 33</parameters>
+  </module>
+
+  <module>
+      <name>yarpview</name>
+      <node>localhost</node>
+      <parameters>--name /view/tempRight --x 330 --y 0 --p 33</parameters>
+  </module>
+
   <!-- object pipeline modules -->
 
   <module>
@@ -47,13 +59,13 @@
   <module>
       <name>yarpview</name>
       <node>localhost</node>
-      <parameters>--name /view/obj/segm --x 0 --y 0 --p 33</parameters>
+      <parameters>--name /view/obj/segm --x 0 --y 720 --p 33</parameters>
   </module>
 
   <module>
       <name>yarpview</name>
       <node>localhost</node>
-      <parameters>--name /view/obj/desc --x 330 --y 0 --p 33</parameters>
+      <parameters>--name /view/obj/desc --x 330 --y 720 --p 33</parameters>
   </module>
 
   <!-- hand pipeline modules -->
@@ -106,18 +118,6 @@
       <name>yarpview</name>
       <node>localhost</node>
       <parameters>--name /view/hand/desc --x 330 --y 360 --p 33</parameters>
-  </module>
-
-  <module>
-      <name>yarpview</name>
-      <node>localhost</node>
-      <parameters>--name /view/tempLeft --x 0 --y 720 --p 33</parameters>
-  </module>
-
-  <module>
-      <name>yarpview</name>
-      <node>localhost</node>
-      <parameters>--name /view/tempRight --x 330 --y 720 --p 33</parameters>
   </module>
 
   <!-- motor modules -->
