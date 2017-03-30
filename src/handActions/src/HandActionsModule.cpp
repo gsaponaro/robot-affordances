@@ -127,7 +127,7 @@ void HandActionsModule::roll(const Vector &targetPos, const Vector &o, string si
         // increase y when using right_arm, decrease y when using left_arm
         targetModified[1] += 0.03*(arm=="right_arm" ? 1 : -1);
         //targetModified[1] += 0.03; // left_arm ugly hack
-        iarm->setTrajTime(0.9); // TODO increase a little
+        iarm->setTrajTime(1.0);
         double timeHere;
         iarm->getTrajTime(&timeHere);
         yDebug("time %f",timeHere);
