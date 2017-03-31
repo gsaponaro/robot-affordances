@@ -514,11 +514,17 @@ bool HandAffManagerModule::getObjDesc()
         objDesc.clear();
 
         // whole
-        const int firstIdx = 2;
-        const int lastIdx = 14;
+        //const int firstIdx = 2;
+        //const int lastIdx = 14;
         // top
-        //const int firstIdx = 15;
-        //const int lastIdx = 27;
+        const int firstIdx = 15;
+        const int lastIdx = 27;
+
+        if (firstIdx==2)
+            yDebug("saving descriptors of whole object");
+        else if (firstIdx==15)
+            yDebug("saving descriptors of top part");
+
         for (int d=firstIdx; d<=lastIdx; ++d)
             objDesc.addDouble(inObjDesc->get(d).asDouble());
     }
