@@ -561,7 +561,7 @@ bool ShapeDescriptorThread::addDescriptors(Obj2D &o, Bottle &b)
         centerBotCnt.addDouble(mom.m01/mom.m00);
     }
 
-    // spatial moments and center of mass info
+    // spatial moments info
     if (useSpatialMoments)
     {
         Bottle &smBot = b.addList();
