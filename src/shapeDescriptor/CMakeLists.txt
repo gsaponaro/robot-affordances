@@ -32,6 +32,9 @@ include_directories(${PROJECT_SOURCE_DIR}/include
                     ${YARP_INCLUDE_DIRS}
                     ${ICUB_INCLUDE_DIRS})
 
+# import math symbols from standard cmath
+add_definitions(-D_USE_MATH_DEFINES)
+
 add_executable(${PROJECT_NAME} ${source} ${header})
 
 target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES} ${OpenCV_LIBRARIES})

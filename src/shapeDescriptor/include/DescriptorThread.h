@@ -9,6 +9,7 @@
 #ifndef DESC_THREAD_H
 #define DESC_THREAD_H
 
+#include <cmath>
 #include <string>
 
 #include <yarp/os/Bottle.h>

@@ -82,21 +82,21 @@ bool Obj2D::computeDescriptors()
     //yDebug("minorAxisEll=%.2f majorAxisEll=%.2f \t eccentricity=%.2f",
     //       minorAxisEll, majorAxisEll, eccentricity);
 
-    compactness = (perimeter>0 ? (4*CV_PI*area)/pow(perimeter,2) : 0);
+    compactness = (perimeter>0 ? (4*M_PI*area)/pow(perimeter,2) : 0);
     if (compactness > 1.0)
     {
         yWarning("compactness was >1.0 -> set to 1.0. check computation of this descriptor!");
         compactness = 1.0;
     }
     //yDebug("4*pi*area=%.2f per^2=%.2f \t compactness=%.2f",
-    //       4*CV_PI*area, pow(perimeter,2), compactness);
+    //       4*M_PI*area, pow(perimeter,2), compactness);
 
     moments = cv::moments(contour);
 
     minEnclosingCircle(contour, circleCenter, circleRadius);
-    circularity = (circleRadius>0 ? area/(CV_PI*pow(circleRadius,2)) : 0);
+    circularity = (circleRadius>0 ? area/(M_PI*pow(circleRadius,2)) : 0);
     //yDebug("area=%.2f pi*radius^2=%.2f \t circularity=%.2f",
-    //       area, CV_PI*pow(circleRadius,2), circularity);
+    //       area, M_PI*pow(circleRadius,2), circularity);
 
     enclosingRect = minAreaRect(contour);
     double majorAxisRect, minorAxisRect;

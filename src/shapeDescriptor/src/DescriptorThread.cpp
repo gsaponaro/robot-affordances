@@ -239,8 +239,8 @@ void ShapeDescriptorThread::run2d()
                   he = enclosingRect.size.height,
                   an = enclosingRect.angle;
 
-            float ca = cos(an / 180.0 * CV_PI),
-                  sa = sin(an / 180.0 * CV_PI);
+            float ca = cos(an / 180.0 * M_PI),
+                  sa = sin(an / 180.0 * M_PI);
 
             if (wi==1 || he==1)
                 yWarning("enclosingRectangle of blob %d is one-dimensional", intIdx);
