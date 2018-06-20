@@ -31,8 +31,9 @@ Online documentation is available here: [https://gsaponaro.github.io/robot-affor
 
 ## Publications
 
-* Giovanni Saponaro, Alexandre Antunes, Rodrigo Ventura, Lorenzo Jamone, Alexandre Bernardino. *Combining Affordance Perception and Probabilistic Planning for Robust Problem Solving in a Cognitive Robot*. IEEE Transactions Systems, Man, and Cybernetics: Systems, 2018 (under review).
+* Giovanni Saponaro, Alexandre Antunes, Rodrigo Ventura, Lorenzo Jamone, Alexandre Bernardino. *Combining Affordance Perception and Probabilistic Planning for Robust Problem Solving in a Cognitive Robot*. Under review.
 * Giovanni Saponaro, Pedro Vicente, Atabak Dehban, Lorenzo Jamone, Alexandre Bernardino, José Santos-Victor. *Learning at the Ends: From Hand to Tool Affordances in Humanoid Robots*. IEEE International Conference on Developmental and Learning and on Epigenetic Robotics (ICDL-EpiRob 2017).
+* Alexandre Antunes, Giovanni Saponaro, Anthony Morse, Lorenzo Jamone, José Santos-Victor, Angelo Cangelosi. *Learn, Plan, Remember: A Developmental Robot Architecture for Task Solving*. IEEE International Conference on Developmental and Learning and on Epigenetic Robotics (ICDL-EpiRob 2017).
 * Alexandre Antunes, Lorenzo Jamone, Giovanni Saponaro, Alexandre Bernardino, Rodrigo Ventura. *From Human Instructions to Robot Actions: Formulation of Goals, Affordances and Probabilistic Planning*. IEEE International Conference on Robotics and Automation (ICRA 2016).
 * Afonso Gonçalves, João Abrantes, Giovanni Saponaro, Lorenzo Jamone, Alexandre Bernardino. *Learning Intermediate Object Affordances: Towards the Development of a Tool Concept*. IEEE International Conference on Development and Learning and on Epigenetic Robotics (ICDL-EpiRob 2014).
 * Afonso Gonçalves, Giovanni Saponaro, Lorenzo Jamone, Alexandre Bernardino. *Learning Visual Affordances of Objects and Tools through Autonomous Robot Exploration*. IEEE International Conference on Autonomous Robot Systems and Competitions (ICARSC 2014).
