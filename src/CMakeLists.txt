@@ -6,11 +6,10 @@
 cmake_minimum_required(VERSION 2.8.9)
 
 find_package(YARP)
+set(YARP_REQUIRED_VERSION 3.1.0)
 find_package(ICUBcontrib)
-list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH}
-                              ${ICUBCONTRIB_MODULE_PATH})
+list(APPEND CMAKE_MODULE_PATH ${ICUBCONTRIB_MODULE_PATH})
 
-include(YarpInstallationHelpers)
 include(ICUBcontribHelpers)
 include(ICUBcontribOptions)
 icubcontrib_set_default_prefix()

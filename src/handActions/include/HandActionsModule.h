@@ -39,13 +39,13 @@ protected:
     yarp::dev::IGazeControl *igaze;
     yarp::dev::IEncoders *encsA;
     yarp::dev::ICartesianControl *iarm;
-    yarp::dev::IPositionControl2 *posA;
-    yarp::dev::IPositionControl2 *posAOther;
-    yarp::dev::IPositionControl2 *posT;
+    yarp::dev::IPositionControl *posA;
+    yarp::dev::IPositionControl *posAOther;
+    yarp::dev::IPositionControl *posT;
 
-    yarp::dev::IControlMode2 *ctrlMA;
-    yarp::dev::IControlMode2 *ctrlMAOther;
-    yarp::dev::IControlMode2 *ctrlMT;
+    yarp::dev::IControlMode *ctrlMA;
+    yarp::dev::IControlMode *ctrlMAOther;
+    yarp::dev::IControlMode *ctrlMT;
 
     bool closing;
     bool twoArms;
