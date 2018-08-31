@@ -19,6 +19,7 @@ Dependencies:
 - [YARP](https://github.com/robotology/yarp)
 - [icub-contrib-common](https://github.com/robotology/icub-contrib-common)
 - [OpenCV](http://opencv.org/downloads.html)
+- [Boost Filesystem Library](https://www.boost.org)
 
 Installation in Linux:
 
