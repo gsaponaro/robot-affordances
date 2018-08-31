@@ -294,7 +294,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 
     if (!drvArmPos.isValid())
     {
-        cout << moduleName << ": unable to connect to device: remote_controlboard of " << arm << endl;
+        yError() << moduleName << ": unable to connect to device: remote_controlboard of " << arm;
         drvGaze.close();
         drvArm.close();
         return false;
@@ -302,7 +302,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 
     if (!drvArmPos.view(posA) || !drvArmPos.view(encsA) || !drvArmPos.view(ctrlMA))
     {
-        cout << moduleName << ": problems acquiring interfaces to remote_controlboard of " << arm << endl;
+        yError() << moduleName << ": problems acquiring interfaces to remote_controlboard of " << arm;
         drvGaze.close();
         drvArm.close();
         drvArmPos.close();
@@ -359,7 +359,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 
     if (!drvArmPosOther.isValid())
     {
-        cout << moduleName << ": unable to connect to device: remote_controlboard of " << other_arm<< endl;
+        yError() << moduleName << ": unable to connect to device: remote_controlboard of " << other_arm;
         drvGaze.close();
         drvArm.close();
         drvArmPos.close();
@@ -369,7 +369,7 @@ bool HandActionsModule::configure(ResourceFinder &rf)
 
     if (!drvArmPosOther.view(posAOther) || !drvArmPosOther.view(ctrlMAOther))
     {
-        cout << moduleName << ": problems acquiring interfaces to remote_controlboard of " << other_arm << endl;
+        yError() << moduleName << ": problems acquiring interfaces to remote_controlboard of " << other_arm;
         drvGaze.close();
         drvArm.close();
         drvArmPos.close();
