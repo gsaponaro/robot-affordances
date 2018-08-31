@@ -396,7 +396,7 @@ bool HandAffManagerModule::getHandDesc()
     {
         const int expectedDescSize = 41;
         if (inHandDesc->size() != expectedDescSize)
-            yError("got %d hand descriptors instead of %d", inHandDesc->size(), expectedDescSize);
+            yError("got %zu hand descriptors instead of %d", inHandDesc->size(), expectedDescSize);
 
         handDesc.clear();
 
@@ -509,7 +509,7 @@ bool HandAffManagerModule::getObjDesc()
     {
         const int expectedDescSize = 41;
         if (inObjDesc->size() != expectedDescSize)
-            yError("got %d object descriptors instead of %d", inObjDesc->size(), expectedDescSize);
+            yError("got %zu object descriptors instead of %d", inObjDesc->size(), expectedDescSize);
 
         objDesc.clear();
 
@@ -803,21 +803,21 @@ bool HandAffManagerModule::saveDesc(const string &label)
         // hand
         if (handDesc.size() != numDesc)
         {
-            yError("got %d hand descriptors, was expecting %d", handDesc.size(), numDesc);
+            yError("got %zu hand descriptors, was expecting %d", handDesc.size(), numDesc);
             return false;
         }
 
         const int numArmJoints = 16;
         if (armJoints.size() != numArmJoints)
         {
-            yError("got %d arm joints, was expecting %d", armJoints.size(), numArmJoints);
+            yError("got %zu arm joints, was expecting %d", armJoints.size(), numArmJoints);
             return false;
         }
 
         const int numHeadJoints = 6;
         if (headJoints.size() != numHeadJoints)
         {
-            yError("got %d head joints, was expecting %d", headJoints.size(), numHeadJoints);
+            yError("got %zu head joints, was expecting %d", headJoints.size(), numHeadJoints);
             return false;
         }
 
@@ -839,7 +839,7 @@ bool HandAffManagerModule::saveDesc(const string &label)
         // object
         if (objDesc.size() != numDesc)
         {
-            yError("got %d object descriptors, was expecting %d", objDesc.size(), numDesc);
+            yError("got %zu object descriptors, was expecting %d", objDesc.size(), numDesc);
             return false;
         }
 
@@ -1019,7 +1019,7 @@ bool HandAffManagerModule::saveEffects(const string &posture,
     const int numEffects = 8;
     if (effects.size() != numEffects)
     {
-        yError("got %d effects, was expecting %d", effects.size(), numEffects);
+        yError("got %zu effects, was expecting %d", effects.size(), numEffects);
         return false;
     }
 

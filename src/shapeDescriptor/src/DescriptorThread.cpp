@@ -425,7 +425,7 @@ void ShapeDescriptorThread::run2d()
             addDescriptors(parts[o].second, botBot);
         }
         t1 = yarp::os::Time::now();
-        yDebug("computed descriptors of %d objects (whole and parts) in %f msec",
+        yDebug("computed descriptors of %zu objects (whole and parts) in %f msec",
                bDesc.size(), 1000.0*(t1-t0));
         outPartDescPort.setEnvelope(tsBin);
         outPartDescPort.write();
