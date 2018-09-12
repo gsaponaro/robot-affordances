@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 2.8.9)
 project(handAffManager)
 
 # mandatory use of these packages
-find_package(YARP REQUIRED)
+find_package(YARP REQUIRED COMPONENTS OS idl_tools sig)
 find_package(ICUBcontrib REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED filesystem system)

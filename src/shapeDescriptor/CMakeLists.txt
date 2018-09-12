@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 2.8.9)
 project(shapeDescriptor)
 
-find_package(YARP)
+find_package(YARP REQUIRED COMPONENTS OS idl_tools)
 find_package(ICUB)
 find_package(ICUBcontrib)
 

@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 2.8.9)
 project(handActions)
 
 # mandatory use of these packages
-find_package(YARP REQUIRED)
+find_package(YARP REQUIRED COMPONENTS OS dev idl_tools math sig)
 find_package(ICUBcontrib REQUIRED)
 
 # extend the current search path used by cmake to load helpers
