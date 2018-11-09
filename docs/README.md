@@ -42,8 +42,10 @@ Online documentation is available here: [https://gsaponaro.github.io/robot-affor
 
 ## Other publications that use our framework
 
-* Atabak Dehban, Lorenzo Jamone, Adam R. Kampff, José Santos-Victor. *Denoising Auto-Encoders for Learning of Objects and Tools Affordances in Continuous Space*. IEEE International Conference on Robotics and Automation (ICRA 2016).
 * Anthony F. Morse, Angelo Cangelosi. *Why Are There Developmental Stages in Language Learning? A Developmental Robotics Model of Language Development*. Cognitive Science, 2016.
+* Atabak Dehban, Lorenzo Jamone, Adam R. Kampff, José Santos-Victor. *A Moderately Large Size Dataset to Learn Visual Affordances of Objects and Tools Using iCub Humanoid Robot*. European Conference on Computer Vision (ECCV 2016), Workshop on Action and Anticipation for Visual Learning.
+* Atabak Dehban, Lorenzo Jamone, Adam R. Kampff, José Santos-Victor. *Denoising Auto-Encoders for Learning of Objects and Tools Affordances in Continuous Space*. IEEE International Conference on Robotics and Automation (ICRA 2016).
+* Atabak Dehban, Lorenzo Jamone, Adam R. Kampff, José Santos-Victor. *A Deep Probabilistic Framework for Heterogeneous Self-Supervised Learning of Affordances*. IEEE-RAS International Conference on Humanoid Robots (Humanoids 2017).
 
 ## License
 
