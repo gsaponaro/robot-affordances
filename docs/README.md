@@ -32,7 +32,7 @@ Online documentation is available here: [https://gsaponaro.github.io/robot-affor
 
 ## Publications
 
-* Giovanni Saponaro, Lorenzo Jamone, Alexandre Bernardino, Giampiero Salvi. *Beyond the Self: Using Grounded Affordances to Interpret and Describe Others' Actions*. IEEE Transactions on Cognitive and Developmental Systems, 2018. Accepted.
+* Giovanni Saponaro, Lorenzo Jamone, Alexandre Bernardino, Giampiero Salvi. *Beyond the Self: Using Grounded Affordances to Interpret and Describe Others' Actions*. IEEE Transactions on Cognitive and Developmental Systems, 2019.
 * Giovanni Saponaro, Alexandre Antunes, Rodrigo Ventura, Lorenzo Jamone, Alexandre Bernardino. *Combining Affordance Perception and Probabilistic Planning for Robust Problem Solving in a Cognitive Robot*. Under review.
 * Giovanni Saponaro, Pedro Vicente, Atabak Dehban, Lorenzo Jamone, Alexandre Bernardino, José Santos-Victor. *Learning at the Ends: From Hand to Tool Affordances in Humanoid Robots*. IEEE International Conference on Developmental and Learning and on Epigenetic Robotics (ICDL-EpiRob 2017).
 * Alexandre Antunes, Giovanni Saponaro, Anthony Morse, Lorenzo Jamone, José Santos-Victor, Angelo Cangelosi. *Learn, Plan, Remember: A Developmental Robot Architecture for Task Solving*. IEEE International Conference on Developmental and Learning and on Epigenetic Robotics (ICDL-EpiRob 2017).
