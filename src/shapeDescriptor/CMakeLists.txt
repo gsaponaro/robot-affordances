@@ -30,7 +30,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include
                     ${ICUB_INCLUDE_DIRS})
 
 # import math symbols from standard cmath
-target_compile_definitions(${PROJECT_NAME} PRIVATE _USE_MATH_DEFINES)
+#target_compile_definitions(${PROJECT_NAME} PRIVATE _USE_MATH_DEFINES)
 
 add_executable(${PROJECT_NAME} ${source} ${header})
 
